@@ -1,19 +1,25 @@
-import { Button } from "@workspace/ui/components/button"
+import { CTA } from "@/components/cta"
+import { Features } from "@/components/Features/features"
+import { Footer } from "@/components/footer"
+import { Hero } from "@/components/hero"
+import { Integrations } from "@/components/Integraions/integrations"
+import { Navbar } from "@/components/nav-bar"
+import { Pricing } from "@/components/Pricing/pricing"
+import { StatsSection } from "@/components/Stats/stats-section"
+import { Testimonials } from "@/components/Testimonials/testimonials"
 
 export default function Page() {
   return (
-    <div className="flex min-h-svh p-6">
-      <div className="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">
-        <div>
-          <h1 className="font-medium">Project ready!</h1>
-          <p>You may now add components and start building.</p>
-          <p>We&apos;ve already added the button component for you.</p>
-          <Button className="mt-2">Button</Button>
-        </div>
-        <div className="text-muted-foreground font-mono text-xs">
-          (Press <kbd>d</kbd> to toggle dark mode)
-        </div>
-      </div>
-    </div>
+    <main className="min-h-screen bg-background">
+      <Navbar />
+      <Hero />
+      <Features />
+       <StatsSection />
+       <Integrations />
+       <Testimonials />
+       <Pricing />
+        <CTA />
+        <Footer />
+    </main>
   )
 }
