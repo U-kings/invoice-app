@@ -181,11 +181,26 @@ export function Navbar() {
                     </Link>
                   ))}
 
-                  <Link href="/login">
-                    <Button variant="ghost">Login</Button>
-                  </Link>
+                  <Button
+                    variant="ghost"
+                    className="mt-8 h-10 rounded-xl bg-white/10 py-4 text-center"
+                  >
+                    <Link
+                      href="/login"
+                      // className=""
+                    >
+                      Login
+                    </Link>
+                  </Button>
 
-                  <Button className="mt-6 bg-[#2EAFB4]">Get Started</Button>
+                  <Button className="mt-0 h-10 rounded-xl bg-[#2EAFB4]">
+                    <Link
+                      href="/signup"
+                      // className="mx-0 mt-4 rounded-xl border text-center"
+                    >
+                      Get Started
+                    </Link>
+                  </Button>
                 </div>
               </SheetContent>
             </Sheet>
