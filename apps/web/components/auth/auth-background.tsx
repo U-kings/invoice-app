@@ -14,8 +14,10 @@ export function AuthBackground() {
       {/* Top Glow */}
       <motion.div
         animate={{
-          scale: [1, 1.15, 1],
-          opacity: [0.35, 0.6, 0.35],
+           x: [-30, 40, -30],
+          y: [-20, 30, -20],
+          // scale: [1, 1.15, 1],
+          // opacity: [0.35, 0.6, 0.35],
         }}
         transition={{
           duration: 8,
@@ -28,8 +30,10 @@ export function AuthBackground() {
       {/* Bottom Glow */}
       <motion.div
         animate={{
-          scale: [1.1, 1, 1.1],
-          opacity: [0.25, 0.5, 0.25],
+            x: [20, -30, 20],
+          y: [40, -30, 40],
+          // scale: [1.1, 1, 1.1],
+          // opacity: [0.25, 0.5, 0.25],
         }}
         transition={{
           duration: 10,

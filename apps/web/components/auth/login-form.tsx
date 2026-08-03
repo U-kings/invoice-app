@@ -187,7 +187,7 @@ const password = useWatch({
 
     <Link
       href="/forgot-password"
-      className="text-sm font-medium text-[#2EAFB4] md:text-nowrap"
+      className="text-sm font-medium text-[#2EAFB4] text-nowrap"
     >
       Forgot Password?
     </Link>

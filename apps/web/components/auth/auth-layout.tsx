@@ -3,6 +3,7 @@
 import { ReactNode } from "react";
 import { motion } from "motion/react";
 import { AuthBackground } from "./auth-background";
+import { BackgroundGlow } from "../background-glow";
 
 export function AuthLayout({
   children,
@@ -12,6 +13,7 @@ export function AuthLayout({
   return (
     <main className="relative min-h-screen overflow-hidden">
       <AuthBackground />
+      {/* <BackgroundGlow /> */}
 
       <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl items-center px-4 lg:px-6 py-10">
         <div className="grid w-full gap-12 lg:grid-cols-2 lg:items-center">

@@ -102,7 +102,7 @@ export function Navbar() {
     >
       <div className="mx-auto flex h-20 w-full items-center justify-between px-4 md:px-6">
         {/* <div className="mx-auto w-full flex h-20 max-w-7xl items-center justify-between px-6 bg-white"> */}
-        <div className="w-full mx-auto flex h-20 max-w-7xl items-center justify-between">
+        <div className="mx-auto flex h-20 w-full max-w-7xl items-center justify-between">
           <Logo />
 
           <nav className="hidden items-center gap-10 lg:flex">
@@ -180,6 +180,10 @@ export function Navbar() {
                       {item.label}
                     </Link>
                   ))}
+
+                  <Link href="/login">
+                    <Button variant="ghost">Login</Button>
+                  </Link>
 
                   <Button className="mt-6 bg-[#2EAFB4]">Get Started</Button>
                 </div>
