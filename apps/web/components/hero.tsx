@@ -65,7 +65,7 @@ export function Hero() {
       </div>
 
       {/* Content */}
-      <div className="relative mx-auto mb-0 flex min-h-screen max-w-7xl flex-col items-center gap-16 px-6 pt-32 lg:flex-row">
+      <div className="relative mx-auto mb-0 flex min-h-screen max-w-7xl flex-col items-center gap-16 px-4 lg:px-6 pt-32 lg:flex-row">
         <HeroLeft />
 
         <Dashboard />

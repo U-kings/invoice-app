@@ -61,7 +61,7 @@ const features = [
 export function Features() {
   return (
     <section className="relative py-28" id="features">
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto max-w-7xl px-4 lg:px-6">
         <motion.div
           initial={{
             opacity: 0,

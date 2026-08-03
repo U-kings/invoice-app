@@ -7,7 +7,7 @@ import { Button } from "@workspace/ui/components/button";
 export function CTA() {
   return (
     <section className="py-28">
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto max-w-7xl px-4 lg:px-6">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}

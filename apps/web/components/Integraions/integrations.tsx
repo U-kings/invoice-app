@@ -48,7 +48,7 @@ const integrations = [
 export function Integrations() {
   return (
     <section className="py-28" id="integrations">
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto max-w-7xl px-4 lg:px-6">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}

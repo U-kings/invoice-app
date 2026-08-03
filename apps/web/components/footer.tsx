@@ -55,7 +55,7 @@ const socials = [
 export function Footer() {
   return (
     <footer className="border-t border-border/60 bg-background" id="contact">
-      <div className="mx-auto max-w-7xl px-6 pt-20 pb-10">
+      <div className="mx-auto max-w-7xl px-4 lg:px-6 pt-20 pb-10">
         <div className="grid gap-12 lg:grid-cols-[1.4fr_repeat(4,1fr)_1.2fr]">
           {/* Logo */}
 
@@ -64,7 +64,7 @@ export function Footer() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <Link href="/" className="flex items-center gap-3">
+            {/* <Link href="/" className="flex items-center gap-3"> */}
               <Logo />
               {/* <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#2EAFB4] text-lg font-bold text-white">
                 S
@@ -73,7 +73,7 @@ export function Footer() {
               <span className="text-3xl font-bold">
                 InvoiceFlow
               </span> */}
-            </Link>
+            {/* </Link> */}
 
             <p className="mt-6 max-w-xs leading-8 text-muted-foreground">
               The modern invoicing platform for businesses that want to get paid

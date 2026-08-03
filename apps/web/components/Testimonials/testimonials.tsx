@@ -61,7 +61,7 @@ export function Testimonials() {
 
   return (
     <section className="py-28" id="testimonials">
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto max-w-7xl px-4 lg:px-6">
         <motion.div
           initial={{ opacity: 0, y: 25 }}
           whileInView={{ opacity: 1, y: 0 }}

@@ -48,6 +48,7 @@ const links = [
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false)
+  const [open, setOpen] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -99,9 +100,9 @@ export function Navbar() {
         // "border-b border-border/50 bg-background/80 shadow-lg backdrop-blur-xl"
       )}
     >
-      <div className="mx-auto flex h-20 w-full items-center justify-between px-6">
+      <div className="mx-auto flex h-20 w-full items-center justify-between px-4 md:px-6">
         {/* <div className="mx-auto w-full flex h-20 max-w-7xl items-center justify-between px-6 bg-white"> */}
-        <div className="container mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
+        <div className="w-full mx-auto flex h-20 max-w-7xl items-center justify-between">
           <Logo />
 
           <nav className="hidden items-center gap-10 lg:flex">
@@ -137,7 +138,9 @@ export function Navbar() {
           </nav>
 
           <div className="hidden items-center gap-4 lg:flex">
-            <Button variant="ghost">Login</Button>
+            <Link href="/login">
+              <Button variant="ghost">Login</Button>
+            </Link>
 
             <ThemeToggle />
 
@@ -156,7 +159,7 @@ export function Navbar() {
           <div className="flex items-center gap-2 lg:hidden">
             <ThemeToggle />
 
-            <Sheet>
+            <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger>
                 {/* <Button size="icon" variant="ghost"> */}
                 <div className="p-4">
@@ -168,7 +171,12 @@ export function Navbar() {
               <SheetContent side="right">
                 <div className="mt-10 flex flex-col gap-5 px-6 py-4">
                   {links.map((item) => (
-                    <Link key={item.href} href={item.href}>
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className="text-lg font-medium transition-colors hover:text-primary"
+                    >
                       {item.label}
                     </Link>
                   ))}

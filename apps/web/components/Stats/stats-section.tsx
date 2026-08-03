@@ -41,7 +41,7 @@ const stats = [
 export function StatsSection() {
   return (
     <section className="py-24">
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto max-w-7xl px-4 lg:px-6">
         <motion.div
           initial={{
             opacity: 0,
