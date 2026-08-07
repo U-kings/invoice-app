@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { verifyAuthToken } from './lib/auth';
 
-export async function middleware(request: NextRequest): Promise<NextResponse> {
+export async function proxy(request: NextRequest): Promise<NextResponse> {
   const token = request.cookies.get('token')?.value;
   const verifiedToken = await verifyAuthToken(token);
   
