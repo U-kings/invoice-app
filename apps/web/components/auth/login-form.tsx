@@ -36,9 +36,9 @@ import { useRouter } from "next/navigation"
 import { useMutation } from "@tanstack/react-query"
 import { LoginCredentials } from "@/app/types/auth"
 
-// Mock API function (Replace with your actual endpoint)
+
 async function loginUser(credentials: LoginCredentials) {
-  const res = await fetch("/api/auth/login  ", {
+  const res = await fetch("/api/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(credentials),
@@ -49,7 +49,8 @@ async function loginUser(credentials: LoginCredentials) {
 
     toast.add({
       title: "Login failed",
-      description: (errorData.message || "Invalid login details") as string,
+      description: (errorData.error || "Invalid login details") as string,
+      // description: (errorData.message || "Invalid login details") as string,
       type: "error",
     })
 
@@ -62,11 +63,9 @@ export function LoginForm() {
   const router = useRouter()
   const setAuth = useAuthStore((state) => state.setAuth)
   const [success, setSuccess] = useState(false)
-  
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(LoginSchema),
-
     defaultValues: {
       email: "",
       password: "",
@@ -74,7 +73,7 @@ export function LoginForm() {
     },
   })
 
-    const password = useWatch({
+  const password = useWatch({
     control: form.control,
     name: "password",
   })
@@ -84,17 +83,8 @@ export function LoginForm() {
     name: "remember",
   })
 
-  // useEffect(() => {
-
-  if (success) {
-    return <AuthSuccess />
-  }
-  //   return () => {
-  //   }
-  // }, [success])
-
-  // TanStack Mutation Setup
-  const { mutate, isPending, error, isError } = useMutation({
+    // TanStack Mutation Setup
+  const { mutate, isPending, error, isError,isSuccess } = useMutation({
     mutationFn: loginUser,
     onSuccess: (data) => {
       // 1. Update your global Zustand state
@@ -109,9 +99,22 @@ export function LoginForm() {
     },
   })
 
+  // useEffect(() => {
+
+  if (isSuccess) {
+    return <AuthSuccess />
+  }
+  //   return () => {
+  //   }
+  // }, [success])
+
   async function onSubmit(values: LoginValues) {
+    const credentials: LoginCredentials = {
+      email: values.email,
+      password: values.password,
+    }
     // Trigger mutation payload
-    mutate(values)
+    mutate(credentials)
     // try {
     //   console.log(values)
 
@@ -229,7 +232,7 @@ export function LoginForm() {
             className="group relative h-12 w-full overflow-hidden bg-[#2EAFB4] hover:bg-[#289ca0]"
           >
             <span className="absolute inset-0 -translate-x-full bg-white/20 transition-transform duration-700 group-hover:translate-x-full" />
-            {form.formState.isSubmitting && isPending && <AuthLoader />}
+            {form.formState.isSubmitting || (isPending && <AuthLoader />)}
             Sign In
             {/* {form.formState.isSubmitting
       ? "Signing In..."

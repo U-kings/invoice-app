@@ -152,7 +152,14 @@ export function Navbar() {
                 scale: 0.95,
               }}
             >
-              <Button className="rounded-xl bg-[#2EAFB4]">Get Started</Button>
+              <Button className="rounded-xl bg-[#2EAFB4]">
+                <Link
+                  href="/signup"
+                  // className="mx-0 mt-4 rounded-xl border text-center"
+                >
+                  Get Started
+                </Link>
+              </Button>
             </motion.div>
           </div>
 

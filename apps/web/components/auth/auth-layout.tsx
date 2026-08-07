@@ -83,7 +83,7 @@ export function AuthLayout({
               duration: 0.6,
               delay: 0.15,
             }}
-            className="mx-auto w-full max-w-md"
+            className="mx-auto w-full max-w-lg"
           >
             <div className="rounded-3xl border border-border/60 bg-background/80 p-8 shadow-2xl backdrop-blur-xl md:p-10">
               {children}

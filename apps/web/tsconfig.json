@@ -19,6 +19,6 @@
     "**/*.mts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
-  ],
+, "../../packages/ui/src/components/phone-input.tsx"  ],
   "exclude": ["node_modules"]
 }

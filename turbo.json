@@ -1,6 +1,15 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
+  "globalEnv": [
+    "MONGO_URI",
+    "JWT_SECRET",
+    "NODE_ENV",
+    "PAYSTACK_SECRET",
+    "NEXT_PUBLIC_BASE_URL",
+    "NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY",
+    "PAYSTACK_SECRET_KEY"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
