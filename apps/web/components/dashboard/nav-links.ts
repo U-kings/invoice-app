@@ -17,37 +17,37 @@ export const navLinks = [
   },
   {
     title: "Invoices",
-    href: "/dashboard/invoices",
+    href: "/invoices",
     icon: FileText,
   },
   {
     title: "Customers",
-    href: "/dashboard/customers",
+    href: "/customers",
     icon: Users,
   },
   {
     title: "Payments",
-    href: "/dashboard/payments",
+    href: "/payments",
     icon: CreditCard,
   },
   {
     title: "Estimates",
-    href: "/dashboard/estimates",
+    href: "/estimates",
     icon: Receipt,
   },
   {
     title: "Products",
-    href: "/dashboard/products",
+    href: "/products",
     icon: Package,
   },
   {
     title: "Reports",
-    href: "/dashboard/reports",
+    href: "/reports",
     icon: BarChart3,
   },
   {
     title: "Settings",
-    href: "/dashboard/settings",
+    href: "/settings",
     icon: Settings,
   },
 ];
