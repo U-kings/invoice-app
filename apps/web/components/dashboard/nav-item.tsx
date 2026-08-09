@@ -1,27 +1,24 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { motion } from "motion/react";
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { motion } from "motion/react"
 
-import { cn } from "@workspace/ui/lib/utils";
+import { cn } from "@workspace/ui/lib/utils"
 
 interface NavItemProps {
-  href: string;
-  title: string;
-  icon: React.ElementType;
+  href: string
+  title: string
+  icon: React.ElementType
 }
 
-export function NavItem({
-  href,
-  title,
-  icon: Icon,
-}: NavItemProps) {
-  const pathname = usePathname();
+export function NavItem({ href, title, icon: Icon }: NavItemProps) {
+  const pathname = usePathname()
 
-  const active =
-    pathname === href ||
-    pathname.startsWith(`${href}/`);
+  // const active =
+  //   pathname === href ||
+  //   pathname.startsWith(`${href}/`);
+  const active = pathname === href
 
   return (
     <Link href={href}>
@@ -41,10 +38,8 @@ export function NavItem({
       >
         <Icon className="h-5 w-5" />
 
-        <span className="font-medium">
-          {title}
-        </span>
+        <span className="font-medium">{title}</span>
       </motion.div>
     </Link>
-  );
+  )
 }
