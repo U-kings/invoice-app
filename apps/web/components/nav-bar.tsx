@@ -86,7 +86,7 @@ export function Navbar() {
     return () => observer.disconnect()
   }, [])
 
-  console.log("Active Section:", activeSection)
+  // console.log("Active Section:", activeSection)
 
   return (
     <motion.header

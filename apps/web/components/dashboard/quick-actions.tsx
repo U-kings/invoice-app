@@ -30,7 +30,7 @@ const actions = [
 
 export function QuickActions() {
   return (
-    <div className="rounded-3xl border bg-background/80 p-6 shadow-sm backdrop-blur-xl">
+    <div className="rounded-3xl h-full border bg-background/80 p-6 shadow-sm backdrop-blur-xl">
       <h2 className="mb-6 text-xl font-semibold">
         Quick Actions
       </h2>

@@ -92,7 +92,8 @@ export function SignupForm() {
         type: "success",
       })
       // 2. Redirect to login
-      router.push("/login")
+      router.push(`/verify-acctount?email=${form.getValues("email")}`)
+      // router.push("/login")
     },
   })
 

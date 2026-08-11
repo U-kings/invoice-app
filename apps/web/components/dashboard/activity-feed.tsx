@@ -19,11 +19,15 @@ const activities = [
     title: "Invoice sent",
     time: "1 hour ago",
   },
+  {
+    title: "Invoice sent",
+    time: "2 hour ago",
+  },
 ];
 
 export function ActivityFeed() {
   return (
-    <div className="rounded-3xl border bg-background/80 p-6 shadow-sm backdrop-blur-xl">
+    <div className="rounded-3xl h-full border bg-background/80 p-6 shadow-sm backdrop-blur-xl">
       <h2 className="mb-6 text-xl font-semibold">
         Activity
       </h2>
