@@ -58,7 +58,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     // 6. Build the fresh callback verification link
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    const verificationUrl = `${appUrl}/api/verify-email?token=${token}`;
+    const verificationUrl = `${appUrl}/api/auth/verify-email?token=${token}`;
 
     // 7. Dispatch the fresh layout via Resend
     await sendVerificationEmail({
