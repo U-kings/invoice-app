@@ -1,43 +1,40 @@
 import { NextRequest, NextResponse } from "next/server"
-import crypto from "crypto"
+import crypto from "crypto" // Note: If this fails on deploy, swap to Web Crypto as shown previously
 import { z } from "zod"
-import User from "@/models/User" // Ensure your User model uses Mongoose types
+import { connectDB } from "@/lib/db" // 1. IMPORT YOUR DATABASE CONNECTION UTILITY
+import User from "@/models/User" 
 
-// 1. Define a strict schema for incoming URL query parameters
 const querySchema = z.object({
   token: z
-    .string({ message: "Verification token is required" }) // Replaced required_error with message
-    .length(64, "Token must be exactly 64 characters long"), // Changed min/max to a precise .length()
+    .string({ message: "Verification token is required" }) 
+    .length(64, "Token must be exactly 64 characters long"), 
 })
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
+    // 2. CONNECT TO YOUR DATABASE FIRST
+    await connectDB()
+
     const { searchParams } = new URL(req.url)
     const rawQueryParams = { token: searchParams.get("token") }
 
-    // 2. Validate URL search params safely against the schema
     const result = querySchema.safeParse(rawQueryParams)
 
     if (!result.success) {
-      // Use .issues to get the array of errors in Zod
-      const firstError =
-        result.error.issues[0]?.message || "Invalid request payload"
+      const firstError = result.error.issues[0]?.message || "Invalid request payload"
       return NextResponse.json({ error: firstError }, { status: 400 })
     }
 
-    // TypeScript now safely infers that `token` is a valid string
     const { token } = result.data
 
-    // 3. Re-hash incoming token safely
     const hashedToken: string = crypto
       .createHash("sha256")
       .update(token)
       .digest("hex")
 
-    // 4. Find the user with Mongoose type support
     const user = await User.findOne({
       verificationToken: hashedToken,
-      verificationTokenExpires: { $gt: new Date() }, // Type safe Date check
+      verificationTokenExpires: { $gt: new Date() }, 
     })
 
     if (!user) {
@@ -47,19 +44,26 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       )
     }
 
-    // 5. Update, clear data, and persist to DB
-    user.isVerified = true
-    user.verificationToken = undefined
-    user.verificationTokenExpires = undefined
-    await user.save()
+    // 3. SECURELY PERSIST VIA DIRECT MONGOOSE COMMANDS 
+    // (This avoids potential schema validation crashes on user.save())
+    await User.updateOne(
+      { _id: user._id },
+      {
+        $set: { isVerified: true },
+        $unset: { verificationToken: "", verificationTokenExpires: "" }
+      }
+    );
 
-    // 6. Type-safe redirect url formulation
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
     return NextResponse.redirect(new URL("/login?verified=true", baseUrl))
   } catch (error: unknown) {
+    // Check your server terminal window! This prints out the true hidden culprit.
     console.error("Verification Error:", error)
+    
+    // Temporarily exposing the raw error message to your browser to help you debug instantly
+    const errMessage = error instanceof Error ? error.message : "Unknown error"
     return NextResponse.json(
-      { error: "An unexpected error occurred during verification" },
+      { error: `An unexpected error occurred during verification: ${errMessage}` },
       { status: 500 }
     )
   }
