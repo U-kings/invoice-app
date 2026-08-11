@@ -1,70 +1,73 @@
-import { NextRequest, NextResponse } from "next/server"
-import crypto from "crypto" // Note: If this fails on deploy, swap to Web Crypto as shown previously
-import { z } from "zod"
-import { connectDB } from "@/lib/db" // 1. IMPORT YOUR DATABASE CONNECTION UTILITY
-import User from "@/models/User" 
+import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
+import { z } from "zod";
+import { prisma } from "@repo/db"; // 🚀 1. Import your newly configured Prisma 7 client
 
 const querySchema = z.object({
   token: z
-    .string({ message: "Verification token is required" }) 
-    .length(64, "Token must be exactly 64 characters long"), 
-})
+    .string({ message: "Verification token is required" })
+    .length(64, "Token must be exactly 64 characters long"),
+});
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
-    // 2. CONNECT TO YOUR DATABASE FIRST
-    await connectDB()
+    const { searchParams } = new URL(req.url);
+    const rawQueryParams = { token: searchParams.get("token") };
 
-    const { searchParams } = new URL(req.url)
-    const rawQueryParams = { token: searchParams.get("token") }
-
-    const result = querySchema.safeParse(rawQueryParams)
+    const result = querySchema.safeParse(rawQueryParams);
 
     if (!result.success) {
-      const firstError = result.error.issues[0]?.message || "Invalid request payload"
-      return NextResponse.json({ error: firstError }, { status: 400 })
+      const firstError = result.error.issues[0]?.message || "Invalid request payload";
+      return NextResponse.json({ error: firstError }, { status: 400 });
     }
 
-    const { token } = result.data
+    const { token } = result.data;
 
+    // Hash the token to match how it was securely stored during registration
     const hashedToken: string = crypto
       .createHash("sha256")
       .update(token)
-      .digest("hex")
+      .digest("hex");
 
-    const user = await User.findOne({
-      verificationToken: hashedToken,
-      verificationTokenExpires: { $gt: new Date() }, 
-    })
+    // 🚀 2. MIGRATED FROM MONGOOSE: Query PostgreSQL using Prisma
+    // Relational filters map directly to structured objects
+    const user = await prisma.user.findFirst({
+      where: {
+        verificationToken: hashedToken,
+        verificationTokenExpires: {
+          gt: new Date(), // Finds rows where expiration date is greater than right now
+        },
+      },
+    });
 
     if (!user) {
       return NextResponse.json(
         { error: "Invalid or expired verification link." },
         { status: 400 }
-      )
+      );
     }
 
-    // 3. SECURELY PERSIST VIA DIRECT MONGOOSE COMMANDS 
-    // (This avoids potential schema validation crashes on user.save())
-    await User.updateOne(
-      { _id: user._id },
-      {
-        $set: { isVerified: true },
-        $unset: { verificationToken: "", verificationTokenExpires: "" }
-      }
-    );
+    // 🚀 3. MIGRATED FROM MONGOOSE: Persist updates safely via Prisma
+    // Instead of MongoDB's $set and $unset, we pass fields as data values
+    // Setting optional columns to `null` handles the 'unset' operation natively in SQL
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        isVerified: true,
+        verificationToken: null,
+        verificationTokenExpires: null,
+      },
+    });
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-    return NextResponse.redirect(new URL("/login?verified=true", baseUrl))
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    return NextResponse.redirect(new URL("/login?verified=true", baseUrl));
+
   } catch (error: unknown) {
-    // Check your server terminal window! This prints out the true hidden culprit.
-    console.error("Verification Error:", error)
-    
-    // Temporarily exposing the raw error message to your browser to help you debug instantly
-    const errMessage = error instanceof Error ? error.message : "Unknown error"
+    console.error("Verification Error:", error);
+
     return NextResponse.json(
-      { error: `An unexpected error occurred during verification: ${errMessage}` },
+      { error: "An unexpected error occurred during verification" },
       { status: 500 }
-    )
+    );
   }
 }

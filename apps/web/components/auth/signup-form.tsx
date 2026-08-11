@@ -29,9 +29,9 @@ import { PasswordStrength } from "./password-strength"
 import { SocialLogin } from "./social-login"
 import { TrustBadge } from "./trust-badge"
 import { AuthLoader } from "./auth-loader"
-import { PhoneInput } from "@workspace/ui/components/phone-input"
 import { signupCredentials } from "@/app/types/auth"
 import { useMutation } from "@tanstack/react-query"
+import { PhoneInput } from "./phone-input"
 
 async function signupUser(credentials: signupCredentials) {
   const res = await fetch("/api/auth/register", {
@@ -92,7 +92,7 @@ export function SignupForm() {
         type: "success",
       })
       // 2. Redirect to login
-      router.push(`/verify-acctount?email=${form.getValues("email")}`)
+      router.push(`/verify-account?email=${form.getValues("email")}`)
       // router.push("/login")
     },
   })
@@ -195,7 +195,9 @@ export function SignupForm() {
                 )}
               />
 
-              <FieldError>{form.formState.errors.email?.message}</FieldError>
+              <FieldError>
+                {form.formState.errors.phoneNumber?.message}
+              </FieldError>
             </FieldContent>
           </Field>
 
@@ -247,9 +249,10 @@ export function SignupForm() {
           <Button
             type="submit"
             disabled={form.formState.isSubmitting}
-            className="h-12 w-full bg-[#2EAFB4] hover:bg-[#289ca0]"
+            className="group relative overflow-hidden h-12 w-full bg-[#2EAFB4] hover:bg-[#289ca0]"
           >
-            {form.formState.isSubmitting && <AuthLoader />}
+            <span className="absolute inset-0 -translate-x-full bg-white/20 transition-transform duration-700 group-hover:translate-x-full" />
+            {form.formState.isSubmitting || (isPending && <AuthLoader />)}
             Create Account
           </Button>
 

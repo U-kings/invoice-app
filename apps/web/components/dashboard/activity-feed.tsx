@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import { motion } from "motion/react";
+import { motion } from "motion/react"
 
 const activities = [
   {
@@ -23,19 +23,17 @@ const activities = [
     title: "Invoice sent",
     time: "2 hour ago",
   },
-];
+]
 
 export function ActivityFeed() {
   return (
-    <div className="rounded-3xl h-full border bg-background/80 p-6 shadow-sm backdrop-blur-xl">
-      <h2 className="mb-6 text-xl font-semibold">
-        Activity
-      </h2>
+    <div className="h-full rounded-3xl border bg-background/80 p-6 shadow-sm backdrop-blur-xl">
+      <h2 className="mb-6 text-xl font-semibold">Activity</h2>
 
       <div className="space-y-5">
         {activities.map((activity, index) => (
           <motion.div
-            key={activity.title}
+            key={++index}
             initial={{
               opacity: 0,
               x: 20,
@@ -52,17 +50,13 @@ export function ActivityFeed() {
             <div className="mt-2 h-3 w-3 rounded-full bg-[#2EAFB4]" />
 
             <div>
-              <p className="font-medium">
-                {activity.title}
-              </p>
+              <p className="font-medium">{activity.title}</p>
 
-              <p className="text-sm text-muted-foreground">
-                {activity.time}
-              </p>
+              <p className="text-sm text-muted-foreground">{activity.time}</p>
             </div>
           </motion.div>
         ))}
       </div>
     </div>
-  );
+  )
 }

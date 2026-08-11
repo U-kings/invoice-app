@@ -3,20 +3,21 @@
 import { Button } from "@workspace/ui/components/button"
 import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
-// import { useEffect, useState } from "react"
+import { useSyncExternalStore } from "react"
+
+// A dummy store that returns false on the server, true on the client
+const emptySubscribe = () => () => {}
+const clientSnapshot = () => true
+const serverSnapshot = () => false
 
 export function ThemeToggle() {
   const { setTheme, resolvedTheme } = useTheme()
-  //   const [mounted, setMounted] = useState(false);
 
-  // Instead of an effect, check conditions inline
-  const isMountedAndReady = typeof window !== "undefined"
+   // Safely registers whether we are hydrated on the client browser
+  const isMounted = useSyncExternalStore(emptySubscribe, clientSnapshot, serverSnapshot)
 
-  //   useEffect(() => {
-  //     setMounted(true);
-  //   }, []);
 
-  if (!isMountedAndReady) return null
+  if (!isMounted) return null
 
   return (
     <Button

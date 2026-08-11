@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated"
+  moduleFormat           = "esm"
+  generatedFileExtension = "ts"
+  importFileExtension    = ""
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                       String    @id @default(uuid())
+  firstName                String
+  middleName               String?   // Marked optional with "?"
+  lastName                 String
+  class                    String?    // Replaces 'userClass' string key
+  email                    String    @unique
+  phoneNumber              String
+  password                 String
+  role                     String?    @default("USER")
+  terms                    Boolean   @default(false)
+  isVerified               Boolean   @default(false)
+  verificationToken        String?
+  verificationTokenExpires DateTime? // PostgreSQL handles Datetime objects natively
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
+  invoices      Invoice[] // A user can create many invoices
+}
+
+
+model Client {
+  id        String    @id @default(uuid())
+  name      String
+  email     String
+  createdAt DateTime  @default(now())
+  invoices  Invoice[] // A client can have many invoices
+}
+
+model Invoice {
+  id         String        @id @default(uuid())
+  userId     String
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clientId   String
+  client     Client        @relation(fields: [clientId], references: [id])
+  status     InvoiceStatus @default(PENDING)
+  dueDate    DateTime
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  lineItems  LineItem[]    // Relates to individual calculated items
+}
+
+model LineItem {
+  id          String   @id @default(uuid())
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  description String
+  quantity    Int
+  price       Decimal  @db.Decimal(10, 2) // 🛡️ Decimal prevents floating-point penny calculation errors
+}
+
+enum InvoiceStatus {
+  PENDING
+  PAID
+  OVERDUE
+  DRAFT
+}

@@ -36,7 +36,6 @@ import { useRouter } from "next/navigation"
 import { useMutation } from "@tanstack/react-query"
 import { LoginCredentials } from "@/app/types/auth"
 
-
 async function loginUser(credentials: LoginCredentials) {
   const res = await fetch("/api/auth/login", {
     method: "POST",
@@ -83,8 +82,8 @@ export function LoginForm() {
     name: "remember",
   })
 
-    // TanStack Mutation Setup
-  const { mutate, isPending, error, isError,isSuccess } = useMutation({
+  // TanStack Mutation Setup
+  const { mutate, isPending, error, isError, isSuccess } = useMutation({
     mutationFn: loginUser,
     onSuccess: (data) => {
       // 1. Update your global Zustand state
@@ -196,7 +195,7 @@ export function LoginForm() {
                   {...form.register("password")}
                 />
 
-                <PasswordStrength password={password ?? ""} />
+                {/* <PasswordStrength password={password ?? ""} /> */}
 
                 <FieldError>
                   {form.formState.errors.password?.message}

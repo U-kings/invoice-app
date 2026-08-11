@@ -1,6 +1,12 @@
 {
   "extends": "@workspace/typescript-config/nextjs.json",
   "compilerOptions": {
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
     "paths": {
       "@/*": ["./*"],
       "@workspace/ui/*": ["../../packages/ui/src/*"]

@@ -1,12 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectDB } from "@/lib/db";
-import User from "@/models/User";
+import { prisma } from "@repo/db"; // 🚀 1. Import your newly configured Prisma 7 client
 import { sendVerificationEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
-    await connectDB();
-
     const { email } = await req.json();
 
     // 1. Basic structural payload check
@@ -14,8 +11,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: "Email address is required." }, { status: 400 });
     }
 
-    // 2. Find user profile in database
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    // 2. MIGRATED FROM MONGOOSE: Find user profile via Prisma
+    const user = await prisma.user.findUnique({ 
+      where: { email: email.toLowerCase().trim() } 
+    });
 
     // Security Tip: If email doesn't exist, return a 200 success message anyway.
     if (!user) {
@@ -45,20 +44,18 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const hashBuffer = await crypto.subtle.digest("SHA-256", data);
     const hashedToken = Array.from(new Uint8Array(hashBuffer), byte => byte.toString(16).padStart(2, '0')).join('');
 
-    // 5. Update the user document fields securely
-    await User.updateOne(
-      { _id: user._id },
-      {
-        $set: {
-          verificationToken: hashedToken,
-          verificationTokenExpires: tokenExpires
-        }
-      }
-    );
+    // 5. MIGRATED FROM MONGOOSE: Update the user row securely via Prisma
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        verificationToken: hashedToken,
+        verificationTokenExpires: tokenExpires,
+      },
+    });
 
     // 6. Build the fresh callback verification link
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    const verificationUrl = `${appUrl}/api/auth/verify-email?token=${token}`;
+    const verificationUrl = `${appUrl}/api/verify-email?token=${token}`;
 
     // 7. Dispatch the fresh layout via Resend
     await sendVerificationEmail({
