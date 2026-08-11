@@ -8,13 +8,16 @@
     "PAYSTACK_SECRET",
     "NEXT_PUBLIC_BASE_URL",
     "NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY",
-    "PAYSTACK_SECRET_KEY"
+    "PAYSTACK_SECRET_KEY",
+    "RESEND_API_KEY",
+    "NEXT_PUBLIC_APP_URL"
   ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "outputs": [".next/**", "!.next/cache/**"],
+      "env": ["APP_*"]
     },
     "lint": {
       "dependsOn": ["^lint"]
