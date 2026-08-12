@@ -11,7 +11,6 @@ interface PageProps {
 export default function VerifyAccountPage({ searchParams }: PageProps) {
   const resolvedParams = React.use(searchParams)
   const userEmail = resolvedParams.email || ""
-  const [showResendBtn, setShowResendBtn] = useState(false)
   const [cooldown, setCooldown] = useState<number>(60)
   const [message, setMessage] = useState<{
     type: "success" | "error"
@@ -50,7 +49,6 @@ export default function VerifyAccountPage({ searchParams }: PageProps) {
         text: "A new verification link has been sent!",
       })
       setCooldown(60) // Start the 60-second countdown
-      setShowResendBtn(false) // Cleanly hide button option context layout on dispatch success
     },
     onError(error) {
       setMessage({

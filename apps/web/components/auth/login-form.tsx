@@ -61,7 +61,6 @@ async function loginUser(credentials: LoginCredentials) {
 export function LoginForm() {
   const router = useRouter()
   const setAuth = useAuthStore((state) => state.setAuth)
-  const [success, setSuccess] = useState(false)
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(LoginSchema),

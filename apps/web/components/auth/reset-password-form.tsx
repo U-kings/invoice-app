@@ -34,7 +34,6 @@ import { useMutation } from "@tanstack/react-query"
 export function ResetPasswordForm() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const [success, setSuccess] = useState(false)
 
   // Extract the ?token= value safely from the URL string
   const token = searchParams.get("token")
@@ -51,15 +50,6 @@ export function ResetPasswordForm() {
     control: form.control,
     name: "password",
   })
-
-  if (success) {
-    return (
-      <AuthSuccess
-        title="Password Updated!"
-        description="Redirecting you to the login page..."
-      />
-    )
-  }
 
   async function resetPassword(password: string) {
     const res = await fetch("/api/auth/reset-password", {
@@ -97,6 +87,15 @@ export function ResetPasswordForm() {
       router.push("/login")
     },
   })
+
+  if (isSuccess) {
+    return (
+      <AuthSuccess
+        title="Password Updated!"
+        description="Redirecting you to the login page..."
+      />
+    )
+  }
 
   const onSubmit = async (values: ResetPasswordValues) => {
     mutate(values?.password)
