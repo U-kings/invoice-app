@@ -42,11 +42,22 @@ export async function POST(request: Request) {
       );
     }
 
-    // 4. Hash the new password securely before committing to the database
+ // user.password is the encrypted bcrypt hash currently stored in your database
+    const isSamePassword = await bcrypt.compare(newPassword, user.password)
+    
+    if (isSamePassword) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: "Your new password cannot be the same as your current password. Please choose a different one." 
+        },
+        { status: 400 }
+      )
+    }
+
     const salt = await bcrypt.genSalt(10);
     const hashedNewPassword = await bcrypt.hash(newPassword, salt);
 
-    // 5. Update user password and clear token columns immediately 
     // This prevents the same token from being used multiple times
     await prisma.user.update({
       where: { id: user.id },

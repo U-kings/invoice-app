@@ -62,12 +62,12 @@ export async function POST(request: Request) {
       to: [cleanEmail],
       subject: "Reset Your Invoicing App Password",
       html: `
-        <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px;">
+        <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 0px solid #e5e7eb; border-radius: 8px;">
           <h2 style="color: #111827; margin-bottom: 16px;">Password Reset Request</h2>
           <p style="color: #4b5563; line-height: 24px;">Hello ${user.firstName || "there"},</p>
           <p style="color: #4b5563; line-height: 24px;">We received a request to reset your invoicing app account password. Click the secure action button below to create a new password:</p>
           <div style="margin: 24px 0;">
-            <a href="${resetUrl}" style="background-color: #2563eb; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block;">Reset Password</a>
+            <a href="${resetUrl}" style="background-color: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block;">Reset Password</a>
           </div>
           <p style="color: #6b7280; font-size: 14px; line-height: 20px;">This secure link is time-sensitive and will expire in 1 hour. If you did not make this request, you can safely ignore this email.</p>
           <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 24px 0;" />
