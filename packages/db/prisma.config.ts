@@ -12,6 +12,6 @@ export default defineConfig({
   
   // Define the transactional connection URL for migrations and CLI tasks
   datasource: {
-    url: process.env.DATABASE_URL!,
+    url: process.env.MIGRATION_URL!,
   },
 });

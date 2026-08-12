@@ -26,6 +26,7 @@ export function VerifyEmail({
   email,
   message,
 }: PageType) {
+  console.log(cooldown)
   return (
     <motion.div
       initial={{
@@ -46,7 +47,7 @@ export function VerifyEmail({
       {pageType === "signup" ? (
         <p className="mt-4 text-muted-foreground">
           We sent a verification link to{" "}
-          <strong style={{ color: "#1a202c" }}>{email}</strong>. Please click
+          <strong className="text-[#1a202c] dark:text-gray-300">{email}</strong>. Please click
           the link in that email to activate your account.
         </p>
       ) : (

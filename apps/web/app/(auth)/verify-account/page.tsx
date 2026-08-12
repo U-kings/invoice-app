@@ -12,7 +12,7 @@ export default function VerifyAccountPage({ searchParams }: PageProps) {
   const resolvedParams = React.use(searchParams)
   const userEmail = resolvedParams.email || ""
   const [showResendBtn, setShowResendBtn] = useState(false)
-  const [cooldown, setCooldown] = useState<number>(0)
+  const [cooldown, setCooldown] = useState<number>(60)
   const [message, setMessage] = useState<{
     type: "success" | "error"
     text: string

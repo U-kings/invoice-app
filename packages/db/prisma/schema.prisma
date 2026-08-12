@@ -24,9 +24,11 @@ model User {
   isVerified               Boolean   @default(false)
   verificationToken        String?
   verificationTokenExpires DateTime? // PostgreSQL handles Datetime objects natively
+  resetToken               String?   @unique
+  resetTokenExpires        DateTime? 
   createdAt                DateTime  @default(now())
   updatedAt                DateTime  @updatedAt
-  invoices      Invoice[] // A user can create many invoices
+  invoices                 Invoice[] // A user can create many invoices
 }
 
 
