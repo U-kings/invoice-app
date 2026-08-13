@@ -7,6 +7,7 @@ import {
   Settings,
   HelpCircle,
   LogOut,
+  User2,
 } from "lucide-react"
 
 import {
@@ -25,12 +26,17 @@ import {
 } from "@workspace/ui/components/dropdown-menu"
 import { useRouter } from "next/navigation"
 import { useTransition } from "react"
+import { useAuthStore } from "@/app/store/useAuthStore"
 
 export function UserMenu() {
+  const userData = useAuthStore((state) => state.user)
+
   const router = useRouter()
 
   // Inside your Client Component:
   const [isPending, startTransition] = useTransition()
+
+  console.log(userData)
 
   const handleLogout = async () => {
     try {
@@ -63,9 +69,9 @@ export function UserMenu() {
         <div className="cursor-pointer rounded-full focus:outline-none">
           {/* <button className="rounded-full focus:outline-none"> */}
           <Avatar className="h-10 w-10">
-            <AvatarImage src="/avatars/user.png" />
+            <AvatarImage src="/avatars/avatar-user.png" />
 
-            <AvatarFallback>KI</AvatarFallback>
+            <AvatarFallback>{userData?.firstName?.charAt(0)}{userData?.lastName?.charAt(0)}</AvatarFallback>
           </Avatar>
           {/* </button> */}
         </div>
@@ -75,9 +81,9 @@ export function UserMenu() {
         {/* <DropdownMenuLabel> */}
         {/* <div className="space-y-1"> */}
         <div className="px-3 py-2">
-          <p className="font-semibold">Kingsley Igbokwe</p>
+          <p className="font-semibold">{userData?.firstName}{" "}{userData?.lastName}</p>
 
-          <p className="text-xs text-muted-foreground">kingsley@example.com</p>
+          <p className="text-xs text-muted-foreground">{userData?.email}</p>
         </div>
         {/* </DropdownMenuLabel> */}
 

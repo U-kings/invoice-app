@@ -19,6 +19,7 @@ import {
 } from "@workspace/ui/components/sheet"
 
 import { Button } from "@workspace/ui/components/button"
+import { Logo } from "../logo"
 
 export function MobileSidebar() {
   const pathname = usePathname()
@@ -41,21 +42,22 @@ export function MobileSidebar() {
       <SheetContent side="left" className="w-72 p-0">
         <SheetHeader className="border-b px-6 py-5">
           <SheetTitle>
-            <Link
-              href="/dashboard"
+            <div
+              // href="/dashboard"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-3"
+              className="flex flex-col items-left gap-3"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#2EAFB4] font-bold text-white">
+              {/* <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#2EAFB4] font-bold text-white">
                 I
-              </div>
+              </div> */}
+              <Logo/>
 
               <div>
-                <p className="text-lg font-bold">InvoiceFlow</p>
+                {/* <p className="text-lg font-bold">InvoiceFlow</p> */}
 
-                <p className="text-xs text-muted-foreground">Dashboard</p>
+                <p className="text-xs text-muted-foreground ml-10">Business Dashboard</p>
               </div>
-            </Link>
+            </div>
           </SheetTitle>
         </SheetHeader>
 

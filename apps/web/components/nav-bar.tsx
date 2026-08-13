@@ -192,19 +192,13 @@ export function Navbar() {
                     variant="ghost"
                     className="mt-8 h-10 rounded-xl bg-white/10 py-4 text-center"
                   >
-                    <Link
-                      href="/login"
-                      // className=""
-                    >
+                    <Link href="/login" className="w-full">
                       Login
                     </Link>
                   </Button>
 
                   <Button className="mt-0 h-10 rounded-xl bg-[#2EAFB4]">
-                    <Link
-                      href="/signup"
-                      // className="mx-0 mt-4 rounded-xl border text-center"
-                    >
+                    <Link href="/signup" className="w-full">
                       Get Started
                     </Link>
                   </Button>

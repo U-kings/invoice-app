@@ -26,7 +26,6 @@ export function VerifyEmail({
   email,
   message,
 }: PageType) {
-  console.log(cooldown)
   return (
     <motion.div
       initial={{
