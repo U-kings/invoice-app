@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import { motion } from "motion/react"
 
 import { cn } from "@workspace/ui/lib/utils"
+import { string } from "zod"
 
 interface NavItemProps {
   href: string
@@ -18,8 +19,8 @@ export function NavItem({ href, title, icon: Icon }: NavItemProps) {
   // const active =
   //   pathname === href ||
   //   pathname.startsWith(`${href}/`);
-  const active = pathname === href
-
+  // const dashboardUrl: string = href?.split("/")[2] ?? ""
+  const active = pathname === href || pathname?.includes(href?.split("/")[2] ?? "Default")
   return (
     <Link href={href}>
       <motion.div

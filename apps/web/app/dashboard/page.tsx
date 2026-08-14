@@ -6,6 +6,7 @@ import { RecentPayments } from "@/components/dashboard/recent-payments"
 import { UpcomingInvoices } from "@/components/dashboard/upcoming-invoices"
 import { QuickActions } from "@/components/dashboard/quick-actions"
 import { ActivityFeed } from "@/components/dashboard/activity-feed"
+import { CreateInvoiceBanner } from "@/components/dashboard/create-invoice-banner"
 
 export default function DashboardPage() {
   return (
@@ -18,7 +19,7 @@ export default function DashboardPage() {
           today.
         </p>
       </div>
-
+      <CreateInvoiceBanner />
       <StatsGrid />
 
       <section className="grid gap-6 xl:grid-cols-12">
