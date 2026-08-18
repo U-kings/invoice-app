@@ -1,7 +1,5 @@
 "use client"
 
-import * as React from "react"
-
 import { Mail } from "lucide-react"
 
 import { Button } from "@workspace/ui/components/button"
@@ -17,6 +15,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@workspace/ui/components/dialog"
+import { markInvoiceAsSent } from "./invoice-storage"
+import { useEffect, useState } from "react"
+import { useSendInvoice } from "@/hooks/use-send-invoice"
+import { toast } from "@workspace/ui/components/toast"
 
 interface InvoiceSendDialogProps {
   invoiceId: string
@@ -31,51 +33,60 @@ export function InvoiceSendDialog({
   onOpenChange,
   email,
 }: InvoiceSendDialogProps) {
-  const [isSending, setIsSending] =
-    React.useState(false)
+  const [recipientEmail, setRecipientEmail] = useState(email)
+  const sendInvoiceMutation = useSendInvoice()
+
+  const [subject, setSubject] = useState(
+    `Invoice ${invoiceId} from Your Company`
+  )
+
+  useEffect(() => {
+    if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setRecipientEmail(email)
+      setSubject(`Invoice ${invoiceId} from Your Company`)
+    }
+  }, [open, email, invoiceId])
+
+  useEffect(() => {
+    // if (sendInvoiceMutation.isError) {
+    //   onOpenChange(false)
+    // }
+    if (sendInvoiceMutation.isSuccess) {
+      onOpenChange(false)
+    }
+
+    return () => {}
+  }, [onOpenChange, sendInvoiceMutation.isError, sendInvoiceMutation.isSuccess])
 
   async function handleSend() {
-    setIsSending(true)
+    // try {
+    sendInvoiceMutation.mutate(invoiceId)
 
-    try {
-      // Replace with your API call later.
-      await new Promise((resolve) =>
-        setTimeout(resolve, 800),
-      )
-
-      console.log("Invoice sent:", {
-        invoiceId,
-        email,
-      })
-
-      onOpenChange(false)
-    } finally {
-      setIsSending(false)
-    }
+    // } catch (error) {
+    //   console.error("Failed to send invoice:", error)
+    //   toast.add({
+    //     type: "error",
+    //     title: "Send failed",
+    //     description: "Failed to send invoice",
+    //   })
+    // }
   }
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={onOpenChange}
-    >
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>
-            Send invoice
-          </DialogTitle>
+          <DialogTitle>Send invoice</DialogTitle>
 
           <DialogDescription>
-            Review the recipient before sending{" "}
-            {invoiceId}.
+            Review the recipient before sending {invoiceId}.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="invoice-email">
-              To
-            </Label>
+            <Label htmlFor="invoice-email">To</Label>
 
             <div className="relative">
               <Mail className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -83,22 +94,32 @@ export function InvoiceSendDialog({
               <Input
                 id="invoice-email"
                 type="email"
-                defaultValue={email}
+                disabled
+                value={recipientEmail}
+                onChange={(event) => setRecipientEmail(event.target.value)}
                 className="pl-9"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="invoice-subject">
-              Subject
-            </Label>
+            <Label htmlFor="invoice-subject">Subject</Label>
 
             <Input
               id="invoice-subject"
-              defaultValue={`Invoice ${invoiceId} from Your Company`}
+              value={subject}
+              disabled
+              onChange={(event) => setSubject(event.target.value)}
             />
           </div>
+        </div>
+
+        <div className="text-center flex justify-center text-red-400">
+          <p className="text-sm">
+            {sendInvoiceMutation.isError
+              ? sendInvoiceMutation.error.message
+              : ""}
+          </p>
         </div>
 
         <DialogFooter>
@@ -106,7 +127,7 @@ export function InvoiceSendDialog({
             render={
               <Button
                 variant="outline"
-                disabled={isSending}
+                disabled={sendInvoiceMutation?.isPending}
               />
             }
           >
@@ -114,10 +135,12 @@ export function InvoiceSendDialog({
           </DialogClose>
 
           <Button
-            disabled={isSending}
+            disabled={
+              sendInvoiceMutation?.isPaused || sendInvoiceMutation.isPending
+            }
             onClick={handleSend}
           >
-            {isSending
+            {sendInvoiceMutation.isPending || sendInvoiceMutation.isPending
               ? "Sending..."
               : "Send invoice"}
           </Button>

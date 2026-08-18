@@ -1,24 +1,18 @@
 "use client"
 
 import Link from "next/link"
-import { MoreHorizontal } from "lucide-react"
 import { createColumnHelper } from "@tanstack/react-table"
 
-import { Button } from "@workspace/ui/components/button"
 import { Checkbox } from "@workspace/ui/components/checkbox"
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@workspace/ui/components/dropdown-menu"
 
 import { InvoiceStatusBadge } from "./invoice-status-badge"
 import { invoiceTableFeatures } from "./table-config"
 
 import type { Invoice } from "./invoice-data"
+import { InvoiceTableActions } from "./invoice-table-actions"
+import { formatCurrency } from "@/lib/currency"
+import { getEffectiveInvoiceStatus } from "./invoice-storage"
+import { formatActivityDate } from "@/lib/invoice/invoice"
 
 const columnHelper = createColumnHelper<typeof invoiceTableFeatures, Invoice>()
 
@@ -38,69 +32,64 @@ const columnHelper = createColumnHelper<typeof invoiceTableFeatures, Invoice>()
 //   return null;
 // }
 
+// export const columns = columnHelper.columns([
+
 export const columns = columnHelper.columns([
   columnHelper.display({
-  id: "select",
+    id: "select",
 
-  enableSorting: false,
-  enableHiding: false,
+    enableSorting: false,
+    enableHiding: false,
 
-  header: ({ table }) => {
-    const selectedRows =
-      table.getSelectedRowModel().rows
+    header: ({ table }) => {
+      const selectedRows = table.getSelectedRowModel().rows
 
-    const visibleRows =
-      table.getRowModel().rows
+      const visibleRows = table.getRowModel().rows
 
-    const selectedCount =
-      selectedRows.length
+      const selectedCount = selectedRows.length
 
-    const visibleSelectedCount =
-      visibleRows.filter((row) =>
+      const visibleSelectedCount = visibleRows.filter((row) =>
         row.getIsSelected()
       ).length
 
-    const allVisibleSelected =
-      visibleRows.length > 0 &&
-      visibleSelectedCount === visibleRows.length
+      const allVisibleSelected =
+        visibleRows.length > 0 && visibleSelectedCount === visibleRows.length
 
-    const someVisibleSelected =
-      visibleSelectedCount > 0 &&
-      visibleSelectedCount < visibleRows.length
+      const someVisibleSelected =
+        visibleSelectedCount > 0 && visibleSelectedCount < visibleRows.length
 
-    return (
-      <Checkbox
-        checked={allVisibleSelected}
-        indeterminate={
-          someVisibleSelected ||
-          (selectedCount > 0 && !allVisibleSelected)
-        }
-        onCheckedChange={() => {
-          if (selectedCount > 0) {
-            table.resetRowSelection()
-            return
+      return (
+        <Checkbox
+          checked={allVisibleSelected}
+          indeterminate={
+            someVisibleSelected || (selectedCount > 0 && !allVisibleSelected)
           }
+          onCheckedChange={() => {
+            if (selectedCount > 0) {
+              table.resetRowSelection()
+              return
+            }
 
-          visibleRows.forEach((row) => {
-            row.toggleSelected(true)
-          })
+            visibleRows.forEach((row) => {
+              row.toggleSelected(true)
+            })
+          }}
+          aria-label="Select all invoices"
+        />
+      )
+    },
+
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        disabled={!row.getCanSelect()}
+        onCheckedChange={(checked) => {
+          row.toggleSelected(checked === true)
         }}
-        aria-label="Select all invoices"
+        aria-label={`Select ${row.original.id}`}
       />
-    )
-  },
-
-  cell: ({ row }) => (
-    <Checkbox
-      checked={row.getIsSelected()}
-      disabled={!row.getCanSelect()}
-      onCheckedChange={(checked) => {
-        row.toggleSelected(checked === true)
-      }}
-      aria-label={`Select ${row.original.id}`}
-    />
-  ),
-}),
+    ),
+  }),
 
   columnHelper.accessor("id", {
     header: "Invoice",
@@ -113,13 +102,15 @@ export const columns = columnHelper.columns([
           href={`/dashboard/invoices/${invoice.id}`}
           className="font-medium transition-colors hover:text-[#2EAFB4]"
         >
-          {invoice.id}
+          {invoice.id?.includes("INV")
+            ? invoice.id
+            : `INV-${invoice.id?.slice(0, 4)}`}
         </Link>
       )
     },
   }),
 
-  columnHelper.accessor("customer", {
+  columnHelper.accessor("customerId", {
     header: "Customer",
 
     cell: ({ row }) => {
@@ -127,10 +118,10 @@ export const columns = columnHelper.columns([
 
       return (
         <div className="min-w-0">
-          <p className="truncate font-medium">{invoice.customer}</p>
+          {/* <p className="truncate font-medium">{invoice.customerId}</p> */}
 
           <p className="truncate text-xs text-muted-foreground">
-            {invoice.email}
+            {invoice.customerEmail}
           </p>
         </div>
       )
@@ -141,7 +132,9 @@ export const columns = columnHelper.columns([
     header: "Issue date",
 
     cell: ({ getValue }) => (
-      <span className="text-sm text-muted-foreground">{getValue()}</span>
+      <span className="text-sm text-muted-foreground">
+        {formatActivityDate(getValue())}
+      </span>
     ),
   }),
 
@@ -149,24 +142,35 @@ export const columns = columnHelper.columns([
     header: "Due date",
 
     cell: ({ getValue }) => (
-      <span className="text-sm text-muted-foreground">{getValue()}</span>
+      <span className="text-sm text-muted-foreground">
+        {formatActivityDate(getValue())}
+      </span>
     ),
   }),
 
-  columnHelper.accessor("amount", {
-    header: "Amount",
+  columnHelper.accessor(
+    (row) =>
+      row.items.reduce((total, item) => total + item.quantity * item.rate, 0),
+    {
+      id: "amount",
+      header: "Amount",
 
-    cell: ({ getValue }) => (
-      <span className="font-medium">${getValue().toLocaleString()}</span>
-    ),
-  }),
+      cell: ({ getValue, row }) => (
+        <span className="font-medium">
+          {formatCurrency(getValue(), row.original.currency)}
+        </span>
+      ),
+    }
+  ),
 
   columnHelper.accessor("status", {
     header: "Status",
 
     filterFn: "status",
 
-    cell: ({ getValue }) => <InvoiceStatusBadge status={getValue()} />,
+    cell: ({ row }) => (
+      <InvoiceStatusBadge status={getEffectiveInvoiceStatus(row.original)} />
+    ),
   }),
 
   columnHelper.display({
@@ -176,37 +180,9 @@ export const columns = columnHelper.columns([
     enableHiding: false,
 
     cell: ({ row }) => {
-      const invoice = row.original
+      // const invoice = row.original
 
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={<Button variant="ghost" size="icon" className="h-8 w-8" />}
-          >
-            <MoreHorizontal className="h-4 w-4" />
-
-            <span className="sr-only">Open actions for {invoice.id}</span>
-          </DropdownMenuTrigger>
-
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              render={<Link href={`/dashboard/invoices/${invoice.id}`} />}
-            >
-              View invoice
-            </DropdownMenuItem>
-
-            <DropdownMenuItem>Edit invoice</DropdownMenuItem>
-
-            <DropdownMenuItem>Download PDF</DropdownMenuItem>
-
-            <DropdownMenuSeparator />
-
-            <DropdownMenuItem className="text-red-500">
-              Delete invoice
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
+      return <InvoiceTableActions invoice={row.original} />
     },
   }),
 ])

@@ -169,6 +169,15 @@ export function DataTable({ data }: DataTableProps) {
 
                 {statusFilter === "Overdue" && <Check className="h-4 w-4" />}
               </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  statusColumn?.setFilterValue("Cancelled")
+                }}
+              >
+                <span className="flex-1">Cancelled</span>
+
+                {statusFilter === "Cancelled" && <Check className="h-4 w-4" />}
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           {/* Column visibility */}

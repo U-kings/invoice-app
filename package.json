@@ -9,7 +9,9 @@
     "format": "turbo format",
     "typecheck": "turbo typecheck",
     "db:generate": "pnpm --filter @repo/db db:generate",
-    "db:push": "pnpm --filter @repo/db db:push"
+    "db:push": "pnpm --filter @repo/db db:push",
+    "db:migrate": "pnpm --filter @repo/db exec prisma migrate dev",
+    "db:reset": "pnpm --filter @repo/db exec prisma migrate reset"
   },
   "devDependencies": {
     "@workspace/eslint-config": "workspace:*",

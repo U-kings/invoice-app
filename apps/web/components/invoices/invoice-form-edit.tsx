@@ -20,7 +20,7 @@ import {
 import { Textarea } from "@workspace/ui/components/textarea"
 import { Plus, Trash2 } from "lucide-react"
 import Link from "next/link"
-import { useRef, useState } from "react"
+import { useState } from "react"
 import {
   InvoiceItem,
   invoiceItems,
@@ -32,11 +32,49 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { InvoiceItemField } from "./invoice-item-field"
 import { Checkbox } from "@workspace/ui/components/checkbox"
 import { getCatalogItems, saveCatalogItems } from "./item-catalog"
-import { addInvoice } from "./invoice-storage"
-import { customers, Invoice } from "./invoice-data"
+import { addInvoice, updateInvoice } from "./invoice-storage"
+import { Invoice } from "./invoice-data"
 import { useRouter } from "next/navigation"
-import { useCreateInvoice } from "@/hooks/use-create-invoice"
-import { useSendInvoice } from "@/hooks/use-send-invoice"
+import { formatDateForInput } from "@/lib/dateFormatter"
+
+interface Customer {
+  id: string
+  name: string
+  email: string
+}
+
+const customers: Customer[] = [
+  {
+    id: "customer-1",
+    name: "Acme Corporation",
+    email: "billing@acme.com",
+  },
+  {
+    id: "customer-2",
+    name: "Globex Inc.",
+    email: "accounts@globex.com",
+  },
+  {
+    id: "customer-3",
+    name: "Stark Industries",
+    email: "finance@stark.com",
+  },
+  {
+    id: "customer-4",
+    name: "Wayne Enterprises",
+    email: "billing@wayne.com",
+  },
+  {
+    id: "customer-5",
+    name: "Streetwise Enterprises",
+    email: "street@wise.com",
+  },
+  {
+    id: "customer-6",
+    name: "NBG Enterprises",
+    email: "ngb-contact@customer.com",
+  },
+]
 
 const paymentTerms = [
   {
@@ -84,7 +122,11 @@ const currencies = [
   },
 ]
 
-export function InvoiceForm() {
+interface InvoiceFormProps {
+  invoice?: Invoice
+}
+
+export function InvoiceFormEdit({ invoice }: InvoiceFormProps) {
   const router = useRouter()
   const [saveToCatalog, setSaveToCatalog] = useState<Record<string, boolean>>(
     {}
@@ -95,30 +137,28 @@ export function InvoiceForm() {
     return storedItems.length > 0 ? storedItems : invoiceItems
   })
 
-  const createInvoiceMutation = useCreateInvoice()
-  // const sendInvoiceMutation = useSendInvoice()
-  const MAX_DATE_BUILT: string = new Intl.DateTimeFormat("en-CA").format(
-    new Date()
-  )
-
-  const [isDraftLoading, setIsDraftLoading] = useState(false)
-
-  const invoiceNumber = crypto.randomUUID()
-
   const form = useForm<InvoiceFormValues>({
     resolver: zodResolver(invoiceSchema),
 
     defaultValues: {
-      invoiceNumber: `INV-${invoiceNumber?.slice(0, 3)}`,
-      customerId: "",
-      customerEmail: "",
-      currency: "NGN",
-      issueDate: MAX_DATE_BUILT,
-      paymentTerm: "Due-on-receipt",
-      dueDate: "",
-      status: "Draft",
+      invoiceNumber: invoice?.invoiceNumber ?? "INV-001",
+      customerId: invoice?.customerId ?? "",
+      customerEmail: invoice?.customerEmail ?? "",
+      currency: invoice?.currency ?? "NGN",
+      issueDate:
+        formatDateForInput(invoice?.issueDate) ??
+        new Date().toISOString().split("T")[0],
+      paymentTerm: invoice?.paymentTerm ?? "Due-on-receipt",
+      dueDate: formatDateForInput(invoice?.dueDate),
+      status: invoice?.status ?? "Draft",
 
-      items: [
+      items: invoice?.items?.map((item) => ({
+        id: item.id,
+        name: item.name,
+        description: item.description,
+        quantity: item.quantity,
+        rate: item.rate,
+      })) ?? [
         {
           id: "",
           name: "",
@@ -128,9 +168,9 @@ export function InvoiceForm() {
         },
       ],
 
-      discount: 0,
-      taxRate: 0,
-      notes: "",
+      discount: invoice?.discount ?? 0,
+      taxRate: invoice?.taxRate ?? 0,
+      notes: invoice?.notes ?? "",
     },
   })
 
@@ -157,6 +197,7 @@ export function InvoiceForm() {
     control: form.control,
     name: "discount",
   })
+
   const issueDate = useWatch({
     control: form.control,
     name: "issueDate",
@@ -212,70 +253,19 @@ export function InvoiceForm() {
     }).format(value)
   }
 
-  async function handleSaveDraft(values: InvoiceFormValues) {
-    setIsDraftLoading(true)
-    // 1. Save selected new items to catalog
-    // --------------------------------
-    let updatedCatalog = [...catalogItems]
-
-    values.items.forEach((item, index) => {
-      if (!saveToCatalog[index]) {
-        return
-      }
-
-      const catalogItem: InvoiceItem = {
-        id: item.id || crypto.randomUUID(),
-        name: item.name.trim(),
-        description: item.description.trim(),
-        quantity: item.quantity,
-        rate: item.rate,
-      }
-
-      const alreadyExists = updatedCatalog.some(
-        (existingItem) =>
-          existingItem.name.trim().toLowerCase() ===
-          catalogItem.name.trim().toLowerCase()
-      )
-
-      if (alreadyExists) {
-        return
-      }
-
-      updatedCatalog = [...updatedCatalog, catalogItem]
-    })
-
-    saveCatalogItems(updatedCatalog)
-    setCatalogItems(updatedCatalog)
-
-    try {
-      createInvoiceMutation.mutate({
-        customerId: values.customerId,
-        currency: values.currency,
-        issueDate: values.issueDate,
-        dueDate: values.dueDate,
-        paymentTerm: values.paymentTerm,
-        discount: values.discount,
-        taxRate: values.taxRate,
-        notes: values.notes,
-        sent: false,
-
-        items: values.items.map((item) => ({
-          description: item.description,
-          quantity: item.quantity,
-          rate: item.rate,
-        })),
-      })
-    } catch (error) {
-      console.error("Failed to create invoice:", error)
-    } finally {
-      
-      setTimeout(() => setIsDraftLoading(false), 1000);
-    }
+  function handleSaveDraft(values: InvoiceFormValues) {
+    console.log("Saving invoice as draft", values)
   }
 
+  //   const invoiceId = useRef(crypto.randomUUID())
+
   async function onSubmit(values: InvoiceFormValues) {
+    console.log(values)
+    // const itemsToSave = values.items.filter((_, index) => saveToCatalog[index])
+    // --------------------------------
     // 1. Save selected new items to catalog
     // --------------------------------
+
     let updatedCatalog = [...catalogItems]
 
     values.items.forEach((item, index) => {
@@ -307,33 +297,59 @@ export function InvoiceForm() {
     saveCatalogItems(updatedCatalog)
     setCatalogItems(updatedCatalog)
 
-    try {
-      createInvoiceMutation.mutate({
-        customerId: values.customerId,
-        currency: values.currency,
-        issueDate: values.issueDate,
-        dueDate: values.dueDate,
-        paymentTerm: values.paymentTerm,
-        discount: values.discount,
-        taxRate: values.taxRate,
-        notes: values.notes,
-        sent: false,
+    // --------------------------------
+    // 2. Create the invoice
+    // --------------------------------
 
-        items: values.items.map((item) => ({
-          description: item.description,
-          quantity: item.quantity,
-          rate: item.rate,
-        })),
-      })
-    } catch (error) {
-      console.error("Failed to create and send invoice:", error)
+    const invoiceData: Invoice = {
+      id: invoice?.id ?? crypto.randomUUID(),
+
+      invoiceNumber: values.invoiceNumber,
+      customerId: values.customerId,
+      customerEmail: values.customerEmail,
+      currency: values.currency,
+      issueDate: values.issueDate,
+      dueDate: values.dueDate,
+      paymentTerm: values.paymentTerm,
+      status: values.status,
+
+      items: values.items.map((item) => ({
+        id: item.id || crypto.randomUUID(),
+        name: item.name,
+        description: item.description,
+        quantity: item.quantity,
+        rate: item.rate,
+      })),
+
+      discount: values.discount,
+      taxRate: values.taxRate,
+      notes: values.notes,
     }
+
+    // --------------------------------
+    // 3. Save the invoice
+    // --------------------------------
+
+    if (invoiceData) {
+      updateInvoice(invoiceData)
+    } else {
+      addInvoice(invoiceData)
+    }
+
+    // --------------------------------
+    // 4. Continue with your existing
+    //    success / redirect logic
+    // --------------------------------
+
+    router.push("/dashboard/invoices")
   }
 
   return (
     <form
       id="invoice-form"
-      onSubmit={form.handleSubmit(onSubmit)}
+      onSubmit={form.handleSubmit(onSubmit, (errors) => {
+        console.log("Invoice validation errors:", errors)
+      })}
       className="space-y-6"
     >
       {/* Invoice information */}
@@ -348,17 +364,11 @@ export function InvoiceForm() {
 
         <FieldGroup className="grid gap-5 md:grid-cols-2">
           <Field data-invalid={!!errors.invoiceNumber}>
-            <FieldLabel htmlFor="invoice-number">
-              Invoice number{" "}
-              <span className="font-medium text-gray-400">
-                (auto-generated)
-              </span>
-            </FieldLabel>
+            <FieldLabel htmlFor="invoice-number">Invoice number</FieldLabel>
 
             <Input
               id="invoice-number"
               placeholder="INV-001"
-              disabled
               aria-invalid={!!errors.invoiceNumber}
               {...register("invoiceNumber")}
             />
@@ -377,9 +387,10 @@ export function InvoiceForm() {
             control={control}
             render={({ field, fieldState }) => {
               const selectedCustomer = customers.find(
-                (customer) => customer.id === field.value
+                (customer) => customer.id === invoice?.customerId
               )
 
+              console.log(selectedCustomer)
               return (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor="customer">Customer</FieldLabel>
@@ -500,7 +511,6 @@ export function InvoiceForm() {
             <Input
               id="issue-date"
               type="date"
-              // max={today}
               aria-invalid={!!errors.issueDate}
               {...register("issueDate")}
             />
@@ -611,23 +621,25 @@ export function InvoiceForm() {
 
                 <Select
                   value={field.value || null}
+                  disabled
                   onValueChange={(value) => {
                     if (value) {
                       field.onChange(value)
                     }
                   }}
-                  disabled
                 >
                   <SelectTrigger
                     id="status"
                     className="data-[size=default]:h-12"
                     aria-invalid={fieldState.invalid}
                   >
-                    <SelectValue placeholder="Draft" />
+                    <SelectValue placeholder="Select status" />
                   </SelectTrigger>
 
                   <SelectContent>
                     <SelectItem value="Draft">Draft</SelectItem>
+
+                    <SelectItem value="Sent">Sent</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -687,6 +699,11 @@ export function InvoiceForm() {
                   control={form.control}
                   name={`items.${index}.name`}
                   render={({ field, fieldState }) => {
+                    // const currentItemId = form.getValues(`items.${index}.id`)
+
+                    // const isCatalogItem = catalogItems.some(
+                    //   (item) => item.id === currentItemId
+                    // )
                     return (
                       <Field data-invalid={fieldState.invalid}>
                         <InvoiceItemField
@@ -762,13 +779,11 @@ export function InvoiceForm() {
                               />
 
                               <div className="space-y-1">
-                                {/* <FieldLabel
+                                <FieldLabel
                                   htmlFor={`item-${index}-save-to-catalog`}
-                                > */}
-                                <p className="text-sm leading-4 font-semibold text-gray-900 dark:text-white">
+                                >
                                   Save this item to your item catalog
-                                </p>
-                                {/* </FieldLabel> */}
+                                </FieldLabel>
 
                                 <FieldDescription>
                                   Make this item available for future invoices.
@@ -1072,23 +1087,23 @@ export function InvoiceForm() {
 
         <div className="flex flex-col-reverse gap-3 sm:flex-row">
           <Button
-            disabled={isDraftLoading}
+            disabled={form.formState.isSubmitting}
             type="button"
             className="h-10"
             variant="outline"
             onClick={handleSubmit(handleSaveDraft)}
           >
-            {isDraftLoading ? "Saving as draft..." : "Save as draft"}
+            {form.formState.isSubmitting
+              ? "Saving to draft..."
+              : "Save as draft"}
           </Button>
 
           <Button
             type="submit"
-            disabled={createInvoiceMutation.isPending && isDraftLoading }
+            disabled={form.formState.isSubmitting}
             className="h-10 bg-[#2EAFB4] text-white hover:bg-[#269ba0]"
           >
-            {createInvoiceMutation.isPending
-              ? "Creating..."
-              : "Create & Send"}
+            {form.formState.isSubmitting ? "Updating..." : "Update Invoice"}
           </Button>
         </div>
       </div>

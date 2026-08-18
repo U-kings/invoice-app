@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { Trash2 } from "lucide-react"
 
 import { Button } from "@workspace/ui/components/button"
 
@@ -15,31 +14,37 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@workspace/ui/components/dialog"
+import { deleteInvoice, INVOICE_STORAGE_EVENT } from "./invoice-storage"
+import { useRouter } from "next/navigation"
 
 interface InvoiceDeleteDialogProps {
   invoiceId: string
   open: boolean
   onOpenChange: (open: boolean) => void
+  onDeleted?: () => void
 }
 
 export function InvoiceDeleteDialog({
   invoiceId,
   open,
   onOpenChange,
+  onDeleted,
 }: InvoiceDeleteDialogProps) {
+  // const router = useRouter()
   const [isDeleting, setIsDeleting] = React.useState(false)
-  const [deleteOpen, setDeleteOpen] =
-  React.useState(false)
 
   async function handleDelete() {
     setIsDeleting(true)
 
     try {
-      // Replace this with your API call later.
-      await new Promise((resolve) => setTimeout(resolve, 800))
+      deleteInvoice(invoiceId)
+      window.dispatchEvent(new Event(INVOICE_STORAGE_EVENT))
 
-      console.log("Invoice deleted:", invoiceId)
       onOpenChange(false)
+
+      onDeleted?.()
+
+      // router.push("/dashboard/invoices")
     } finally {
       setIsDeleting(false)
     }
@@ -47,18 +52,6 @@ export function InvoiceDeleteDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger
-        render={
-          <Button
-            variant="ghost"
-            className="w-full justify-start text-destructive hover:text-destructive"
-          />
-        }
-      >
-        <Trash2 className="mr-2 h-4 w-4" />
-        Delete invoice
-      </DialogTrigger>
-
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Delete invoice?</DialogTitle>

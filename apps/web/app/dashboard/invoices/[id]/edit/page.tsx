@@ -1,9 +1,70 @@
-import React from 'react'
+"use client"
 
-type Props = {}
+import { useParams } from "next/navigation"
 
-export default function page({}: Props) {
+import { getInvoices } from "@/components/invoices/invoice-storage"
+import { InvoiceFormEdit } from "@/components/invoices/invoice-form-edit"
+import Link from "next/link"
+import { ArrowLeft } from "lucide-react"
+import { useEffect, useState } from "react"
+import { Invoice } from "@/components/invoices/invoice-data"
+
+export default function EditInvoicePage() {
+  const params = useParams<{ id: string }>()
+
+  const [invoice, setInvoice] = useState<Invoice | null>(null)
+  const [isLoaded, setIsLoaded] = useState(false)
+
+  useEffect(() => {
+    const storedInvoices = getInvoices()
+
+    const foundInvoice = storedInvoices.find(
+      (invoice) => invoice.id === params.id
+    )
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setInvoice(foundInvoice ?? null)
+    setIsLoaded(true)
+  }, [params.id])
+
+  if (!invoice) {
+    return (
+      <div className="space-y-4">
+        <Link
+          href="/dashboard/invoices"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to invoices
+        </Link>
+
+        <h1 className="text-2xl font-semibold">Invoice not found</h1>
+
+        <p className="text-sm text-muted-foreground">
+          The invoice you&apos;re trying to edit could not be found.
+        </p>
+      </div>
+    )
+  }
+
   return (
-    <div>page</div>
+    <div className="space-y-8">
+      <div>
+        <Link
+          href="/dashboard/invoices"
+          className="mb-4 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to invoices
+        </Link>
+        <h1 className="text-2xl font-semibold">Edit invoice</h1>
+
+        <p className="mt-1 text-sm text-muted-foreground">
+          Update the details of {invoice.invoiceNumber}.
+        </p>
+      </div>
+
+      <InvoiceFormEdit invoice={invoice} />
+    </div>
   )
 }

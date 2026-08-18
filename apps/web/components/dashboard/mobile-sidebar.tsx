@@ -45,17 +45,19 @@ export function MobileSidebar() {
             <div
               // href="/dashboard"
               onClick={() => setOpen(false)}
-              className="flex flex-col items-left gap-3"
+              className="items-left flex flex-col gap-3"
             >
               {/* <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#2EAFB4] font-bold text-white">
                 I
               </div> */}
-              <Logo/>
+              <Logo />
 
               <div>
                 {/* <p className="text-lg font-bold">InvoiceFlow</p> */}
 
-                <p className="text-xs text-muted-foreground ml-10">Business Dashboard</p>
+                <p className="ml-10 text-xs text-muted-foreground">
+                  Business Dashboard
+                </p>
               </div>
             </div>
           </SheetTitle>
@@ -64,8 +66,8 @@ export function MobileSidebar() {
         <nav className="space-y-2 p-4">
           {navLinks.map((item, index) => {
             const active =
-              pathname === item.href || pathname.startsWith(`${item.href}/`)
-
+              pathname === item.href ||
+              pathname?.includes(item.href?.split("/")[2] ?? "Default")
             const Icon = item.icon
 
             return (

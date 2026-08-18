@@ -16,7 +16,7 @@ export async function sendVerificationEmail({
 }: SendVerificationEmailArgs): Promise<{ success: boolean; data?: any; error?: any }> {
   try {
     const { data, error } = await resend.emails.send({
-      from: "Acme <onboarding@resend.dev>", // Replace with your verified custom domain later
+      from: "Invoice Flow <onboarding@resend.dev>", // Replace with your verified custom domain later
       to: [to],
       subject: "Verify your account",
       html: `

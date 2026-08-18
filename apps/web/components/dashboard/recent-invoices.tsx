@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { MoreHorizontal } from "lucide-react";
 
 import { InvoiceStatusBadge } from "./invoice-status-badge";
+import Link from "next/link";
 
 const invoices = [
   {
@@ -57,7 +58,9 @@ export function RecentInvoices() {
         </h2>
 
         <button className="text-sm font-medium text-[#2EAFB4]">
+          <Link href={"/dashboard/invoices"}>
           View All
+          </Link>
         </button>
       </div>
 

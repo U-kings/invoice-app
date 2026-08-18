@@ -113,31 +113,6 @@ export function LoginForm() {
     }
     // Trigger mutation payload
     mutate(credentials)
-    // try {
-    //   console.log(values)
-
-    //   await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    //   toast.add({
-    //     title: "Welcome back 👋",
-    //     description: "You have successfully signed in.",
-    //     type: "success",
-    //   })
-    //   // toast.success("Welcome back 👋");
-
-    //   setSuccess(true)
-
-    //   // setTimeout(() => {
-    //   //   router.push("/dashboard");
-    //   // }, 1500);
-    // } catch {
-    //   toast.add({
-    //     title: "Login failed",
-    //     description: "Invalid email or password.",
-    //     type: "error",
-    //   })
-    //   // toast.error("Unable to login.");
-    // }
   }
 
   return (

@@ -40,7 +40,7 @@ export function Sidebar() {
 
       {/* Upgrade Card */}
       <div className="p-5">
-        <div className="rounded-3xl border bg-gradient-to-br from-[#2EAFB4]/10 to-transparent p-5">
+        <div className="rounded-3xl border bg-linear-to-br from-[#2EAFB4]/10 to-transparent p-5">
           <h3 className="font-semibold">Upgrade to Pro</h3>
 
           <p className="mt-2 text-sm text-muted-foreground">

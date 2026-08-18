@@ -1,12 +1,10 @@
-import { cn } from "@workspace/ui/lib/utils";
+import { cn } from "@workspace/ui/lib/utils"
 
 interface Props {
-  status: string;
+  status: string
 }
 
-export function InvoiceStatusBadge({
-  status,
-}: Props) {
+export function InvoiceStatusBadge({ status }: Props) {
   return (
     <span
       className={cn(
@@ -21,10 +19,12 @@ export function InvoiceStatusBadge({
           "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400",
 
         status === "Draft" &&
-          "bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300"
+          "bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300",
+        status === "Cancelled" &&
+          "bg-gray-100 text-gray-900 dark:bg-gray-500/20 dark:text-gray-500"
       )}
     >
       {status}
     </span>
-  );
+  )
 }

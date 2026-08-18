@@ -54,7 +54,7 @@ export async function POST(request: Request) {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
     const resetUrl = `${baseUrl}/reset-password?token=${token}`
 
-    const fromEmail = "Acme <onboarding@resend.dev>"
+    const fromEmail = "Invoice Flow <onboarding@resend.dev>"
 
     // 8. Trigger automated transactional mail delivery via Resend API
     const { error } = await resend.emails.send({
