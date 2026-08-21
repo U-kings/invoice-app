@@ -5,7 +5,7 @@ export const invoiceStatus = [
     color: "#2EAFB4",
   },
   {
-    name: "Pending",
+    name: "Sent",
     value: 18,
     color: "#F59E0B",
   },

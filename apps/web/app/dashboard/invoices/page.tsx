@@ -6,16 +6,40 @@ import { DataTable } from "@/components/invoices/data-table"
 import { useInvoices } from "@/hooks/use-invoice"
 
 export default function InvoicesPage() {
-  const { invoices } = useInvoices()
+
+   const {
+    data,
+    isLoading,
+    isFetching,
+    isError,
+    error,
+  } = useInvoices({
+    page: 1,
+    pageSize: 10,
+  })
+
+  if (isLoading) {
+    return <div>Loading invoices...</div>
+  }
+
+  if (isError) {
+    return (
+      <div>
+        {error.message}
+      </div>
+    )
+  }
+
+  console.log(data)
 
   return (
     <div className="space-y-8">
       <InvoicePageHeader />
 
-      <InvoiceStats invoices={invoices} />
+      <InvoiceStats invoices={data?.data} />
 
       <section className="space-y-4">
-        <DataTable data={invoices} />
+        <DataTable data={data?.data ?? []} />
       </section>
     </div>
   )

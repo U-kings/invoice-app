@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import jwt from "jsonwebtoken"
 
 import { prisma } from "@repo/db"
-import { sendInvoice } from "@/lib/invoice/send-invoice"
+import { sendInvoice } from "@/lib/invoices/send-invoice"
 
 interface AuthPayload {
   userId: string
@@ -26,6 +26,240 @@ interface CreateInvoiceBody {
   status?: "DRAFT" | "SENT"
   send?: boolean
   items: CreateInvoiceItem[]
+}
+
+import { InvoiceStatus as PrismaInvoiceStatus } from "@repo/db"
+
+const statusMap: Record<
+  string,
+  PrismaInvoiceStatus
+> = {
+  Sent: "SENT",
+  Paid: "PAID",
+  Overdue: "OVERDUE",
+  Draft: "DRAFT",
+  Cancelled: "CANCELLED",
+}
+
+export async function GET(req: NextRequest) {
+  try {
+    // ---------------------------------------------------------
+    // 1. Get authentication token
+    // ---------------------------------------------------------
+
+    const token = req.cookies.get("token")?.value
+
+    if (!token) {
+      return NextResponse.json(
+        {
+          error: "Unauthorized",
+        },
+        {
+          status: 401,
+        }
+      )
+    }
+
+    // ---------------------------------------------------------
+    // 2. Verify JWT
+    // ---------------------------------------------------------
+
+    const jwtSecret = process.env.JWT_SECRET
+
+    if (!jwtSecret) {
+      throw new Error(
+        "JWT_SECRET environment variable is missing from configuration."
+      )
+    }
+
+    let decoded: {
+      userId: string
+      role?: string
+      class?: string
+    }
+
+    try {
+      decoded = jwt.verify(
+        token,
+        jwtSecret
+      ) as typeof decoded
+    } catch {
+      return NextResponse.json(
+        {
+          error: "Invalid or expired token",
+        },
+        {
+          status: 401,
+        }
+      )
+    }
+
+    if (!decoded.userId) {
+      return NextResponse.json(
+        {
+          error: "Invalid authentication token",
+        },
+        {
+          status: 401,
+        }
+      )
+    }
+
+    // ---------------------------------------------------------
+    // 3. Query parameters
+    // ---------------------------------------------------------
+
+    const { searchParams } = new URL(req.url)
+
+    const search =
+      searchParams.get("search")?.trim() || ""
+
+    const status =
+      searchParams.get("status")?.trim() || ""
+
+    const page = Math.max(
+      Number(searchParams.get("page")) || 1,
+      1
+    )
+
+    const pageSize = Math.min(
+      Math.max(
+        Number(searchParams.get("pageSize")) || 10,
+        1
+      ),
+      100
+    )
+
+    const skip =
+      (page - 1) * pageSize
+
+    // ---------------------------------------------------------
+    // 4. Validate status
+    // ---------------------------------------------------------
+
+    let statusFilter:
+      | PrismaInvoiceStatus
+      | undefined
+
+    if (status) {
+      statusFilter = statusMap[status]
+
+      if (!statusFilter) {
+        return NextResponse.json(
+          {
+            error: "Invalid invoice status",
+          },
+          {
+            status: 400,
+          }
+        )
+      }
+    }
+
+    // ---------------------------------------------------------
+    // 5. Build WHERE clause
+    // ---------------------------------------------------------
+
+    const where = {
+      userId: decoded.userId,
+
+      ...(search
+        ? {
+            OR: [
+              {
+                invoiceNumber: {
+                  contains: search,
+                  mode: "insensitive" as const,
+                },
+              },
+              {
+                customer: {
+                  name: {
+                    contains: search,
+                    mode: "insensitive" as const,
+                  },
+                },
+              },
+              {
+                customer: {
+                  email: {
+                    contains: search,
+                    mode: "insensitive" as const,
+                  },
+                },
+              },
+            ],
+          }
+        : {}),
+
+      ...(statusFilter
+        ? {
+            status: statusFilter,
+          }
+        : {}),
+    }
+
+    // ---------------------------------------------------------
+    // 6. Fetch invoices + count
+    // ---------------------------------------------------------
+
+    const [invoices, total] =
+      await prisma.$transaction([
+        prisma.invoice.findMany({
+          where,
+          include: {
+            customer: true,
+            lineItems: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+          skip,
+          take: pageSize,
+        }),
+
+        prisma.invoice.count({
+          where,
+        }),
+      ])
+
+    // ---------------------------------------------------------
+    // 7. Pagination
+    // ---------------------------------------------------------
+
+    const totalPages = Math.ceil(
+      total / pageSize
+    )
+
+    return NextResponse.json({
+      data: invoices,
+
+      pagination: {
+        page,
+        pageSize,
+        total,
+        totalPages,
+        hasNextPage:
+          page < totalPages,
+        hasPreviousPage:
+          page > 1,
+      },
+    })
+  } catch (error) {
+    console.error(
+      "Get invoices error:",
+      error
+    )
+
+    return NextResponse.json(
+      {
+        error: "Failed to fetch invoices.",
+      },
+      {
+        status: 500,
+      }
+    )
+  }
 }
 
 export async function POST(req: NextRequest) {

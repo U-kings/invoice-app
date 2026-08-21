@@ -3,14 +3,13 @@
 import { motion } from "motion/react"
 import { CircleDollarSign, Clock3, FileText, TriangleAlert } from "lucide-react"
 
-import type { Invoice, InvoiceStatus } from "./invoice-data"
-import { getEffectiveInvoiceStatus } from "./invoice-storage"
 import { BsCash } from "react-icons/bs"
 import { formatCurrency } from "@/lib/currency"
-import { getInvoiceTotal } from "@/lib/invoice/invoice"
+import { getEffectiveInvoiceStatus, getInvoiceTotal } from "@/lib/invoices/invoice"
+import { Invoice, InvoiceStatus } from "@/hooks/use-invoice"
 
 interface InvoiceStatsProps {
-  invoices: Invoice[]
+  invoices: Invoice[] | undefined
 }
 
 interface CurrencyTotal {
@@ -19,19 +18,19 @@ interface CurrencyTotal {
 }
 
 function groupByCurrency(
-  invoices: Invoice[],
+  invoices: Invoice[] | undefined,
   statuses: InvoiceStatus[]
 ): CurrencyTotal[] {
   const totals: Record<string, number> = {}
 
-  invoices.forEach((invoice) => {
+  invoices?.forEach((invoice) => {
     const status = getEffectiveInvoiceStatus(invoice)
 
     if (!statuses.includes(status)) {
       return
     }
 
-    const total = getInvoiceTotal(invoice)
+    const total = getInvoiceTotal(invoice) ?? 0
 
     totals[invoice.currency] = (totals[invoice.currency] ?? 0) + total
   })
@@ -43,10 +42,10 @@ function groupByCurrency(
 }
 
 export function InvoiceStats({ invoices }: InvoiceStatsProps) {
-  const totals = invoices.reduce(
+  const totals = invoices?.reduce(
     (acc, invoice) => {
       const status = getEffectiveInvoiceStatus(invoice)
-      const total = getInvoiceTotal(invoice)
+      const total = getInvoiceTotal(invoice) ?? 0
 
       acc.totalInvoices += 1
 
@@ -85,7 +84,7 @@ export function InvoiceStats({ invoices }: InvoiceStatsProps) {
     {
       type: "count" as const,
       title: "Total invoices",
-      value: totals.totalInvoices.toString(),
+      value: totals?.totalInvoices.toString(),
       description: "All invoices",
       icon: FileText,
     },

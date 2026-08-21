@@ -1,5 +1,5 @@
+import { InvoiceStatus } from "@/hooks/use-invoice"
 import { cn } from "@workspace/ui/lib/utils"
-import type { InvoiceStatus } from "./invoice-data"
 
 interface InvoiceStatusBadgeProps {
   status: InvoiceStatus

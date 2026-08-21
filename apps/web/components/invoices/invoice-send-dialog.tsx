@@ -15,16 +15,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@workspace/ui/components/dialog"
-import { markInvoiceAsSent } from "./invoice-storage"
 import { useEffect, useState } from "react"
 import { useSendInvoice } from "@/hooks/use-send-invoice"
 import { toast } from "@workspace/ui/components/toast"
 
 interface InvoiceSendDialogProps {
-  invoiceId: string
+  invoiceId: string | undefined
   open: boolean
   onOpenChange: (open: boolean) => void
-  email: string
+  email: string | undefined
 }
 
 export function InvoiceSendDialog({

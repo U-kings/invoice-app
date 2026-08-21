@@ -32,8 +32,6 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { InvoiceItemField } from "./invoice-item-field"
 import { Checkbox } from "@workspace/ui/components/checkbox"
 import { getCatalogItems, saveCatalogItems } from "./item-catalog"
-import { addInvoice } from "./invoice-storage"
-import { customers, Invoice } from "./invoice-data"
 import { useRouter } from "next/navigation"
 import { useCreateInvoice } from "@/hooks/use-create-invoice"
 import { useSendInvoice } from "@/hooks/use-send-invoice"
@@ -83,6 +81,8 @@ const currencies = [
     symbol: "₦",
   },
 ]
+
+const customers: any[] = []
 
 export function InvoiceForm() {
   const router = useRouter()
@@ -268,8 +268,7 @@ export function InvoiceForm() {
     } catch (error) {
       console.error("Failed to create invoice:", error)
     } finally {
-      
-      setTimeout(() => setIsDraftLoading(false), 1000);
+      setTimeout(() => setIsDraftLoading(false), 1000)
     }
   }
 
@@ -376,7 +375,7 @@ export function InvoiceForm() {
             name="customerId"
             control={control}
             render={({ field, fieldState }) => {
-              const selectedCustomer = customers.find(
+              const selectedCustomer = customers?.find(
                 (customer) => customer.id === field.value
               )
 
@@ -1083,12 +1082,10 @@ export function InvoiceForm() {
 
           <Button
             type="submit"
-            disabled={createInvoiceMutation.isPending && isDraftLoading }
+            disabled={createInvoiceMutation.isPending && isDraftLoading}
             className="h-10 bg-[#2EAFB4] text-white hover:bg-[#269ba0]"
           >
-            {createInvoiceMutation.isPending
-              ? "Creating..."
-              : "Create & Send"}
+            {createInvoiceMutation.isPending ? "Creating..." : "Create & Send"}
           </Button>
         </div>
       </div>

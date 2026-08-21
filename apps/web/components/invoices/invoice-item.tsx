@@ -1,20 +1,20 @@
 import { Separator } from "@workspace/ui/components/separator"
-import { Invoice } from "./invoice-data"
 import { formatCurrency } from "@/lib/currency"
+import { Invoice } from "@/hooks/use-invoice"
 
 interface InvoiceItemsProps {
-  invoice: Invoice
+  invoice: Invoice | undefined
 }
 
 export function InvoiceItems({ invoice }: InvoiceItemsProps) {
-  const subtotal = invoice?.items.reduce(
+  const subtotal = invoice?.lineItems.reduce(
     (total, item) => total + item.quantity * item.rate,
     0
   )
 
   const taxRate = invoice?.taxRate
-  const tax = subtotal * (taxRate / 100)
-  const total = subtotal + tax
+  const tax = subtotal && subtotal * (taxRate ?? 0 / 100)
+  const total = subtotal && subtotal + (tax ?? 0)
   const currency = invoice?.currency
   return (
     <div className="rounded-2xl border bg-background">
@@ -28,7 +28,7 @@ export function InvoiceItems({ invoice }: InvoiceItemsProps) {
 
       {/* Items */}
       <div className="divide-y">
-        {invoice?.items?.map((item) => {
+        {invoice?.lineItems?.map((item) => {
           const amount = item.quantity * item.rate
 
           return (

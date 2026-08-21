@@ -15,8 +15,8 @@ import {
 } from "@workspace/ui/components/dropdown-menu"
 
 import { InvoiceDeleteDialog } from "./invoice-delete-dialog"
-import { Invoice } from "./invoice-data"
-import { getEffectiveInvoiceStatus } from "./invoice-storage"
+import { Invoice } from "@/hooks/use-invoice"
+import { getEffectiveInvoiceStatus } from "@/lib/invoices/invoice"
 
 interface InvoiceTableActionsProps {
   invoice: Invoice

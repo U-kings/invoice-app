@@ -11,45 +11,31 @@ import { InvoicePayment } from "@/components/invoices/invoice-payment"
 import { InvoiceActions } from "@/components/invoices/invoice-actions"
 import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
-import { Invoice } from "@/components/invoices/invoice-data"
 import {
+  formatActivityDate,
   getEffectiveInvoiceStatus,
-  getInvoices,
-  INVOICE_STORAGE_EVENT,
-} from "@/components/invoices/invoice-storage"
-import { formatActivityDate } from "@/lib/invoice/invoice"
+} from "@/lib/invoices/invoice"
+import { Invoice, useInvoices } from "@/hooks/use-invoice"
 
 export default function InvoiceDetailsPage() {
   const params = useParams<{ id: string }>()
-  const [invoice, setInvoice] = useState<Invoice | null>(null)
 
-  const effectiveStatus = invoice ? getEffectiveInvoiceStatus(invoice) : null
+  const { data } = useInvoices({
+    page: 1,
+    pageSize: 1,
+    search: params?.id,
+  })
+
+  const firstInvoice = data?.data?.[0]
+
+  const effectiveStatus =
+    firstInvoice !== undefined ? getEffectiveInvoiceStatus(firstInvoice) : null
 
   const isPaid = effectiveStatus === "Paid"
   // const isCancelled = effectiveStatus === "Cancelled"
   const isSent = effectiveStatus === "Sent"
 
-  useEffect(() => {
-    const loadInvoice = () => {
-      const storedInvoices = getInvoices()
-
-      const foundInvoice = storedInvoices.find(
-        (invoice) => invoice.id === params.id
-      )
-
-      setInvoice(foundInvoice ?? null)
-    }
-
-    loadInvoice()
-
-    window.addEventListener(INVOICE_STORAGE_EVENT, loadInvoice)
-
-    return () => {
-      window.removeEventListener(INVOICE_STORAGE_EVENT, loadInvoice)
-    }
-  }, [params.id])
-
-  if (!invoice) {
+  if (!data?.data) {
     return (
       <div className="mx-auto w-full max-w-7xl space-y-6">
         <Link
@@ -81,30 +67,30 @@ export default function InvoiceDetailsPage() {
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-2xl font-semibold tracking-tight">
-              {invoice.id}
+              {data.data?.[0]?.id}
             </h1>
 
             <InvoiceStatusBadge status={effectiveStatus ?? "Draft"} />
           </div>
 
           <p className="text-sm text-muted-foreground">
-            Issued {invoice.issueDate} · Due {invoice.dueDate}
+            Issued {data.data?.[0]?.issueDate} · Due {data.data?.[0]?.dueDate}
           </p>
         </div>
 
-        <InvoiceActions invoice={invoice} />
+        <InvoiceActions invoice={data.data?.[0]} />
       </div>
 
-      <InvoiceSummary invoice={invoice} />
-      <InvoiceItems invoice={invoice} />
+      <InvoiceSummary invoice={data.data?.[0]} />
+      <InvoiceItems invoice={data.data?.[0]} />
       {effectiveStatus === "Cancelled" ? (
-        <InvoiceCancellation invoice={invoice} />
+        <InvoiceCancellation invoice={data.data?.[0]} />
       ) : (
         <>
           {(isPaid ||
             effectiveStatus === "Sent" ||
             effectiveStatus === "Overdue") && (
-            <InvoicePayment invoice={invoice} />
+            <InvoicePayment invoice={data.data?.[0]} />
           )}
         </>
       )}
@@ -112,7 +98,7 @@ export default function InvoiceDetailsPage() {
   )
 }
 
-function InvoiceCancellation({ invoice }: { invoice: Invoice }) {
+function InvoiceCancellation({ invoice }: { invoice: Invoice | undefined}) {
   return (
     <div className="rounded-2xl border bg-background p-6">
       <div className="mb-5">
@@ -127,7 +113,7 @@ function InvoiceCancellation({ invoice }: { invoice: Invoice }) {
         <div>
           <p className="text-sm font-medium">Cancelled on</p>
 
-          {invoice.cancelledAt && (
+          {invoice?.cancelledAt && (
             <p className="text-sm text-muted-foreground">
               {formatActivityDate(invoice.cancelledAt)}
             </p>

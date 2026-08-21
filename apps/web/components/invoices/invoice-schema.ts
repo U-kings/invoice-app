@@ -24,7 +24,7 @@ export const invoiceSchema = z
 
     dueDate: z.string(),
 
-    status: z.enum(["Draft", "Sent", "Paid", "Pending", "Overdue", "Cancelled"]),
+    status: z.enum(["Draft", "Sent", "Paid", "Overdue", "Cancelled"]),
 
     items: z.array(invoiceItemSchema).min(1, "Add at least one invoice item"),
 

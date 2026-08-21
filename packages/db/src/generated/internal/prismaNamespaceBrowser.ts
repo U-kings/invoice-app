@@ -110,6 +110,7 @@ export type CustomerScalarFieldEnum = (typeof CustomerScalarFieldEnum)[keyof typ
 export const InvoiceScalarFieldEnum = {
   id: 'id',
   invoiceNumber: 'invoiceNumber',
+  publicToken: 'publicToken',
   userId: 'userId',
   customerId: 'customerId',
   status: 'status',
@@ -122,6 +123,7 @@ export const InvoiceScalarFieldEnum = {
   notes: 'notes',
   sentAt: 'sentAt',
   paidAt: 'paidAt',
+  cancelledAt: 'cancelledAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

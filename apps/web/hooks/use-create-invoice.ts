@@ -2,9 +2,9 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
-import type { Invoice } from "@/components/invoices/invoice-data"
 import { toast } from "@workspace/ui/components/toast"
 import { useRouter } from "next/navigation"
+import { Invoice } from "./use-invoice"
 
 export interface CreateInvoicePayload {
   customerId: string

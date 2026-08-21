@@ -32,10 +32,11 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { InvoiceItemField } from "./invoice-item-field"
 import { Checkbox } from "@workspace/ui/components/checkbox"
 import { getCatalogItems, saveCatalogItems } from "./item-catalog"
-import { addInvoice, updateInvoice } from "./invoice-storage"
-import { Invoice } from "./invoice-data"
+// import { addInvoice, updateInvoice } from "./invoice-storage"
+// import { Invoice } from "./invoice-data"
 import { useRouter } from "next/navigation"
 import { formatDateForInput } from "@/lib/dateFormatter"
+import { Invoice } from "@/hooks/use-invoice"
 
 interface Customer {
   id: string
@@ -143,7 +144,7 @@ export function InvoiceFormEdit({ invoice }: InvoiceFormProps) {
     defaultValues: {
       invoiceNumber: invoice?.invoiceNumber ?? "INV-001",
       customerId: invoice?.customerId ?? "",
-      customerEmail: invoice?.customerEmail ?? "",
+      customerEmail: invoice?.customer?.email ?? "",
       currency: invoice?.currency ?? "NGN",
       issueDate:
         formatDateForInput(invoice?.issueDate) ??
@@ -152,7 +153,7 @@ export function InvoiceFormEdit({ invoice }: InvoiceFormProps) {
       dueDate: formatDateForInput(invoice?.dueDate),
       status: invoice?.status ?? "Draft",
 
-      items: invoice?.items?.map((item) => ({
+      items: invoice?.lineItems?.map((item) => ({
         id: item.id,
         name: item.name,
         description: item.description,
@@ -306,14 +307,14 @@ export function InvoiceFormEdit({ invoice }: InvoiceFormProps) {
 
       invoiceNumber: values.invoiceNumber,
       customerId: values.customerId,
-      customerEmail: values.customerEmail,
+      // customerEmail: values.customer.email,
       currency: values.currency,
       issueDate: values.issueDate,
       dueDate: values.dueDate,
       paymentTerm: values.paymentTerm,
       status: values.status,
 
-      items: values.items.map((item) => ({
+      lineItems: values.items.map((item) => ({
         id: item.id || crypto.randomUUID(),
         name: item.name,
         description: item.description,
@@ -330,11 +331,11 @@ export function InvoiceFormEdit({ invoice }: InvoiceFormProps) {
     // 3. Save the invoice
     // --------------------------------
 
-    if (invoiceData) {
-      updateInvoice(invoiceData)
-    } else {
-      addInvoice(invoiceData)
-    }
+    // if (invoiceData) {
+    //   updateInvoice(invoiceData)
+    // } else {
+    //   addInvoice(invoiceData)
+    // }
 
     // --------------------------------
     // 4. Continue with your existing

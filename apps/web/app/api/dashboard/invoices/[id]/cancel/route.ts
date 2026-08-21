@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import jwt from "jsonwebtoken"
-import { sendInvoice } from "@/lib/invoices/send-invoice"
+
+import { prisma } from "@repo/db"
 
 interface AuthPayload {
   userId: string
@@ -18,7 +19,7 @@ export async function POST(
 ) {
   try {
     // ---------------------------------------------
-    // 1. Authenticate
+    // 1. Authenticate user
     // ---------------------------------------------
 
     const token = req.cookies.get("token")?.value
@@ -76,39 +77,87 @@ export async function POST(
     }
 
     // ---------------------------------------------
-    // 3. Send invoice
+    // 3. Find invoice belonging to user
     // ---------------------------------------------
 
-    const invoice = await sendInvoice(
-      id,
-      decoded.userId
-    )
-
-    // ---------------------------------------------
-    // 4. Return updated invoice
-    // ---------------------------------------------
-
-    return NextResponse.json(
-      {
-        message: "Invoice sent successfully",
-        invoice,
+    const invoice = await prisma.invoice.findFirst({
+      where: {
+        id,
+        userId: decoded.userId,
       },
-      { status: 200 }
-    )
+    })
+
+    if (!invoice) {
+      return NextResponse.json(
+        { error: "Invoice not found" },
+        { status: 404 }
+      )
+    }
+
+    // ---------------------------------------------
+    // 4. Validate current status
+    // ---------------------------------------------
+
+    if (invoice.status === "CANCELLED") {
+      return NextResponse.json(
+        {
+          error: "Invoice is already cancelled",
+        },
+        { status: 409 }
+      )
+    }
+
+    if (invoice.status === "PAID") {
+      return NextResponse.json(
+        {
+          error:
+            "A paid invoice cannot be cancelled",
+        },
+        { status: 400 }
+      )
+    }
+
+    // ---------------------------------------------
+    // 5. Cancel invoice
+    // ---------------------------------------------
+
+    const updatedInvoice =
+      await prisma.invoice.update({
+        where: {
+          id: invoice.id,
+        },
+        data: {
+          status: "CANCELLED",
+          cancelledAt: new Date(),
+        },
+        include: {
+          customer: true,
+          lineItems: true,
+        },
+      })
+
+    // ---------------------------------------------
+    // 6. Return updated invoice
+    // ---------------------------------------------
+
+    return NextResponse.json({
+      message: "Invoice cancelled successfully",
+      invoice: updatedInvoice,
+    })
   } catch (error) {
     console.error(
-      "Send Invoice Error:",
+      "Cancel Invoice Error:",
       error
     )
 
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Failed to send invoice"
-
     return NextResponse.json(
-      { error: message },
-      { status: 400 }
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to cancel invoice",
+      },
+      { status: 500 }
     )
   }
 }

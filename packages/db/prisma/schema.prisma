@@ -46,6 +46,7 @@ model Customer {
 model Invoice {
   id            String @id @default(uuid())
   invoiceNumber String @unique
+  publicToken   String @unique @default(uuid())
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -65,8 +66,9 @@ model Invoice {
 
   notes String?
 
-  sentAt DateTime?
-  paidAt DateTime?
+  sentAt      DateTime?
+  paidAt      DateTime?
+  cancelledAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -14,45 +14,29 @@ import {
   DialogTitle,
 } from "@workspace/ui/components/dialog"
 
-import { cancelInvoice } from "./invoice-storage"
+// import { cancelInvoice } from "./invoice-storage"
+import { useCancelInvoice } from "@/hooks/use-cancel-invoice"
+import { Invoice } from "@/hooks/use-invoice"
 
 interface InvoiceCancelDialogProps {
-  invoiceId: string
+  invoice: Invoice | undefined
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
 export function InvoiceCancelDialog({
-  invoiceId,
+  invoice,
   open,
   onOpenChange,
 }: InvoiceCancelDialogProps) {
-  const [isCancelling, setIsCancelling] = React.useState(false)
+  const cancelInvoiceMutation = useCancelInvoice()
 
   async function handleCancel() {
-    setIsCancelling(true)
-
-    try {
-      const invoice = cancelInvoice(invoiceId)
-
-      if (!invoice) {
-        console.error("Invoice not found:", invoiceId)
-        return
-      }
-
-      const updatedInvoice = cancelInvoice(invoice.id)
-
-      if (!updatedInvoice) {
-        return
-      }
-
-      // We'll connect this to the page state next
-      console.log("Invoice cancelled:", updatedInvoice)
-
-      onOpenChange(false)
-    } finally {
-      setIsCancelling(false)
-    }
+    cancelInvoiceMutation.mutate(invoice?.id, {
+      onSuccess: () => {
+        onOpenChange(false)
+      },
+    })
   }
 
   return (
@@ -62,24 +46,35 @@ export function InvoiceCancelDialog({
           <DialogTitle>Cancel invoice?</DialogTitle>
 
           <DialogDescription>
-            This will mark the invoice as cancelled. You won&apos;t be able to
+            Are you sure you want to cancel{" "}
+            <span className="font-medium text-foreground">
+              {invoice?.invoiceNumber}
+            </span>
+            ? This will mark the invoice as cancelled. You won&apos;t be able to
             mark a cancelled invoice as paid.
           </DialogDescription>
         </DialogHeader>
 
         <DialogFooter>
           <DialogClose
-            render={<Button variant="outline" disabled={isCancelling} />}
+            render={
+              <Button
+                variant="outline"
+                disabled={cancelInvoiceMutation.isPending}
+              />
+            }
           >
             Keep invoice
           </DialogClose>
 
           <Button
             variant="destructive"
-            disabled={isCancelling}
+            disabled={cancelInvoiceMutation.isPending}
             onClick={handleCancel}
           >
-            {isCancelling ? "Cancelling..." : "Yes, cancel invoice"}
+            {cancelInvoiceMutation.isPending
+              ? "Cancelling..."
+              : "Yes, cancel invoice"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -5,10 +5,10 @@ import jwt from "jsonwebtoken"
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
-    const { email, password } = await req.json()
+    const { email, password: inputPassword } = await req.json()
 
     // 1. Basic structural string check
-    if (!email || !password) {
+    if (!email || !inputPassword) {
       return NextResponse.json(
         { error: "Email and password are required" },
         { status: 400 }
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     // 3. Compare passwords safely using bcryptjs
-    const isMatch: boolean = await bcrypt.compare(password, user.password)
+    const isMatch: boolean = await bcrypt.compare(inputPassword, user.password)
     if (!isMatch) {
       return NextResponse.json(
         { error: "Invalid credentials" },
@@ -67,9 +67,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       { expiresIn: "7d" }
     )
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...publicUser } = user
+
     const response = NextResponse.json({
       message: "Login successful",
-      user: user,
+      user: publicUser,
       access_token: token,
     })
 

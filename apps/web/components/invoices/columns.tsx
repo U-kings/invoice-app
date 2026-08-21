@@ -8,11 +8,13 @@ import { Checkbox } from "@workspace/ui/components/checkbox"
 import { InvoiceStatusBadge } from "./invoice-status-badge"
 import { invoiceTableFeatures } from "./table-config"
 
-import type { Invoice } from "./invoice-data"
 import { InvoiceTableActions } from "./invoice-table-actions"
 import { formatCurrency } from "@/lib/currency"
-import { getEffectiveInvoiceStatus } from "./invoice-storage"
-import { formatActivityDate } from "@/lib/invoice/invoice"
+import {
+  formatActivityDate,
+  getEffectiveInvoiceStatus,
+} from "@/lib/invoices/invoice"
+import { Invoice } from "@/hooks/use-invoice"
 
 const columnHelper = createColumnHelper<typeof invoiceTableFeatures, Invoice>()
 
@@ -121,7 +123,7 @@ export const columns = columnHelper.columns([
           {/* <p className="truncate font-medium">{invoice.customerId}</p> */}
 
           <p className="truncate text-xs text-muted-foreground">
-            {invoice.customerEmail}
+            {invoice.customer?.email}
           </p>
         </div>
       )
@@ -150,7 +152,10 @@ export const columns = columnHelper.columns([
 
   columnHelper.accessor(
     (row) =>
-      row.items.reduce((total, item) => total + item.quantity * item.rate, 0),
+      row.lineItems.reduce(
+        (total, item) => total + item.quantity * item.rate,
+        0
+      ),
     {
       id: "amount",
       header: "Amount",

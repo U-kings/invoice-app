@@ -3,6 +3,7 @@
 import Link from "next/link"
 
 import {
+  Check,
   CheckCircle2,
   CircleX,
   Copy,
@@ -26,26 +27,59 @@ import { InvoiceDeleteDialog } from "./invoice-delete-dialog"
 import { useState } from "react"
 import { InvoiceSendDialog } from "./invoice-send-dialog"
 import { useRouter } from "next/navigation"
-import {
-  cancelInvoice,
-  markInvoiceAsPaid,
-  notifyInvoiceStorageUpdated,
-  saveInvoices,
-} from "./invoice-storage"
-import { Invoice } from "./invoice-data"
 import { InvoiceCancelDialog } from "./invoice-cancel-dialog"
+import { InvoiceMarkPaidDialog } from "./invoice-mark-paid-dialog"
+import { useDownloadInvoice } from "@/hooks/use-download-invoice"
+import { toast } from "@workspace/ui/components/toast"
+import { getEffectiveInvoiceStatus } from "@/lib/invoices/invoice"
+import { Invoice } from "@/hooks/use-invoice"
 
 interface InvoiceActionsProps {
-  invoice: Invoice
+  invoice: Invoice | undefined
 }
 
 export function InvoiceActions({ invoice }: InvoiceActionsProps) {
   const router = useRouter()
-  const isPaid = invoice?.status === "Paid"
-  const isCancelled = invoice?.status === "Cancelled"
+  const effectiveStatus = getEffectiveInvoiceStatus(invoice)
+  const canMarkAsPaid =
+    effectiveStatus === "Sent" || effectiveStatus === "Overdue"
+  const canCancel =
+    effectiveStatus === "Draft" ||
+    effectiveStatus === "Sent" ||
+    effectiveStatus === "Overdue"
+  const isPaid = effectiveStatus === "Paid"
+  const isCancelled = effectiveStatus === "Cancelled"
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [sendOpen, setSendOpen] = useState(false)
   const [cancelOpen, setCancelOpen] = useState(false)
+  const [markPaidOpen, setMarkPaidOpen] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const downloadInvoice = useDownloadInvoice()
+
+  const handleCopyInvoiceLink = async (publicToken: string) => {
+    try {
+      const url = `${window.location.origin}/invoice/${publicToken}`
+
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      toast.add({
+        title: "Link copied",
+        type: "success",
+        description: "Invoice link copied to clipboard.",
+      })
+      setTimeout(() => {
+        setCopied(false)
+      }, 2000)
+    } catch (error) {
+      console.error("Failed to copy invoice link:", error)
+
+      toast.add({
+        title: "Copy failed",
+        type: "error",
+        description: "Unable to copy the invoice link.",
+      })
+    }
+  }
 
   return (
     <>
@@ -54,7 +88,7 @@ export function InvoiceActions({ invoice }: InvoiceActionsProps) {
         <Button
           variant="outline"
           nativeButton={false}
-          render={<Link href={`/dashboard/invoices/${invoice.id}/edit`} />}
+          render={<Link href={`/dashboard/invoices/${invoice?.id}/edit`} />}
         >
           <Pencil className="mr-2 h-4 w-4" />
           Edit
@@ -62,13 +96,16 @@ export function InvoiceActions({ invoice }: InvoiceActionsProps) {
 
         {/* Download */}
         <Button
-          variant="outline"
-          onClick={() => {
-            console.log("Download invoice:", invoice.id)
-          }}
+          onClick={() =>
+            downloadInvoice.mutate({
+              invoiceId: invoice?.id,
+            })
+          }
+          disabled={downloadInvoice.isPending}
         >
-          <Download className="mr-2 h-4 w-4" />
-          Download
+          <Download className="size-4" />
+
+          {downloadInvoice.isPending ? "Downloading..." : "Download PDF"}
         </Button>
 
         {/* More actions */}
@@ -100,13 +137,10 @@ export function InvoiceActions({ invoice }: InvoiceActionsProps) {
             )}
 
             {/* Mark as paid */}
-            {!isCancelled && !isPaid && (
+            {canMarkAsPaid && (
               <DropdownMenuItem
                 disabled={isCancelled || isPaid}
-                onClick={() => {
-                  console.log("Mark invoice as paid:", invoice.id)
-                  markInvoiceAsPaid(invoice.id)
-                }}
+                onClick={() => setMarkPaidOpen(true)}
               >
                 <CheckCircle2 className="mr-2 h-4 w-4" />
                 Mark as paid
@@ -115,16 +149,19 @@ export function InvoiceActions({ invoice }: InvoiceActionsProps) {
 
             {/* Duplicate */}
             <DropdownMenuItem
-              onClick={() => {
-                console.log("Duplicate invoice:", invoice.id)
-              }}
+              onClick={() => handleCopyInvoiceLink(invoice?.publicToken ?? "")}
             >
-              <Copy className="mr-2 h-4 w-4" />
-              Copy
+              {copied ? (
+                <Check className="size-4" />
+              ) : (
+                <Copy className="size-4" />
+              )}
+
+              {copied ? "Copied" : "Copy link"}
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />
-            {(isPaid || !isCancelled) && (
+            {canCancel && (
               <DropdownMenuItem
                 className="text-amber-600 focus:text-amber-600"
                 disabled={isPaid || isCancelled}
@@ -151,15 +188,21 @@ export function InvoiceActions({ invoice }: InvoiceActionsProps) {
 
       {/* Send dialog */}
       <InvoiceSendDialog
-        invoiceId={invoice.id}
-        email={invoice.customerEmail}
+        invoiceId={invoice?.id}
+        email={invoice?.customer?.email}
         open={sendOpen}
         onOpenChange={setSendOpen}
       />
 
+      <InvoiceMarkPaidDialog
+        invoice={invoice}
+        open={markPaidOpen}
+        onOpenChange={setMarkPaidOpen}
+      />
+
       {/* Delete dialog */}
       <InvoiceDeleteDialog
-        invoiceId={invoice.id}
+        invoiceId={invoice?.id}
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         onDeleted={() => {
@@ -169,7 +212,7 @@ export function InvoiceActions({ invoice }: InvoiceActionsProps) {
 
       {/* Cancel dialog */}
       <InvoiceCancelDialog
-        invoiceId={invoice.id}
+        invoice={invoice}
         open={cancelOpen}
         onOpenChange={setCancelOpen}
       />

@@ -2,10 +2,10 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
-import type { Invoice } from "@/components/invoices/invoice-data"
 import { toast } from "@workspace/ui/components/toast"
+import { Invoice } from "./use-invoice"
 
-export async function sendInvoice(invoiceId: string): Promise<Invoice> {
+export async function sendInvoice(invoiceId: string  | undefined): Promise<Invoice> {
   const response = await fetch(`/api/dashboard/invoices/${invoiceId}/send`, {
     method: "POST",
   })
@@ -28,7 +28,7 @@ export function useSendInvoice() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (invoiceId: string) => sendInvoice(invoiceId),
+    mutationFn: (invoiceId: string | undefined) => sendInvoice(invoiceId),
 
     onSuccess: (invoice) => {
       toast.add({

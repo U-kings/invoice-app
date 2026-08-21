@@ -1,13 +1,15 @@
+import { Invoice } from "@/hooks/use-invoice"
 import { Mail, User } from "lucide-react"
-import { customers, Invoice } from "./invoice-data"
 
 interface InvoiceSummaryProps {
-  invoice: Invoice
+  invoice: Invoice | undefined
 }
 
+
 export function InvoiceSummary({ invoice }: InvoiceSummaryProps) {
+  const customers: any[] = []
   const currentCustomer = customers.find(
-    (customer) => customer.id === invoice.customerId
+    (customer) => customer.id === invoice?.customerId
   )
   return (
     <div className="grid gap-6 rounded-2xl border bg-background p-6 md:grid-cols-2">

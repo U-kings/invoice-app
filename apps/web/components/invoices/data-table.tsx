@@ -34,21 +34,21 @@ import { ArrowDown, ArrowUp, ListFilter } from "lucide-react"
 import { columns } from "./columns"
 import { invoiceTableFeatures } from "./table-config"
 
-import type { Invoice } from "./invoice-data"
 import { Search } from "lucide-react"
 import { DataTablePagination } from "./data-table-pagination"
 import { InvoiceBulkActions } from "./invoice-bulk-actions"
 import Link from "next/link"
+import { Invoice } from "@/hooks/use-invoice"
 
 interface DataTableProps {
-  data: Invoice[]
+  data: Invoice[] | undefined
 }
 
 export function DataTable({ data }: DataTableProps) {
   const table = useTable(
     {
       features: invoiceTableFeatures,
-      data,
+      data: data ?? [],
       columns,
       globalFilterFn: "includesString",
     },

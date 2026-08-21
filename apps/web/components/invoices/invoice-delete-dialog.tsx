@@ -14,11 +14,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@workspace/ui/components/dialog"
-import { deleteInvoice, INVOICE_STORAGE_EVENT } from "./invoice-storage"
 import { useRouter } from "next/navigation"
 
 interface InvoiceDeleteDialogProps {
-  invoiceId: string
+  invoiceId: string | undefined
   open: boolean
   onOpenChange: (open: boolean) => void
   onDeleted?: () => void
@@ -37,8 +36,8 @@ export function InvoiceDeleteDialog({
     setIsDeleting(true)
 
     try {
-      deleteInvoice(invoiceId)
-      window.dispatchEvent(new Event(INVOICE_STORAGE_EVENT))
+      // deleteInvoice(invoiceId)
+      // window.dispatchEvent(new Event(INVOICE_STORAGE_EVENT))
 
       onOpenChange(false)
 

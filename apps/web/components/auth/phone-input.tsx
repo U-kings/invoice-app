@@ -33,7 +33,7 @@ const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
             <button
               {...rootProps}
               type="button"
-              className="flex items-center justify-center border border-input bg-background rounded-md px-3 h-10 hover:bg-accent focus:outline-none focus:ring-1 focus:ring-ring"
+              className="flex items-center justify-center border border-input bg-background rounded-md px-3 h-12 hover:bg-accent focus:outline-none focus:ring-1 focus:ring-ring"
             >
               {children}
             </button>
@@ -48,7 +48,7 @@ const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
           value={phoneInput.inputValue} // Use inputValue for formatted keyboard typing string display
           onChange={phoneInput.handlePhoneValueChange}
           placeholder={props.placeholder ?? "Enter phone number"}
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          className="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         />
       </div>
     )

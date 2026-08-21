@@ -1,13 +1,12 @@
 import { Banknote, CalendarDays, CheckCircle2, CreditCard } from "lucide-react"
 
 import { InvoiceStatusBadge } from "./invoice-status-badge"
-import { Invoice } from "./invoice-data"
-import { getEffectiveInvoiceStatus } from "./invoice-storage"
 import { formatCurrency } from "@/lib/currency"
-import { formatActivityDate, getInvoiceTotal } from "@/lib/invoice/invoice"
+import { formatActivityDate, getEffectiveInvoiceStatus, getInvoiceTotal } from "@/lib/invoices/invoice"
+import { Invoice } from "@/hooks/use-invoice"
 
 interface InvoicePaymentProps {
-  invoice: Invoice
+  invoice: Invoice | undefined
 }
 
 function formatPaidDate(date?: string) {
@@ -66,7 +65,7 @@ export function InvoicePayment({ invoice }: InvoicePaymentProps) {
 
                 <div>
                   <p className="text-sm font-medium">Paid on</p>
-                  {invoice.paidAt && (
+                  {invoice?.paidAt && (
                     <p className="text-sm text-muted-foreground">
                       {formatPaidDate(invoice.paidAt)}
                     </p>
@@ -111,7 +110,7 @@ export function InvoicePayment({ invoice }: InvoicePaymentProps) {
             </div>
 
             <p className="font-semibold">
-              {formatCurrency(getInvoiceTotal(invoice), invoice.currency)}
+              {formatCurrency(getInvoiceTotal(invoice), invoice?.currency)}
             </p>
           </div>
         </div>
@@ -123,7 +122,7 @@ export function InvoicePayment({ invoice }: InvoicePaymentProps) {
   )
 }
 
-function InvoiceActivity({ invoice }: { invoice: Invoice }) {
+function InvoiceActivity({ invoice }: { invoice: Invoice|undefined }) {
   const status = getEffectiveInvoiceStatus(invoice)
 
   const isPaid = status === "Paid"
@@ -134,27 +133,27 @@ function InvoiceActivity({ invoice }: { invoice: Invoice }) {
     {
       title: "Invoice created",
       description: "Invoice was created.",
-      date: formatActivityDate(invoice.issueDate),
+      date: formatActivityDate(invoice?.issueDate),
     },
-    ...(invoice.sentAt
+    ...(invoice?.sentAt
       ? [
           {
             title: "Invoice sent",
-            description: `Invoice was sent to ${invoice.customerEmail}.`,
+            description: `Invoice was sent to ${invoice.customer?.email}.`,
             date: formatActivityDate(invoice.sentAt),
           },
         ]
       : []),
-    ...(invoice.paidAt || isPaid
+    ...(invoice?.paidAt || isPaid
       ? [
           {
             title: "Invoice paid",
             description: "Payment received.",
-            date: formatActivityDate(invoice.paidAt),
+            date: formatActivityDate(invoice?.paidAt),
           },
         ]
       : []),
-    ...(invoice.cancelledAt
+    ...(invoice?.cancelledAt
       ? [
           {
             title: "Invoice cancelled",

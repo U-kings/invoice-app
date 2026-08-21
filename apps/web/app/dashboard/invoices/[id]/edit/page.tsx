@@ -1,31 +1,22 @@
-"use client"
-
-import { useParams } from "next/navigation"
-
-import { getInvoices } from "@/components/invoices/invoice-storage"
 import { InvoiceFormEdit } from "@/components/invoices/invoice-form-edit"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
-import { useEffect, useState } from "react"
-import { Invoice } from "@/components/invoices/invoice-data"
+import { prisma } from "@repo/db"
+import { Invoice } from "@/hooks/use-invoice"
 
-export default function EditInvoicePage() {
-  const params = useParams<{ id: string }>()
+interface CustomerPageProps {
+  params: Promise<{
+    id: string
+  }>
+}
 
-  const [invoice, setInvoice] = useState<Invoice | null>(null)
-  const [isLoaded, setIsLoaded] = useState(false)
-
-  useEffect(() => {
-    const storedInvoices = getInvoices()
-
-    const foundInvoice = storedInvoices.find(
-      (invoice) => invoice.id === params.id
-    )
-
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setInvoice(foundInvoice ?? null)
-    setIsLoaded(true)
-  }, [params.id])
+export default async function EditInvoicePage({ params }: CustomerPageProps) {
+  const resolvedParams = await params
+  const invoiceNumber = resolvedParams.id
+  const invoice = await prisma.invoice.findUnique({
+    where: { id: invoiceNumber },
+    // include: {},
+  })
 
   if (!invoice) {
     return (
@@ -60,11 +51,11 @@ export default function EditInvoicePage() {
         <h1 className="text-2xl font-semibold">Edit invoice</h1>
 
         <p className="mt-1 text-sm text-muted-foreground">
-          Update the details of {invoice.invoiceNumber}.
+          Update the details of {invoice?.invoiceNumber}.
         </p>
       </div>
 
-      <InvoiceFormEdit invoice={invoice} />
+      {/* <InvoiceFormEdit invoice={invoice} /> */}
     </div>
   )
 }
