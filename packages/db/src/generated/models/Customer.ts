@@ -29,6 +29,8 @@ export type CustomerMinAggregateOutputType = {
   userId: string | null
   name: string | null
   email: string | null
+  status: $Enums.CustomerStatus | null
+  countryCode: string | null
   createdAt: Date | null
 }
 
@@ -37,6 +39,8 @@ export type CustomerMaxAggregateOutputType = {
   userId: string | null
   name: string | null
   email: string | null
+  status: $Enums.CustomerStatus | null
+  countryCode: string | null
   createdAt: Date | null
 }
 
@@ -45,6 +49,8 @@ export type CustomerCountAggregateOutputType = {
   userId: number
   name: number
   email: number
+  status: number
+  countryCode: number
   createdAt: number
   _all: number
 }
@@ -55,6 +61,8 @@ export type CustomerMinAggregateInputType = {
   userId?: true
   name?: true
   email?: true
+  status?: true
+  countryCode?: true
   createdAt?: true
 }
 
@@ -63,6 +71,8 @@ export type CustomerMaxAggregateInputType = {
   userId?: true
   name?: true
   email?: true
+  status?: true
+  countryCode?: true
   createdAt?: true
 }
 
@@ -71,6 +81,8 @@ export type CustomerCountAggregateInputType = {
   userId?: true
   name?: true
   email?: true
+  status?: true
+  countryCode?: true
   createdAt?: true
   _all?: true
 }
@@ -152,6 +164,8 @@ export type CustomerGroupByOutputType = {
   userId: string
   name: string
   email: string
+  status: $Enums.CustomerStatus
+  countryCode: string | null
   createdAt: Date
   _count: CustomerCountAggregateOutputType | null
   _min: CustomerMinAggregateOutputType | null
@@ -181,6 +195,8 @@ export type CustomerWhereInput = {
   userId?: Prisma.StringFilter<"Customer"> | string
   name?: Prisma.StringFilter<"Customer"> | string
   email?: Prisma.StringFilter<"Customer"> | string
+  status?: Prisma.EnumCustomerStatusFilter<"Customer"> | $Enums.CustomerStatus
+  countryCode?: Prisma.StringNullableFilter<"Customer"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Customer"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   invoices?: Prisma.InvoiceListRelationFilter
@@ -191,6 +207,8 @@ export type CustomerOrderByWithRelationInput = {
   userId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   email?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  countryCode?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   invoices?: Prisma.InvoiceOrderByRelationAggregateInput
@@ -204,6 +222,8 @@ export type CustomerWhereUniqueInput = Prisma.AtLeast<{
   userId?: Prisma.StringFilter<"Customer"> | string
   name?: Prisma.StringFilter<"Customer"> | string
   email?: Prisma.StringFilter<"Customer"> | string
+  status?: Prisma.EnumCustomerStatusFilter<"Customer"> | $Enums.CustomerStatus
+  countryCode?: Prisma.StringNullableFilter<"Customer"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Customer"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   invoices?: Prisma.InvoiceListRelationFilter
@@ -214,6 +234,8 @@ export type CustomerOrderByWithAggregationInput = {
   userId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   email?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  countryCode?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.CustomerCountOrderByAggregateInput
   _max?: Prisma.CustomerMaxOrderByAggregateInput
@@ -228,6 +250,8 @@ export type CustomerScalarWhereWithAggregatesInput = {
   userId?: Prisma.StringWithAggregatesFilter<"Customer"> | string
   name?: Prisma.StringWithAggregatesFilter<"Customer"> | string
   email?: Prisma.StringWithAggregatesFilter<"Customer"> | string
+  status?: Prisma.EnumCustomerStatusWithAggregatesFilter<"Customer"> | $Enums.CustomerStatus
+  countryCode?: Prisma.StringNullableWithAggregatesFilter<"Customer"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Customer"> | Date | string
 }
 
@@ -235,6 +259,8 @@ export type CustomerCreateInput = {
   id?: string
   name: string
   email: string
+  status?: $Enums.CustomerStatus
+  countryCode?: string | null
   createdAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutCustomersInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutCustomerInput
@@ -245,6 +271,8 @@ export type CustomerUncheckedCreateInput = {
   userId: string
   name: string
   email: string
+  status?: $Enums.CustomerStatus
+  countryCode?: string | null
   createdAt?: Date | string
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutCustomerInput
 }
@@ -253,6 +281,8 @@ export type CustomerUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
+  countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutCustomersNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutCustomerNestedInput
@@ -263,6 +293,8 @@ export type CustomerUncheckedUpdateInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
+  countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutCustomerNestedInput
 }
@@ -272,6 +304,8 @@ export type CustomerCreateManyInput = {
   userId: string
   name: string
   email: string
+  status?: $Enums.CustomerStatus
+  countryCode?: string | null
   createdAt?: Date | string
 }
 
@@ -279,6 +313,8 @@ export type CustomerUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
+  countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -287,6 +323,8 @@ export type CustomerUncheckedUpdateManyInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
+  countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -305,6 +343,8 @@ export type CustomerCountOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   email?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  countryCode?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -313,6 +353,8 @@ export type CustomerMaxOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   email?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  countryCode?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -321,6 +363,8 @@ export type CustomerMinOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   email?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  countryCode?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -371,6 +415,10 @@ export type CustomerUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.CustomerScalarWhereInput | Prisma.CustomerScalarWhereInput[]
 }
 
+export type EnumCustomerStatusFieldUpdateOperationsInput = {
+  set?: $Enums.CustomerStatus
+}
+
 export type CustomerCreateNestedOneWithoutInvoicesInput = {
   create?: Prisma.XOR<Prisma.CustomerCreateWithoutInvoicesInput, Prisma.CustomerUncheckedCreateWithoutInvoicesInput>
   connectOrCreate?: Prisma.CustomerCreateOrConnectWithoutInvoicesInput
@@ -389,6 +437,8 @@ export type CustomerCreateWithoutUserInput = {
   id?: string
   name: string
   email: string
+  status?: $Enums.CustomerStatus
+  countryCode?: string | null
   createdAt?: Date | string
   invoices?: Prisma.InvoiceCreateNestedManyWithoutCustomerInput
 }
@@ -397,6 +447,8 @@ export type CustomerUncheckedCreateWithoutUserInput = {
   id?: string
   name: string
   email: string
+  status?: $Enums.CustomerStatus
+  countryCode?: string | null
   createdAt?: Date | string
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutCustomerInput
 }
@@ -435,6 +487,8 @@ export type CustomerScalarWhereInput = {
   userId?: Prisma.StringFilter<"Customer"> | string
   name?: Prisma.StringFilter<"Customer"> | string
   email?: Prisma.StringFilter<"Customer"> | string
+  status?: Prisma.EnumCustomerStatusFilter<"Customer"> | $Enums.CustomerStatus
+  countryCode?: Prisma.StringNullableFilter<"Customer"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Customer"> | Date | string
 }
 
@@ -442,6 +496,8 @@ export type CustomerCreateWithoutInvoicesInput = {
   id?: string
   name: string
   email: string
+  status?: $Enums.CustomerStatus
+  countryCode?: string | null
   createdAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutCustomersInput
 }
@@ -451,6 +507,8 @@ export type CustomerUncheckedCreateWithoutInvoicesInput = {
   userId: string
   name: string
   email: string
+  status?: $Enums.CustomerStatus
+  countryCode?: string | null
   createdAt?: Date | string
 }
 
@@ -474,6 +532,8 @@ export type CustomerUpdateWithoutInvoicesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
+  countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutCustomersNestedInput
 }
@@ -483,6 +543,8 @@ export type CustomerUncheckedUpdateWithoutInvoicesInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
+  countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -490,6 +552,8 @@ export type CustomerCreateManyUserInput = {
   id?: string
   name: string
   email: string
+  status?: $Enums.CustomerStatus
+  countryCode?: string | null
   createdAt?: Date | string
 }
 
@@ -497,6 +561,8 @@ export type CustomerUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
+  countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   invoices?: Prisma.InvoiceUpdateManyWithoutCustomerNestedInput
 }
@@ -505,6 +571,8 @@ export type CustomerUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
+  countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutCustomerNestedInput
 }
@@ -513,6 +581,8 @@ export type CustomerUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
+  countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -552,6 +622,8 @@ export type CustomerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   userId?: boolean
   name?: boolean
   email?: boolean
+  status?: boolean
+  countryCode?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   invoices?: boolean | Prisma.Customer$invoicesArgs<ExtArgs>
@@ -563,6 +635,8 @@ export type CustomerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   userId?: boolean
   name?: boolean
   email?: boolean
+  status?: boolean
+  countryCode?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["customer"]>
@@ -572,6 +646,8 @@ export type CustomerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   userId?: boolean
   name?: boolean
   email?: boolean
+  status?: boolean
+  countryCode?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["customer"]>
@@ -581,10 +657,12 @@ export type CustomerSelectScalar = {
   userId?: boolean
   name?: boolean
   email?: boolean
+  status?: boolean
+  countryCode?: boolean
   createdAt?: boolean
 }
 
-export type CustomerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "name" | "email" | "createdAt", ExtArgs["result"]["customer"]>
+export type CustomerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "name" | "email" | "status" | "countryCode" | "createdAt", ExtArgs["result"]["customer"]>
 export type CustomerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   invoices?: boolean | Prisma.Customer$invoicesArgs<ExtArgs>
@@ -608,6 +686,8 @@ export type $CustomerPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     userId: string
     name: string
     email: string
+    status: $Enums.CustomerStatus
+    countryCode: string | null
     createdAt: Date
   }, ExtArgs["result"]["customer"]>
   composites: {}
@@ -1038,6 +1118,8 @@ export interface CustomerFieldRefs {
   readonly userId: Prisma.FieldRef<"Customer", 'String'>
   readonly name: Prisma.FieldRef<"Customer", 'String'>
   readonly email: Prisma.FieldRef<"Customer", 'String'>
+  readonly status: Prisma.FieldRef<"Customer", 'CustomerStatus'>
+  readonly countryCode: Prisma.FieldRef<"Customer", 'String'>
   readonly createdAt: Prisma.FieldRef<"Customer", 'DateTime'>
 }
     

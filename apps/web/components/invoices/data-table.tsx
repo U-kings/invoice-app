@@ -1,7 +1,5 @@
 "use client"
 
-import * as React from "react"
-
 import { flexRender, useTable } from "@tanstack/react-table"
 
 import { Input } from "@workspace/ui/components/input"
@@ -38,19 +36,93 @@ import { Search } from "lucide-react"
 import { DataTablePagination } from "./data-table-pagination"
 import { InvoiceBulkActions } from "./invoice-bulk-actions"
 import Link from "next/link"
-import { Invoice } from "@/hooks/use-invoice"
+import { Invoice, InvoiceStatus, useInvoices } from "@/hooks/use-invoice"
+import { useEffect, useState } from "react"
+import { useDebounce } from "@/hooks/use-debounce"
 
-interface DataTableProps {
-  data: Invoice[] | undefined
-}
+// interface DataTableProps {
+//   data: Invoice[] | undefined
+// }
 
-export function DataTable({ data }: DataTableProps) {
+// export function DataTable({ data }: DataTableProps) {
+export function DataTable() {
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [searchInput, setSearchInput] = useState("")
+  const [status, setStatus] = useState<InvoiceStatus | undefined>(undefined)
+  const debouncedSearch = useDebounce(searchInput, 400)
+
+  // Reset to first page on search or status change
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPage(1)
+  }, [debouncedSearch, status])
+
+  // 2. Fetch server data using your TanStack Query hook
+  const { data, isLoading, isFetching } = useInvoices({
+    page,
+    pageSize,
+    search: debouncedSearch,
+    status,
+  })
+
+  // Extract the response items and the server metadata
+  const invoicesList = data?.data ?? []
+  const serverPagination = data?.pagination
+
   const table = useTable(
     {
       features: invoiceTableFeatures,
-      data: data ?? [],
+      data: invoicesList,
+      // data: data ?? [],
       columns,
       globalFilterFn: "includesString",
+
+      // Tell your table architecture to listen to remote state changes
+      state: {
+        globalFilter: searchInput, // Feeds back into table.state.globalFilter for the Input
+        columnFilters: status ? [{ id: "status", value: status }] : [], // Maps to statusColumn filter value
+        pagination: {
+          pageIndex: page - 1, // Tables use 0-indexed values usually
+          pageSize: pageSize,
+        },
+      },
+      // Mirror structural limits from your server response meta
+      pageCount: serverPagination?.totalPages ?? -1,
+
+      manualFiltering: true,
+      manualPagination: true,
+
+      // Intercept when table.setGlobalFilter() is executed by the search Input component
+      onGlobalFilterChange: (updater) => {
+        const nextValue =
+          typeof updater === "function" ? updater(searchInput) : updater
+        setSearchInput(nextValue)
+      },
+
+      // Intercept when statusColumn.setFilterValue() is executed by the DropdownMenu component
+      onColumnFiltersChange: (updater) => {
+        const currentFilters = status ? [{ id: "status", value: status }] : []
+        const nextFilters =
+          typeof updater === "function" ? updater(currentFilters) : updater
+
+        // Look for the "status" column filter in the new filters array
+        const statusFilterObj = nextFilters.find((f) => f.id === "status")
+        setStatus(statusFilterObj?.value as InvoiceStatus | undefined)
+      },
+
+      // Intercept navigation button actions (nextPage, previousPage) executed by sub-components
+      onPaginationChange: (updater) => {
+        // Handle both functional updaters and plain object assignments
+        const nextState =
+          typeof updater === "function"
+            ? updater({ pageIndex: page - 1, pageSize })
+            : updater
+
+        // Translate 0-index table position back to 1-index API query state
+        setPage(nextState.pageIndex + 1)
+        setPageSize(nextState.pageSize)
+      },
     },
     (state) => ({
       globalFilter: state.globalFilter,

@@ -80,6 +80,12 @@ export function SignupForm() {
     name: "terms",
   })
 
+  // Inside your Registration / Signup form component file:
+  const termsChecked = useWatch({
+    control: form.control,
+    name: "terms", // Make sure this matches your schema property string definition
+  })
+
   // TanStack Mutation Setup
   const { mutate, isPending, error, isError } = useMutation({
     mutationFn: signupUser,
@@ -137,7 +143,7 @@ export function SignupForm() {
         subtitle="Start sending professional invoices in minutes."
       />
 
-      <SocialLogin />
+      <SocialLogin termsAccepted={!!termsChecked} />
 
       <Divider />
 
@@ -249,7 +255,7 @@ export function SignupForm() {
           <Button
             type="submit"
             disabled={form.formState.isSubmitting}
-            className="group relative overflow-hidden h-12 w-full bg-[#2EAFB4] hover:bg-[#289ca0]"
+            className="group relative h-12 w-full overflow-hidden bg-[#2EAFB4] hover:bg-[#289ca0]"
           >
             <span className="absolute inset-0 -translate-x-full bg-white/20 transition-transform duration-700 group-hover:translate-x-full" />
             {form.formState.isSubmitting || (isPending && <AuthLoader />)}

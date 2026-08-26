@@ -1,53 +1,45 @@
 "use client"
 
-import { Download, Loader2, Printer } from "lucide-react"
+import { CheckCircle, Download, Loader2, Printer } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@workspace/ui/components/button"
 import { toast } from "@workspace/ui/components/toast"
+import Link from "next/link"
 
 type InvoiceActionsProps = {
   publicToken: string
 }
 
-export function InvoiceActions({
-  publicToken,
-}: InvoiceActionsProps) {
-  const [isDownloading, setIsDownloading] =
-    useState(false)
+export function InvoiceActions({ publicToken }: InvoiceActionsProps) {
+  const [isDownloading, setIsDownloading] = useState(false)
 
   async function handleDownload() {
     try {
       setIsDownloading(true)
 
       const response = await fetch(
-        `/api/dashboard/invoices/public/${publicToken}/pdf`
+        `/api/dashboard/invoices/public/${publicToken}/pdf`,
+        {
+          method: "POST",
+        }
       )
 
       if (!response.ok) {
-        throw new Error(
-          "Failed to download invoice"
-        )
+        throw new Error("Failed to download invoice")
       }
 
       const blob = await response.blob()
 
-      const url =
-        window.URL.createObjectURL(blob)
+      const url = window.URL.createObjectURL(blob)
 
-      const link =
-        document.createElement("a")
+      const link = document.createElement("a")
 
       link.href = url
 
-      const contentDisposition =
-        response.headers.get(
-          "Content-Disposition"
-        )
+      const contentDisposition = response.headers.get("Content-Disposition")
 
       const filename =
-        contentDisposition?.match(
-          /filename="([^"]+)"/
-        )?.[1] ?? "invoice.pdf"
+        contentDisposition?.match(/filename="([^"]+)"/)?.[1] ?? "invoice.pdf"
 
       link.download = filename
 
@@ -60,8 +52,7 @@ export function InvoiceActions({
       toast.add({
         title: "Downloaded",
         type: "success",
-        description:
-          "Invoice downloaded successfully",
+        description: "Invoice downloaded successfully",
       })
     } catch (error) {
       console.error(error)
@@ -69,8 +60,7 @@ export function InvoiceActions({
       toast.add({
         title: "Download failed",
         type: "error",
-        description:
-          "We couldn't download the invoice.",
+        description: "We couldn't download the invoice.",
       })
     } finally {
       setIsDownloading(false)
@@ -83,10 +73,7 @@ export function InvoiceActions({
 
   return (
     <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end print:hidden">
-      <Button
-        variant="outline"
-        onClick={handlePrint}
-      >
+      <Button variant="outline" onClick={handlePrint}>
         <Printer className="size-4" />
         Print
       </Button>
@@ -102,9 +89,16 @@ export function InvoiceActions({
           <Download className="size-4" />
         )}
 
-        {isDownloading
-          ? "Downloading..."
-          : "Download PDF"}
+        {isDownloading ? "Downloading..." : "Download PDF"}
+      </Button>
+      <Button
+        nativeButton={false}
+        render={<Link href={`/pay/${publicToken}`}></Link>}
+        disabled={isDownloading}
+        className="bg-[#2EAFB4] text-white hover:bg-[#269ca1]"
+      >
+        <CheckCircle />
+        Check out
       </Button>
     </div>
   )

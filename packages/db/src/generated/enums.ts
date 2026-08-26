@@ -9,6 +9,27 @@
 * 🟢 You can import this file directly.
 */
 
+export const PaymentProvider = {
+  PAYSTACK: 'PAYSTACK',
+  STRIPE: 'STRIPE',
+  FLUTTERWAVE: 'FLUTTERWAVE'
+} as const
+
+export type PaymentProvider = (typeof PaymentProvider)[keyof typeof PaymentProvider]
+
+
+export const PaymentStatus = {
+  PENDING: 'PENDING',
+  PROCESSING: 'PROCESSING',
+  SUCCESS: 'SUCCESS',
+  FAILED: 'FAILED',
+  CANCELLED: 'CANCELLED',
+  EXPIRED: 'EXPIRED'
+} as const
+
+export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]
+
+
 export const InvoiceStatus = {
   DRAFT: 'DRAFT',
   SENT: 'SENT',
@@ -18,3 +39,12 @@ export const InvoiceStatus = {
 } as const
 
 export type InvoiceStatus = (typeof InvoiceStatus)[keyof typeof InvoiceStatus]
+
+
+export const CustomerStatus = {
+  ACTIVE: 'ACTIVE',
+  ARCHIVED: 'ARCHIVED',
+  BLOCKED: 'BLOCKED'
+} as const
+
+export type CustomerStatus = (typeof CustomerStatus)[keyof typeof CustomerStatus]

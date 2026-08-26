@@ -33,6 +33,7 @@ export type UserMinAggregateOutputType = {
   email: string | null
   phoneNumber: string | null
   password: string | null
+  googleId: string | null
   role: string | null
   terms: boolean | null
   isVerified: boolean | null
@@ -53,6 +54,7 @@ export type UserMaxAggregateOutputType = {
   email: string | null
   phoneNumber: string | null
   password: string | null
+  googleId: string | null
   role: string | null
   terms: boolean | null
   isVerified: boolean | null
@@ -73,6 +75,7 @@ export type UserCountAggregateOutputType = {
   email: number
   phoneNumber: number
   password: number
+  googleId: number
   role: number
   terms: number
   isVerified: number
@@ -95,6 +98,7 @@ export type UserMinAggregateInputType = {
   email?: true
   phoneNumber?: true
   password?: true
+  googleId?: true
   role?: true
   terms?: true
   isVerified?: true
@@ -115,6 +119,7 @@ export type UserMaxAggregateInputType = {
   email?: true
   phoneNumber?: true
   password?: true
+  googleId?: true
   role?: true
   terms?: true
   isVerified?: true
@@ -135,6 +140,7 @@ export type UserCountAggregateInputType = {
   email?: true
   phoneNumber?: true
   password?: true
+  googleId?: true
   role?: true
   terms?: true
   isVerified?: true
@@ -226,8 +232,9 @@ export type UserGroupByOutputType = {
   lastName: string
   class: string | null
   email: string
-  phoneNumber: string
-  password: string
+  phoneNumber: string | null
+  password: string | null
+  googleId: string | null
   role: string | null
   terms: boolean
   isVerified: boolean
@@ -267,8 +274,9 @@ export type UserWhereInput = {
   lastName?: Prisma.StringFilter<"User"> | string
   class?: Prisma.StringNullableFilter<"User"> | string | null
   email?: Prisma.StringFilter<"User"> | string
-  phoneNumber?: Prisma.StringFilter<"User"> | string
-  password?: Prisma.StringFilter<"User"> | string
+  phoneNumber?: Prisma.StringNullableFilter<"User"> | string | null
+  password?: Prisma.StringNullableFilter<"User"> | string | null
+  googleId?: Prisma.StringNullableFilter<"User"> | string | null
   role?: Prisma.StringNullableFilter<"User"> | string | null
   terms?: Prisma.BoolFilter<"User"> | boolean
   isVerified?: Prisma.BoolFilter<"User"> | boolean
@@ -278,8 +286,9 @@ export type UserWhereInput = {
   resetTokenExpires?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
-  invoices?: Prisma.InvoiceListRelationFilter
+  businessProfile?: Prisma.XOR<Prisma.BusinessProfileNullableScalarRelationFilter, Prisma.BusinessProfileWhereInput> | null
   customers?: Prisma.CustomerListRelationFilter
+  invoices?: Prisma.InvoiceListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -289,8 +298,9 @@ export type UserOrderByWithRelationInput = {
   lastName?: Prisma.SortOrder
   class?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrder
-  phoneNumber?: Prisma.SortOrder
-  password?: Prisma.SortOrder
+  phoneNumber?: Prisma.SortOrderInput | Prisma.SortOrder
+  password?: Prisma.SortOrderInput | Prisma.SortOrder
+  googleId?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrderInput | Prisma.SortOrder
   terms?: Prisma.SortOrder
   isVerified?: Prisma.SortOrder
@@ -300,13 +310,15 @@ export type UserOrderByWithRelationInput = {
   resetTokenExpires?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  invoices?: Prisma.InvoiceOrderByRelationAggregateInput
+  businessProfile?: Prisma.BusinessProfileOrderByWithRelationInput
   customers?: Prisma.CustomerOrderByRelationAggregateInput
+  invoices?: Prisma.InvoiceOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   email?: string
+  googleId?: string
   resetToken?: string
   AND?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   OR?: Prisma.UserWhereInput[]
@@ -315,8 +327,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   middleName?: Prisma.StringNullableFilter<"User"> | string | null
   lastName?: Prisma.StringFilter<"User"> | string
   class?: Prisma.StringNullableFilter<"User"> | string | null
-  phoneNumber?: Prisma.StringFilter<"User"> | string
-  password?: Prisma.StringFilter<"User"> | string
+  phoneNumber?: Prisma.StringNullableFilter<"User"> | string | null
+  password?: Prisma.StringNullableFilter<"User"> | string | null
   role?: Prisma.StringNullableFilter<"User"> | string | null
   terms?: Prisma.BoolFilter<"User"> | boolean
   isVerified?: Prisma.BoolFilter<"User"> | boolean
@@ -325,9 +337,10 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   resetTokenExpires?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
-  invoices?: Prisma.InvoiceListRelationFilter
+  businessProfile?: Prisma.XOR<Prisma.BusinessProfileNullableScalarRelationFilter, Prisma.BusinessProfileWhereInput> | null
   customers?: Prisma.CustomerListRelationFilter
-}, "id" | "email" | "resetToken">
+  invoices?: Prisma.InvoiceListRelationFilter
+}, "id" | "email" | "googleId" | "resetToken">
 
 export type UserOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -336,8 +349,9 @@ export type UserOrderByWithAggregationInput = {
   lastName?: Prisma.SortOrder
   class?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrder
-  phoneNumber?: Prisma.SortOrder
-  password?: Prisma.SortOrder
+  phoneNumber?: Prisma.SortOrderInput | Prisma.SortOrder
+  password?: Prisma.SortOrderInput | Prisma.SortOrder
+  googleId?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrderInput | Prisma.SortOrder
   terms?: Prisma.SortOrder
   isVerified?: Prisma.SortOrder
@@ -362,8 +376,9 @@ export type UserScalarWhereWithAggregatesInput = {
   lastName?: Prisma.StringWithAggregatesFilter<"User"> | string
   class?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   email?: Prisma.StringWithAggregatesFilter<"User"> | string
-  phoneNumber?: Prisma.StringWithAggregatesFilter<"User"> | string
-  password?: Prisma.StringWithAggregatesFilter<"User"> | string
+  phoneNumber?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  password?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  googleId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   role?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   terms?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   isVerified?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
@@ -382,8 +397,9 @@ export type UserCreateInput = {
   lastName: string
   class?: string | null
   email: string
-  phoneNumber: string
-  password: string
+  phoneNumber?: string | null
+  password?: string | null
+  googleId?: string | null
   role?: string | null
   terms?: boolean
   isVerified?: boolean
@@ -393,8 +409,9 @@ export type UserCreateInput = {
   resetTokenExpires?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  invoices?: Prisma.InvoiceCreateNestedManyWithoutUserInput
+  businessProfile?: Prisma.BusinessProfileCreateNestedOneWithoutUserInput
   customers?: Prisma.CustomerCreateNestedManyWithoutUserInput
+  invoices?: Prisma.InvoiceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -404,8 +421,9 @@ export type UserUncheckedCreateInput = {
   lastName: string
   class?: string | null
   email: string
-  phoneNumber: string
-  password: string
+  phoneNumber?: string | null
+  password?: string | null
+  googleId?: string | null
   role?: string | null
   terms?: boolean
   isVerified?: boolean
@@ -415,8 +433,9 @@ export type UserUncheckedCreateInput = {
   resetTokenExpires?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutUserInput
+  businessProfile?: Prisma.BusinessProfileUncheckedCreateNestedOneWithoutUserInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutUserInput
+  invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -426,8 +445,9 @@ export type UserUpdateInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   class?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   terms?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -437,8 +457,9 @@ export type UserUpdateInput = {
   resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  invoices?: Prisma.InvoiceUpdateManyWithoutUserNestedInput
+  businessProfile?: Prisma.BusinessProfileUpdateOneWithoutUserNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutUserNestedInput
+  invoices?: Prisma.InvoiceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -448,8 +469,9 @@ export type UserUncheckedUpdateInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   class?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   terms?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -459,8 +481,9 @@ export type UserUncheckedUpdateInput = {
   resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutUserNestedInput
+  businessProfile?: Prisma.BusinessProfileUncheckedUpdateOneWithoutUserNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutUserNestedInput
+  invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -470,8 +493,9 @@ export type UserCreateManyInput = {
   lastName: string
   class?: string | null
   email: string
-  phoneNumber: string
-  password: string
+  phoneNumber?: string | null
+  password?: string | null
+  googleId?: string | null
   role?: string | null
   terms?: boolean
   isVerified?: boolean
@@ -490,8 +514,9 @@ export type UserUpdateManyMutationInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   class?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   terms?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -510,8 +535,9 @@ export type UserUncheckedUpdateManyInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   class?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   terms?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -532,6 +558,7 @@ export type UserCountOrderByAggregateInput = {
   email?: Prisma.SortOrder
   phoneNumber?: Prisma.SortOrder
   password?: Prisma.SortOrder
+  googleId?: Prisma.SortOrder
   role?: Prisma.SortOrder
   terms?: Prisma.SortOrder
   isVerified?: Prisma.SortOrder
@@ -552,6 +579,7 @@ export type UserMaxOrderByAggregateInput = {
   email?: Prisma.SortOrder
   phoneNumber?: Prisma.SortOrder
   password?: Prisma.SortOrder
+  googleId?: Prisma.SortOrder
   role?: Prisma.SortOrder
   terms?: Prisma.SortOrder
   isVerified?: Prisma.SortOrder
@@ -572,6 +600,7 @@ export type UserMinOrderByAggregateInput = {
   email?: Prisma.SortOrder
   phoneNumber?: Prisma.SortOrder
   password?: Prisma.SortOrder
+  googleId?: Prisma.SortOrder
   role?: Prisma.SortOrder
   terms?: Prisma.SortOrder
   isVerified?: Prisma.SortOrder
@@ -608,6 +637,20 @@ export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
 }
 
+export type UserCreateNestedOneWithoutBusinessProfileInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBusinessProfileInput, Prisma.UserUncheckedCreateWithoutBusinessProfileInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBusinessProfileInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutBusinessProfileNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBusinessProfileInput, Prisma.UserUncheckedCreateWithoutBusinessProfileInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBusinessProfileInput
+  upsert?: Prisma.UserUpsertWithoutBusinessProfileInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutBusinessProfileInput, Prisma.UserUpdateWithoutBusinessProfileInput>, Prisma.UserUncheckedUpdateWithoutBusinessProfileInput>
+}
+
 export type UserCreateNestedOneWithoutCustomersInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutCustomersInput, Prisma.UserUncheckedCreateWithoutCustomersInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutCustomersInput
@@ -636,15 +679,16 @@ export type UserUpdateOneRequiredWithoutInvoicesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutInvoicesInput, Prisma.UserUpdateWithoutInvoicesInput>, Prisma.UserUncheckedUpdateWithoutInvoicesInput>
 }
 
-export type UserCreateWithoutCustomersInput = {
+export type UserCreateWithoutBusinessProfileInput = {
   id?: string
   firstName: string
   middleName?: string | null
   lastName: string
   class?: string | null
   email: string
-  phoneNumber: string
-  password: string
+  phoneNumber?: string | null
+  password?: string | null
+  googleId?: string | null
   role?: string | null
   terms?: boolean
   isVerified?: boolean
@@ -654,6 +698,115 @@ export type UserCreateWithoutCustomersInput = {
   resetTokenExpires?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  customers?: Prisma.CustomerCreateNestedManyWithoutUserInput
+  invoices?: Prisma.InvoiceCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutBusinessProfileInput = {
+  id?: string
+  firstName: string
+  middleName?: string | null
+  lastName: string
+  class?: string | null
+  email: string
+  phoneNumber?: string | null
+  password?: string | null
+  googleId?: string | null
+  role?: string | null
+  terms?: boolean
+  isVerified?: boolean
+  verificationToken?: string | null
+  verificationTokenExpires?: Date | string | null
+  resetToken?: string | null
+  resetTokenExpires?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutUserInput
+  invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutBusinessProfileInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutBusinessProfileInput, Prisma.UserUncheckedCreateWithoutBusinessProfileInput>
+}
+
+export type UserUpsertWithoutBusinessProfileInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutBusinessProfileInput, Prisma.UserUncheckedUpdateWithoutBusinessProfileInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutBusinessProfileInput, Prisma.UserUncheckedCreateWithoutBusinessProfileInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutBusinessProfileInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutBusinessProfileInput, Prisma.UserUncheckedUpdateWithoutBusinessProfileInput>
+}
+
+export type UserUpdateWithoutBusinessProfileInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  middleName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  class?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  terms?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  verificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verificationTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  customers?: Prisma.CustomerUpdateManyWithoutUserNestedInput
+  invoices?: Prisma.InvoiceUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutBusinessProfileInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  middleName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  class?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  terms?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  verificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verificationTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutUserNestedInput
+  invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutCustomersInput = {
+  id?: string
+  firstName: string
+  middleName?: string | null
+  lastName: string
+  class?: string | null
+  email: string
+  phoneNumber?: string | null
+  password?: string | null
+  googleId?: string | null
+  role?: string | null
+  terms?: boolean
+  isVerified?: boolean
+  verificationToken?: string | null
+  verificationTokenExpires?: Date | string | null
+  resetToken?: string | null
+  resetTokenExpires?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  businessProfile?: Prisma.BusinessProfileCreateNestedOneWithoutUserInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutUserInput
 }
 
@@ -664,8 +817,9 @@ export type UserUncheckedCreateWithoutCustomersInput = {
   lastName: string
   class?: string | null
   email: string
-  phoneNumber: string
-  password: string
+  phoneNumber?: string | null
+  password?: string | null
+  googleId?: string | null
   role?: string | null
   terms?: boolean
   isVerified?: boolean
@@ -675,6 +829,7 @@ export type UserUncheckedCreateWithoutCustomersInput = {
   resetTokenExpires?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  businessProfile?: Prisma.BusinessProfileUncheckedCreateNestedOneWithoutUserInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -701,8 +856,9 @@ export type UserUpdateWithoutCustomersInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   class?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   terms?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -712,6 +868,7 @@ export type UserUpdateWithoutCustomersInput = {
   resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  businessProfile?: Prisma.BusinessProfileUpdateOneWithoutUserNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutUserNestedInput
 }
 
@@ -722,8 +879,9 @@ export type UserUncheckedUpdateWithoutCustomersInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   class?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   terms?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -733,6 +891,7 @@ export type UserUncheckedUpdateWithoutCustomersInput = {
   resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  businessProfile?: Prisma.BusinessProfileUncheckedUpdateOneWithoutUserNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -743,8 +902,9 @@ export type UserCreateWithoutInvoicesInput = {
   lastName: string
   class?: string | null
   email: string
-  phoneNumber: string
-  password: string
+  phoneNumber?: string | null
+  password?: string | null
+  googleId?: string | null
   role?: string | null
   terms?: boolean
   isVerified?: boolean
@@ -754,6 +914,7 @@ export type UserCreateWithoutInvoicesInput = {
   resetTokenExpires?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  businessProfile?: Prisma.BusinessProfileCreateNestedOneWithoutUserInput
   customers?: Prisma.CustomerCreateNestedManyWithoutUserInput
 }
 
@@ -764,8 +925,9 @@ export type UserUncheckedCreateWithoutInvoicesInput = {
   lastName: string
   class?: string | null
   email: string
-  phoneNumber: string
-  password: string
+  phoneNumber?: string | null
+  password?: string | null
+  googleId?: string | null
   role?: string | null
   terms?: boolean
   isVerified?: boolean
@@ -775,6 +937,7 @@ export type UserUncheckedCreateWithoutInvoicesInput = {
   resetTokenExpires?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  businessProfile?: Prisma.BusinessProfileUncheckedCreateNestedOneWithoutUserInput
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -801,8 +964,9 @@ export type UserUpdateWithoutInvoicesInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   class?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   terms?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -812,6 +976,7 @@ export type UserUpdateWithoutInvoicesInput = {
   resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  businessProfile?: Prisma.BusinessProfileUpdateOneWithoutUserNestedInput
   customers?: Prisma.CustomerUpdateManyWithoutUserNestedInput
 }
 
@@ -822,8 +987,9 @@ export type UserUncheckedUpdateWithoutInvoicesInput = {
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
   class?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   terms?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -833,6 +999,7 @@ export type UserUncheckedUpdateWithoutInvoicesInput = {
   resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  businessProfile?: Prisma.BusinessProfileUncheckedUpdateOneWithoutUserNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -842,13 +1009,13 @@ export type UserUncheckedUpdateWithoutInvoicesInput = {
  */
 
 export type UserCountOutputType = {
-  invoices: number
   customers: number
+  invoices: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  invoices?: boolean | UserCountOutputTypeCountInvoicesArgs
   customers?: boolean | UserCountOutputTypeCountCustomersArgs
+  invoices?: boolean | UserCountOutputTypeCountInvoicesArgs
 }
 
 /**
@@ -864,15 +1031,15 @@ export type UserCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountInvoicesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.InvoiceWhereInput
+export type UserCountOutputTypeCountCustomersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CustomerWhereInput
 }
 
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountCustomersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.CustomerWhereInput
+export type UserCountOutputTypeCountInvoicesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.InvoiceWhereInput
 }
 
 
@@ -885,6 +1052,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   email?: boolean
   phoneNumber?: boolean
   password?: boolean
+  googleId?: boolean
   role?: boolean
   terms?: boolean
   isVerified?: boolean
@@ -894,8 +1062,9 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   resetTokenExpires?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  invoices?: boolean | Prisma.User$invoicesArgs<ExtArgs>
+  businessProfile?: boolean | Prisma.User$businessProfileArgs<ExtArgs>
   customers?: boolean | Prisma.User$customersArgs<ExtArgs>
+  invoices?: boolean | Prisma.User$invoicesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -908,6 +1077,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   email?: boolean
   phoneNumber?: boolean
   password?: boolean
+  googleId?: boolean
   role?: boolean
   terms?: boolean
   isVerified?: boolean
@@ -928,6 +1098,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   email?: boolean
   phoneNumber?: boolean
   password?: boolean
+  googleId?: boolean
   role?: boolean
   terms?: boolean
   isVerified?: boolean
@@ -948,6 +1119,7 @@ export type UserSelectScalar = {
   email?: boolean
   phoneNumber?: boolean
   password?: boolean
+  googleId?: boolean
   role?: boolean
   terms?: boolean
   isVerified?: boolean
@@ -959,10 +1131,11 @@ export type UserSelectScalar = {
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "firstName" | "middleName" | "lastName" | "class" | "email" | "phoneNumber" | "password" | "role" | "terms" | "isVerified" | "verificationToken" | "verificationTokenExpires" | "resetToken" | "resetTokenExpires" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "firstName" | "middleName" | "lastName" | "class" | "email" | "phoneNumber" | "password" | "googleId" | "role" | "terms" | "isVerified" | "verificationToken" | "verificationTokenExpires" | "resetToken" | "resetTokenExpires" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  invoices?: boolean | Prisma.User$invoicesArgs<ExtArgs>
+  businessProfile?: boolean | Prisma.User$businessProfileArgs<ExtArgs>
   customers?: boolean | Prisma.User$customersArgs<ExtArgs>
+  invoices?: boolean | Prisma.User$invoicesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -971,8 +1144,9 @@ export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
   objects: {
-    invoices: Prisma.$InvoicePayload<ExtArgs>[]
+    businessProfile: Prisma.$BusinessProfilePayload<ExtArgs> | null
     customers: Prisma.$CustomerPayload<ExtArgs>[]
+    invoices: Prisma.$InvoicePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -981,8 +1155,9 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     lastName: string
     class: string | null
     email: string
-    phoneNumber: string
-    password: string
+    phoneNumber: string | null
+    password: string | null
+    googleId: string | null
     role: string | null
     terms: boolean
     isVerified: boolean
@@ -1386,8 +1561,9 @@ readonly fields: UserFieldRefs;
  */
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  invoices<T extends Prisma.User$invoicesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$invoicesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  businessProfile<T extends Prisma.User$businessProfileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$businessProfileArgs<ExtArgs>>): Prisma.Prisma__BusinessProfileClient<runtime.Types.Result.GetResult<Prisma.$BusinessProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   customers<T extends Prisma.User$customersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$customersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  invoices<T extends Prisma.User$invoicesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$invoicesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1425,6 +1601,7 @@ export interface UserFieldRefs {
   readonly email: Prisma.FieldRef<"User", 'String'>
   readonly phoneNumber: Prisma.FieldRef<"User", 'String'>
   readonly password: Prisma.FieldRef<"User", 'String'>
+  readonly googleId: Prisma.FieldRef<"User", 'String'>
   readonly role: Prisma.FieldRef<"User", 'String'>
   readonly terms: Prisma.FieldRef<"User", 'Boolean'>
   readonly isVerified: Prisma.FieldRef<"User", 'Boolean'>
@@ -1827,27 +2004,22 @@ export type UserDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
 }
 
 /**
- * User.invoices
+ * User.businessProfile
  */
-export type User$invoicesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type User$businessProfileArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the Invoice
+   * Select specific fields to fetch from the BusinessProfile
    */
-  select?: Prisma.InvoiceSelect<ExtArgs> | null
+  select?: Prisma.BusinessProfileSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the Invoice
+   * Omit specific fields from the BusinessProfile
    */
-  omit?: Prisma.InvoiceOmit<ExtArgs> | null
+  omit?: Prisma.BusinessProfileOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.InvoiceInclude<ExtArgs> | null
-  where?: Prisma.InvoiceWhereInput
-  orderBy?: Prisma.InvoiceOrderByWithRelationInput | Prisma.InvoiceOrderByWithRelationInput[]
-  cursor?: Prisma.InvoiceWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.InvoiceScalarFieldEnum | Prisma.InvoiceScalarFieldEnum[]
+  include?: Prisma.BusinessProfileInclude<ExtArgs> | null
+  where?: Prisma.BusinessProfileWhereInput
 }
 
 /**
@@ -1872,6 +2044,30 @@ export type User$customersArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.CustomerScalarFieldEnum | Prisma.CustomerScalarFieldEnum[]
+}
+
+/**
+ * User.invoices
+ */
+export type User$invoicesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Invoice
+   */
+  select?: Prisma.InvoiceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Invoice
+   */
+  omit?: Prisma.InvoiceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InvoiceInclude<ExtArgs> | null
+  where?: Prisma.InvoiceWhereInput
+  orderBy?: Prisma.InvoiceOrderByWithRelationInput | Prisma.InvoiceOrderByWithRelationInput[]
+  cursor?: Prisma.InvoiceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.InvoiceScalarFieldEnum | Prisma.InvoiceScalarFieldEnum[]
 }
 
 /**

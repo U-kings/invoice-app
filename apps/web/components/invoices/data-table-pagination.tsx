@@ -95,7 +95,7 @@ export function DataTablePagination({
               table.setPageSize(Number(value));
             }}
           >
-            <SelectTrigger className="h-9 w-[72px]">
+            <SelectTrigger className="h-9 w-18">
               <SelectValue />
             </SelectTrigger>
 
@@ -135,6 +135,7 @@ export function DataTablePagination({
             className="h-9 w-9"
             disabled={!table.getCanPreviousPage()}
             onClick={() => {
+              
               table.previousPage();
             }}
             aria-label="Previous page"

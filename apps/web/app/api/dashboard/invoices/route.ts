@@ -9,6 +9,7 @@ interface AuthPayload {
 }
 
 interface CreateInvoiceItem {
+  name: string
   description: string
   quantity: number
   rate: number
@@ -30,10 +31,7 @@ interface CreateInvoiceBody {
 
 import { InvoiceStatus as PrismaInvoiceStatus } from "@repo/db"
 
-const statusMap: Record<
-  string,
-  PrismaInvoiceStatus
-> = {
+const statusMap: Record<string, PrismaInvoiceStatus> = {
   Sent: "SENT",
   Paid: "PAID",
   Overdue: "OVERDUE",
@@ -79,10 +77,7 @@ export async function GET(req: NextRequest) {
     }
 
     try {
-      decoded = jwt.verify(
-        token,
-        jwtSecret
-      ) as typeof decoded
+      decoded = jwt.verify(token, jwtSecret) as typeof decoded
     } catch {
       return NextResponse.json(
         {
@@ -111,35 +106,24 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url)
 
-    const search =
-      searchParams.get("search")?.trim() || ""
+    const search = searchParams.get("search")?.trim() || ""
 
-    const status =
-      searchParams.get("status")?.trim() || ""
+    const status = searchParams.get("status")?.trim() || ""
 
-    const page = Math.max(
-      Number(searchParams.get("page")) || 1,
-      1
-    )
+    const page = Math.max(Number(searchParams.get("page")) || 1, 1)
 
     const pageSize = Math.min(
-      Math.max(
-        Number(searchParams.get("pageSize")) || 10,
-        1
-      ),
+      Math.max(Number(searchParams.get("pageSize")) || 10, 1),
       100
     )
 
-    const skip =
-      (page - 1) * pageSize
+    const skip = (page - 1) * pageSize
 
     // ---------------------------------------------------------
     // 4. Validate status
     // ---------------------------------------------------------
 
-    let statusFilter:
-      | PrismaInvoiceStatus
-      | undefined
+    let statusFilter: PrismaInvoiceStatus | undefined
 
     if (status) {
       statusFilter = statusMap[status]
@@ -203,33 +187,30 @@ export async function GET(req: NextRequest) {
     // 6. Fetch invoices + count
     // ---------------------------------------------------------
 
-    const [invoices, total] =
-      await prisma.$transaction([
-        prisma.invoice.findMany({
-          where,
-          include: {
-            customer: true,
-            lineItems: true,
-          },
-          orderBy: {
-            createdAt: "desc",
-          },
-          skip,
-          take: pageSize,
-        }),
+    const [invoices, total] = await prisma.$transaction([
+      prisma.invoice.findMany({
+        where,
+        include: {
+          customer: true,
+          lineItems: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        skip,
+        take: pageSize,
+      }),
 
-        prisma.invoice.count({
-          where,
-        }),
-      ])
+      prisma.invoice.count({
+        where,
+      }),
+    ])
 
     // ---------------------------------------------------------
     // 7. Pagination
     // ---------------------------------------------------------
 
-    const totalPages = Math.ceil(
-      total / pageSize
-    )
+    const totalPages = Math.ceil(total / pageSize)
 
     return NextResponse.json({
       data: invoices,
@@ -239,17 +220,12 @@ export async function GET(req: NextRequest) {
         pageSize,
         total,
         totalPages,
-        hasNextPage:
-          page < totalPages,
-        hasPreviousPage:
-          page > 1,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
       },
     })
   } catch (error) {
-    console.error(
-      "Get invoices error:",
-      error
-    )
+    console.error("Get invoices error:", error)
 
     return NextResponse.json(
       {
@@ -478,6 +454,8 @@ export async function POST(req: NextRequest) {
 
           lineItems: {
             create: items.map((item) => ({
+              name: item.name.trim(),
+
               description: item.description.trim(),
 
               quantity: item.quantity,

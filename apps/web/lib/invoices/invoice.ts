@@ -46,6 +46,11 @@ export function formatActivityDate(date?: string) {
 export function getEffectiveInvoiceStatus(
   invoice: Invoice | undefined
 ): InvoiceStatus {
+  const newStatus = invoice
+    ? invoice?.status?.charAt(0)?.toUpperCase() +
+      invoice?.status.slice(1).toLowerCase()
+    : "Draft"
+
   if (!invoice) {
     return "Draft"
   }
@@ -60,11 +65,11 @@ export function getEffectiveInvoiceStatus(
     return "Overdue"
   }
 
-  if (invoice.status === "Paid") {
+  if (newStatus === "Paid") {
     return "Paid"
   }
 
-  if (invoice.status === "Cancelled") {
+  if (newStatus === "Cancelled") {
     return "Cancelled"
   }
 

@@ -1,24 +1,26 @@
+"use client"
+
 import { InvoiceFormEdit } from "@/components/invoices/invoice-form-edit"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 import { prisma } from "@repo/db"
-import { Invoice } from "@/hooks/use-invoice"
+import { Invoice, useInvoices } from "@/hooks/use-invoice"
+import { useParams } from "next/navigation"
 
-interface CustomerPageProps {
-  params: Promise<{
-    id: string
-  }>
-}
+export default function EditInvoicePage() {
+  const params = useParams<{ id: string }>()
 
-export default async function EditInvoicePage({ params }: CustomerPageProps) {
-  const resolvedParams = await params
-  const invoiceNumber = resolvedParams.id
-  const invoice = await prisma.invoice.findUnique({
-    where: { id: invoiceNumber },
-    // include: {},
+  const { data, isLoading } = useInvoices({
+    page: 1,
+    pageSize: 1,
+    search: params?.id,
   })
+  // const invoice = await prisma.invoice.findUnique({
+  //   where: { id: invoiceNumber },
+  //   include: { lineItems: true },
+  // })
 
-  if (!invoice) {
+  if (!data?.data) {
     return (
       <div className="space-y-4">
         <Link
@@ -51,11 +53,11 @@ export default async function EditInvoicePage({ params }: CustomerPageProps) {
         <h1 className="text-2xl font-semibold">Edit invoice</h1>
 
         <p className="mt-1 text-sm text-muted-foreground">
-          Update the details of {invoice?.invoiceNumber}.
+          Update the details of {data?.data[0]?.invoiceNumber}.
         </p>
       </div>
 
-      {/* <InvoiceFormEdit invoice={invoice} /> */}
+      <InvoiceFormEdit invoice={data?.data[0]} />
     </div>
   )
 }

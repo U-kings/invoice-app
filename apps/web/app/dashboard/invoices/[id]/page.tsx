@@ -10,7 +10,6 @@ import { InvoiceItems } from "@/components/invoices/invoice-item"
 import { InvoicePayment } from "@/components/invoices/invoice-payment"
 import { InvoiceActions } from "@/components/invoices/invoice-actions"
 import { useParams } from "next/navigation"
-import { useEffect, useState } from "react"
 import {
   formatActivityDate,
   getEffectiveInvoiceStatus,
@@ -20,20 +19,18 @@ import { Invoice, useInvoices } from "@/hooks/use-invoice"
 export default function InvoiceDetailsPage() {
   const params = useParams<{ id: string }>()
 
-  const { data } = useInvoices({
+  const { data, isLoading } = useInvoices({
     page: 1,
     pageSize: 1,
     search: params?.id,
   })
 
-  const firstInvoice = data?.data?.[0]
+  const firstInvoice = data?.data?.[0] as Invoice
 
   const effectiveStatus =
     firstInvoice !== undefined ? getEffectiveInvoiceStatus(firstInvoice) : null
 
   const isPaid = effectiveStatus === "Paid"
-  // const isCancelled = effectiveStatus === "Cancelled"
-  const isSent = effectiveStatus === "Sent"
 
   if (!data?.data) {
     return (
@@ -46,7 +43,9 @@ export default function InvoiceDetailsPage() {
           Back to invoices
         </Link>
 
-        <h1 className="text-2xl font-semibold">Invoice not found</h1>
+        <h1 className="text-sm font-semibold">
+          {isLoading ? "Loading invoice..." : "Invoice not found"}
+        </h1>
       </div>
     )
   }
@@ -67,18 +66,19 @@ export default function InvoiceDetailsPage() {
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-2xl font-semibold tracking-tight">
-              {data.data?.[0]?.id}
+              {data.data?.[0]?.invoiceNumber}
             </h1>
 
             <InvoiceStatusBadge status={effectiveStatus ?? "Draft"} />
           </div>
 
           <p className="text-sm text-muted-foreground">
-            Issued {data.data?.[0]?.issueDate} · Due {data.data?.[0]?.dueDate}
+            Issued {formatActivityDate(data.data?.[0]?.issueDate)} · Due{" "}
+            {formatActivityDate(data.data?.[0]?.dueDate)}
           </p>
         </div>
 
-        <InvoiceActions invoice={data.data?.[0]} />
+        <InvoiceActions invoice={firstInvoice} />
       </div>
 
       <InvoiceSummary invoice={data.data?.[0]} />
@@ -98,7 +98,7 @@ export default function InvoiceDetailsPage() {
   )
 }
 
-function InvoiceCancellation({ invoice }: { invoice: Invoice | undefined}) {
+function InvoiceCancellation({ invoice }: { invoice: Invoice | undefined }) {
   return (
     <div className="rounded-2xl border bg-background p-6">
       <div className="mb-5">

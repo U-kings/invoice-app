@@ -16,11 +16,12 @@ export function InvoiceItems({ invoice }: InvoiceItemsProps) {
   const tax = subtotal && subtotal * (taxRate ?? 0 / 100)
   const total = subtotal && subtotal + (tax ?? 0)
   const currency = invoice?.currency
+
   return (
     <div className="rounded-2xl border bg-background">
       {/* Desktop/tablet header */}
       <div className="hidden grid-cols-[1fr_100px_140px_140px] gap-4 border-b bg-muted/30 px-6 py-3 text-xs font-medium tracking-wider text-muted-foreground uppercase sm:grid">
-        <span>Description</span>
+        <span>Item/Description</span>
         <span className="text-right">Qty</span>
         <span className="text-right">Rate</span>
         <span className="text-right">Amount</span>
@@ -37,7 +38,10 @@ export function InvoiceItems({ invoice }: InvoiceItemsProps) {
               className="grid gap-3 px-6 py-4 sm:grid-cols-[1fr_100px_140px_140px] sm:items-center sm:gap-4"
             >
               <div>
-                <p className="font-medium">{item.description}</p>
+                <div className="flex flex-col">
+                  <p className="font-medium">{item.name}</p>
+                  <p className="font-light text-sm">{item.description}</p>
+                </div>
 
                 {/* Mobile-only metadata */}
                 <div className="mt-1 flex gap-3 text-xs text-muted-foreground sm:hidden">
@@ -72,14 +76,16 @@ export function InvoiceItems({ invoice }: InvoiceItemsProps) {
             <span className="text-muted-foreground">Subtotal</span>
 
             <span className="font-medium">
-              {formatCurrency(subtotal, currency)}
+              {invoice ? formatCurrency(subtotal, currency) : "—"}
             </span>
           </div>
 
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Tax ({taxRate}%)</span>
 
-            <span className="font-medium">{formatCurrency(tax, currency)}</span>
+            <span className="font-medium">
+              {invoice ? formatCurrency(tax, currency) : "—"}
+            </span>
           </div>
 
           <Separator />
@@ -88,7 +94,7 @@ export function InvoiceItems({ invoice }: InvoiceItemsProps) {
             <span className="text-base font-semibold">Total</span>
 
             <span className="text-xl font-semibold">
-              {formatCurrency(total, currency)}
+              {invoice ? formatCurrency(total, currency) : "—"}
             </span>
           </div>
         </div>

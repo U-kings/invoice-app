@@ -8,11 +8,7 @@ type PublicInvoicePageProps = {
   }>
 }
 
-const PUBLIC_STATUSES = [
-  "SENT",
-  "PAID",
-  "OVERDUE",
-]
+const PUBLIC_STATUSES = ["SENT", "PAID", "OVERDUE"]
 
 export default async function PublicInvoicePage({
   params,
@@ -28,6 +24,7 @@ export default async function PublicInvoicePage({
       lineItems: true,
     },
   })
+  
 
   if (!invoice) {
     notFound()
@@ -38,33 +35,24 @@ export default async function PublicInvoicePage({
   }
 
   const subtotal = invoice.lineItems.reduce<number>(
-    (sum, item) =>
-      sum +
-      Number(item.rate) * item.quantity,
+    (sum, item) => sum + Number(item.rate) * item.quantity,
     0
   )
 
   const discount = Number(invoice.discount)
 
-  const taxableAmount = Math.max(
-    subtotal - discount,
-    0
-  )
+  const taxableAmount = Math.max(subtotal - discount, 0)
 
   const taxRate = Number(invoice.taxRate)
 
-  const tax =
-    taxableAmount * (taxRate / 100)
+  const tax = taxableAmount * (taxRate / 100)
 
-  const total =
-    taxableAmount + tax
+  const total = taxableAmount + tax
 
   return (
     <main className="min-h-screen bg-muted/30 py-6 sm:py-10 print:bg-white print:py-0">
       <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8">
-        <InvoiceActions
-          publicToken={invoice.publicToken}
-        />
+        <InvoiceActions publicToken={invoice.publicToken} />
 
         <div
           id="invoice"
@@ -88,7 +76,7 @@ export default async function PublicInvoicePage({
               </div>
 
               <div className="sm:text-right">
-                <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#2EAFB4]">
+                <p className="text-xs font-medium tracking-[0.18em] text-[#2EAFB4] uppercase">
                   Invoice
                 </p>
 
@@ -96,9 +84,7 @@ export default async function PublicInvoicePage({
                   {invoice.invoiceNumber}
                 </h1>
 
-                <InvoiceStatus
-                  status={invoice.status}
-                />
+                <InvoiceStatus status={invoice.status} />
               </div>
             </div>
           </header>
@@ -106,17 +92,15 @@ export default async function PublicInvoicePage({
           {/* Invoice details */}
           <section className="grid gap-8 border-b px-6 py-8 sm:grid-cols-2 sm:px-10 lg:grid-cols-4">
             <div>
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              <p className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
                 Billed to
               </p>
 
               <div className="mt-3">
-                <p className="font-semibold">
-                  {invoice.customer.name}
-                </p>
+                <p className="font-semibold">{invoice.customer.name}</p>
 
                 {invoice.customer.email && (
-                  <p className="mt-1 break-all text-sm text-muted-foreground">
+                  <p className="mt-1 text-sm break-all text-muted-foreground">
                     {invoice.customer.email}
                   </p>
                 )}
@@ -135,10 +119,7 @@ export default async function PublicInvoicePage({
 
             <InvoiceDetail
               label="Payment terms"
-              value={
-                invoice.paymentTerm ??
-                "Due on receipt"
-              }
+              value={invoice.paymentTerm ?? "Due on receipt"}
             />
           </section>
 
@@ -146,23 +127,15 @@ export default async function PublicInvoicePage({
           <section className="px-6 py-8 sm:px-10">
             <div className="overflow-hidden rounded-xl border">
               {/* Desktop heading */}
-              <div className="hidden grid-cols-[1fr_70px_120px_130px] gap-4 bg-muted/50 px-5 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground sm:grid">
+              <div className="hidden grid-cols-[1fr_70px_120px_130px] gap-4 bg-muted/50 px-5 py-3 text-xs font-medium tracking-wider text-muted-foreground uppercase sm:grid">
                 <span>Description</span>
-                <span className="text-right">
-                  Qty
-                </span>
-                <span className="text-right">
-                  Rate
-                </span>
-                <span className="text-right">
-                  Amount
-                </span>
+                <span className="text-right">Qty</span>
+                <span className="text-right">Rate</span>
+                <span className="text-right">Amount</span>
               </div>
 
               {invoice.lineItems.map((item) => {
-                const amount =
-                  Number(item.rate) *
-                  item.quantity
+                const amount = Number(item.rate) * item.quantity
 
                 return (
                   <div
@@ -170,16 +143,11 @@ export default async function PublicInvoicePage({
                     className="grid gap-3 border-t px-5 py-5 sm:grid-cols-[1fr_70px_120px_130px] sm:items-center sm:gap-4"
                   >
                     <div>
-                      <p className="text-sm font-medium">
-                        {item.description}
-                      </p>
+                      <p className="text-sm font-medium">{item.description}</p>
 
                       <p className="mt-1 text-xs text-muted-foreground sm:hidden">
                         {item.quantity} ×{" "}
-                        {formatCurrency(
-                          Number(item.rate),
-                          invoice.currency
-                        )}
+                        {formatCurrency(Number(item.rate), invoice.currency)}
                       </p>
                     </div>
 
@@ -188,17 +156,11 @@ export default async function PublicInvoicePage({
                     </div>
 
                     <div className="hidden text-right text-sm sm:block">
-                      {formatCurrency(
-                        Number(item.rate),
-                        invoice.currency
-                      )}
+                      {formatCurrency(Number(item.rate), invoice.currency)}
                     </div>
 
                     <div className="text-right text-sm font-medium">
-                      {formatCurrency(
-                        amount,
-                        invoice.currency
-                      )}
+                      {formatCurrency(amount, invoice.currency)}
                     </div>
                   </div>
                 )
@@ -212,43 +174,29 @@ export default async function PublicInvoicePage({
               <div className="space-y-3">
                 <SummaryRow
                   label="Subtotal"
-                  value={formatCurrency(
-                    subtotal,
-                    invoice.currency
-                  )}
+                  value={formatCurrency(subtotal, invoice.currency)}
                 />
 
                 {discount > 0 && (
                   <SummaryRow
                     label="Discount"
-                    value={`- ${formatCurrency(
-                      discount,
-                      invoice.currency
-                    )}`}
+                    value={`- ${formatCurrency(discount, invoice.currency)}`}
                   />
                 )}
 
                 {tax > 0 && (
                   <SummaryRow
                     label={`Tax (${taxRate}%)`}
-                    value={formatCurrency(
-                      tax,
-                      invoice.currency
-                    )}
+                    value={formatCurrency(tax, invoice.currency)}
                   />
                 )}
               </div>
 
               <div className="mt-5 flex items-center justify-between rounded-xl bg-muted/50 px-4 py-4">
-                <span className="text-sm font-medium">
-                  Total
-                </span>
+                <span className="text-sm font-medium">Total</span>
 
                 <span className="text-xl font-semibold tracking-tight text-[#2EAFB4]">
-                  {formatCurrency(
-                    total,
-                    invoice.currency
-                  )}
+                  {formatCurrency(total, invoice.currency)}
                 </span>
               </div>
             </div>
@@ -257,11 +205,11 @@ export default async function PublicInvoicePage({
           {/* Notes */}
           {invoice.notes && (
             <section className="border-t px-6 py-8 sm:px-10">
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              <p className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
                 Notes
               </p>
 
-              <p className="mt-3 max-w-2xl whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
+              <p className="mt-3 max-w-2xl text-sm leading-6 whitespace-pre-wrap text-muted-foreground">
                 {invoice.notes}
               </p>
             </section>
@@ -269,9 +217,7 @@ export default async function PublicInvoicePage({
 
           {/* Footer */}
           <footer className="border-t bg-muted/30 px-6 py-7 text-center sm:px-10">
-            <p className="text-sm font-medium">
-              Thank you for your business.
-            </p>
+            <p className="text-sm font-medium">Thank you for your business.</p>
 
             <p className="mt-1 text-xs text-muted-foreground">
               This invoice was generated electronically.
@@ -283,66 +229,39 @@ export default async function PublicInvoicePage({
   )
 }
 
-function InvoiceDetail({
-  label,
-  value,
-}: {
-  label: string
-  value: string
-}) {
+function InvoiceDetail({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+      <p className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
         {label}
       </p>
 
-      <p className="mt-3 text-sm font-medium">
-        {value}
-      </p>
+      <p className="mt-3 text-sm font-medium">{value}</p>
     </div>
   )
 }
 
-function SummaryRow({
-  label,
-  value,
-}: {
-  label: string
-  value: string
-}) {
+function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-4 text-sm">
-      <span className="text-muted-foreground">
-        {label}
-      </span>
+      <span className="text-muted-foreground">{label}</span>
 
       <span>{value}</span>
     </div>
   )
 }
 
-function InvoiceStatus({
-  status,
-}: {
-  status: string
-}) {
-  const statusStyles: Record<
-    string,
-    string
-  > = {
-    PAID:
-      "bg-emerald-500/10 text-emerald-600",
-    SENT:
-      "bg-blue-500/10 text-blue-600",
-    OVERDUE:
-      "bg-red-500/10 text-red-600",
+function InvoiceStatus({ status }: { status: string }) {
+  const statusStyles: Record<string, string> = {
+    PAID: "bg-emerald-500/10 text-emerald-600",
+    SENT: "bg-blue-500/10 text-blue-600",
+    OVERDUE: "bg-red-500/10 text-red-600",
   }
 
   return (
     <span
       className={`mt-3 inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
-        statusStyles[status] ??
-        "bg-muted text-muted-foreground"
+        statusStyles[status] ?? "bg-muted text-muted-foreground"
       }`}
     >
       {formatStatus(status)}
@@ -354,34 +273,23 @@ function formatStatus(status: string) {
   return status
     .toLowerCase()
     .replace(/_/g, " ")
-    .replace(/\b\w/g, (char) =>
-      char.toUpperCase()
-    )
+    .replace(/\b\w/g, (char) => char.toUpperCase())
 }
 
 function formatDate(date: Date) {
-  return new Intl.DateTimeFormat(
-    "en-NG",
-    {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }
-  ).format(date)
+  return new Intl.DateTimeFormat("en-NG", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(date)
 }
 
-function formatCurrency(
-  amount: number,
-  currency: string
-) {
+function formatCurrency(amount: number, currency: string) {
   try {
-    return new Intl.NumberFormat(
-      "en-NG",
-      {
-        style: "currency",
-        currency,
-      }
-    ).format(amount)
+    return new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency,
+    }).format(amount)
   } catch {
     return `${currency} ${amount.toFixed(2)}`
   }

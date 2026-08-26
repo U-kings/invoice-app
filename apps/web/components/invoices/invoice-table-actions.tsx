@@ -45,13 +45,19 @@ export function InvoiceTableActions({ invoice }: InvoiceTableActionsProps) {
 
         <DropdownMenuContent align="end">
           <DropdownMenuItem
-            render={<Link href={`/dashboard/invoices/${invoice?.id}`} />}
+            render={
+              <Link href={`/dashboard/invoices/${invoice?.invoiceNumber}`} />
+            }
           >
             View invoice
           </DropdownMenuItem>
           {!isCancelled && !isPaid && (
             <DropdownMenuItem
-              render={<Link href={`/dashboard/invoices/${invoice?.id}/edit`} />}
+              render={
+                <Link
+                  href={`/dashboard/invoices/${invoice?.invoiceNumber}/edit`}
+                />
+              }
             >
               Edit invoice
             </DropdownMenuItem>
@@ -61,9 +67,7 @@ export function InvoiceTableActions({ invoice }: InvoiceTableActionsProps) {
           {isOverdue && isSent && (
             <DropdownMenuItem>Resend invoice</DropdownMenuItem>
           )}
-          {isDraft && (
-            <DropdownMenuItem>Send invoice</DropdownMenuItem>
-          )}
+          {isDraft && <DropdownMenuItem>Send invoice</DropdownMenuItem>}
           {(isSent || isDraft) && !isCancelled && (
             <DropdownMenuItem>Mark as paid</DropdownMenuItem>
           )}
@@ -83,7 +87,7 @@ export function InvoiceTableActions({ invoice }: InvoiceTableActionsProps) {
       </DropdownMenu>
 
       <InvoiceDeleteDialog
-        invoiceId={invoice.id}
+        invoice={invoice}
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
       />

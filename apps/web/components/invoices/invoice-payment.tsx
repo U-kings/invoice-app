@@ -24,7 +24,7 @@ function formatPaidDate(date?: string) {
 export function InvoicePayment({ invoice }: InvoicePaymentProps) {
   const status = getEffectiveInvoiceStatus(invoice)
 
-  const isPaid = status === "Paid"
+  const isPaid = status === "Paid"?.toUpperCase()
   // const isCancelled = status === "Overdue"
 
   return (
@@ -126,8 +126,6 @@ function InvoiceActivity({ invoice }: { invoice: Invoice|undefined }) {
   const status = getEffectiveInvoiceStatus(invoice)
 
   const isPaid = status === "Paid"
-
-  console.log(invoice)
 
   const activities = [
     {

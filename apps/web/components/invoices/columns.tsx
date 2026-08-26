@@ -18,24 +18,6 @@ import { Invoice } from "@/hooks/use-invoice"
 
 const columnHelper = createColumnHelper<typeof invoiceTableFeatures, Invoice>()
 
-// function SortIcon({
-//   direction,
-// }: {
-//   direction: false | "asc" | "desc";
-// }) {
-//   if (direction === "asc") {
-//     return <ArrowUp className="h-3.5 w-3.5" />;
-//   }
-
-//   if (direction === "desc") {
-//     return <ArrowDown className="h-3.5 w-3.5" />;
-//   }
-
-//   return null;
-// }
-
-// export const columns = columnHelper.columns([
-
 export const columns = columnHelper.columns([
   columnHelper.display({
     id: "select",
@@ -101,12 +83,12 @@ export const columns = columnHelper.columns([
 
       return (
         <Link
-          href={`/dashboard/invoices/${invoice.id}`}
+          href={`/dashboard/invoices/${invoice.invoiceNumber}`}
           className="font-medium transition-colors hover:text-[#2EAFB4]"
         >
           {invoice.id?.includes("INV")
             ? invoice.id
-            : `INV-${invoice.id?.slice(0, 4)}`}
+            : `INV-${invoice.id?.slice(0, 3)}`}
         </Link>
       )
     },

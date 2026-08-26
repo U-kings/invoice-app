@@ -27,6 +27,17 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       )
     }
 
+    // Inside your traditional login route:
+    if (!user.password) {
+      return NextResponse.json(
+        {
+          error:
+            "This account uses Google Sign-In. Please click 'Continue with Google'.",
+        },
+        { status: 400 }
+      )
+    }
+
     // 3. Compare passwords safely using bcryptjs
     const isMatch: boolean = await bcrypt.compare(inputPassword, user.password)
     if (!isMatch) {

@@ -15,8 +15,9 @@ export interface CreateInvoicePayload {
   discount?: number
   taxRate?: number
   notes?: string
-  sent?: boolean
+  send?: boolean
   items: {
+    name:string
     description: string
     quantity: number
     rate: number

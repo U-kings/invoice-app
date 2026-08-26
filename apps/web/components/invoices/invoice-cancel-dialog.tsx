@@ -32,7 +32,7 @@ export function InvoiceCancelDialog({
   const cancelInvoiceMutation = useCancelInvoice()
 
   async function handleCancel() {
-    cancelInvoiceMutation.mutate(invoice?.id, {
+    cancelInvoiceMutation.mutate(invoice?.invoiceNumber, {
       onSuccess: () => {
         onOpenChange(false)
       },

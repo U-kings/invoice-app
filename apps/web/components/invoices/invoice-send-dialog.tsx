@@ -21,6 +21,7 @@ import { toast } from "@workspace/ui/components/toast"
 
 interface InvoiceSendDialogProps {
   invoiceId: string | undefined
+  invoiceNumber: string | undefined
   open: boolean
   onOpenChange: (open: boolean) => void
   email: string | undefined
@@ -28,6 +29,7 @@ interface InvoiceSendDialogProps {
 
 export function InvoiceSendDialog({
   invoiceId,
+  invoiceNumber,
   open,
   onOpenChange,
   email,
@@ -36,16 +38,16 @@ export function InvoiceSendDialog({
   const sendInvoiceMutation = useSendInvoice()
 
   const [subject, setSubject] = useState(
-    `Invoice ${invoiceId} from Your Company`
+    `Invoice ${invoiceNumber} from Your Company`
   )
 
   useEffect(() => {
     if (open) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setRecipientEmail(email)
-      setSubject(`Invoice ${invoiceId} from Your Company`)
+      setSubject(`Invoice ${invoiceNumber} from Your Company`)
     }
-  }, [open, email, invoiceId])
+  }, [open, email, invoiceNumber])
 
   useEffect(() => {
     // if (sendInvoiceMutation.isError) {
@@ -79,7 +81,7 @@ export function InvoiceSendDialog({
           <DialogTitle>Send invoice</DialogTitle>
 
           <DialogDescription>
-            Review the recipient before sending {invoiceId}.
+            Review the recipient before sending {invoiceNumber}.
           </DialogDescription>
         </DialogHeader>
 

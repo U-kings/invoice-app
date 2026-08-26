@@ -1,7 +1,7 @@
 "use client"
 
-import * as React from "react"
-
+import { useDeleteInvoice } from "@/hooks/use-delete-invoice"
+import { Invoice } from "@/hooks/use-invoice"
 import { Button } from "@workspace/ui/components/button"
 
 import {
@@ -14,39 +14,55 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@workspace/ui/components/dialog"
+import { toast } from "@workspace/ui/components/toast"
 import { useRouter } from "next/navigation"
 
 interface InvoiceDeleteDialogProps {
-  invoiceId: string | undefined
+  invoice: Invoice
   open: boolean
   onOpenChange: (open: boolean) => void
   onDeleted?: () => void
 }
 
 export function InvoiceDeleteDialog({
-  invoiceId,
+  invoice,
   open,
   onOpenChange,
   onDeleted,
 }: InvoiceDeleteDialogProps) {
-  // const router = useRouter()
-  const [isDeleting, setIsDeleting] = React.useState(false)
+  const deleteInvoiceMutation = useDeleteInvoice()
 
   async function handleDelete() {
-    setIsDeleting(true)
+    deleteInvoiceMutation.mutate(
+      {
+        invoiceId: invoice.id,
+      },
+      {
+        onSuccess: () => {
+          onOpenChange(false)
+          onDeleted?.()
+          toast.add({
+            title: "Invoice deleted",
+            description: `${invoice.invoiceNumber} has been deleted.`,
+            type: "success",
+          })
 
-    try {
-      // deleteInvoice(invoiceId)
-      // window.dispatchEvent(new Event(INVOICE_STORAGE_EVENT))
+        },
 
-      onOpenChange(false)
+        onError: (error) => {
+          onOpenChange(false)
+          toast.add({
+            title: "Unable to delete invoice",
+            description:
+              error instanceof Error
+                ? error.message
+                : "Something went wrong while deleting the invoice.",
+            type: "error",
+          })
+        },
+      }
+    )
 
-      onDeleted?.()
-
-      // router.push("/dashboard/invoices")
-    } finally {
-      setIsDeleting(false)
-    }
   }
 
   return (
@@ -57,24 +73,31 @@ export function InvoiceDeleteDialog({
 
           <DialogDescription>
             Are you sure you want to delete{" "}
-            <span className="font-medium text-foreground">{invoiceId}</span>?
-            This action cannot be undone.
+            <span className="font-medium text-foreground">
+              {invoice?.invoiceNumber}
+            </span>
+            ? This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
 
         <DialogFooter>
           <DialogClose
-            render={<Button variant="outline" disabled={isDeleting} />}
+            render={
+              <Button
+                variant="outline"
+                disabled={deleteInvoiceMutation.isPending}
+              />
+            }
           >
             Cancel
           </DialogClose>
 
           <Button
             variant="destructive"
-            disabled={isDeleting}
+            disabled={deleteInvoiceMutation.isPending}
             onClick={handleDelete}
           >
-            {isDeleting ? "Deleting..." : "Delete invoice"}
+            {deleteInvoiceMutation.isPending ? "Deleting..." : "Delete invoice"}
           </Button>
         </DialogFooter>
       </DialogContent>

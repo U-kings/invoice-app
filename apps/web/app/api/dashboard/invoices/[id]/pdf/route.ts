@@ -1,6 +1,9 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib"
 import { NextResponse } from "next/server"
 import { prisma } from "@repo/db"
+import fontkit from "@pdf-lib/fontkit"
+import path from "path"
+import { readFileSync } from "fs"
 
 export async function POST(
   request: Request,
@@ -42,9 +45,10 @@ export async function POST(
       return sum + Number(item.rate) * item.quantity
     }, 0)
 
-    const discount = Number(invoice.discount)
+    const discountPercent = Number(invoice.discount)
+    const discountAmount = subtotal * (discountPercent / 100)
 
-    const subtotalAfterDiscount = Math.max(subtotal - discount, 0)
+    const subtotalAfterDiscount = Math.max(subtotal - discountAmount, 0)
 
     const taxRate = Number(invoice.taxRate)
 
@@ -58,9 +62,23 @@ export async function POST(
 
     const pdf = await PDFDocument.create()
 
-    const regularFont = await pdf.embedFont(StandardFonts.Helvetica)
+    pdf.registerFontkit(fontkit)
 
-    const boldFont = await pdf.embedFont(StandardFonts.HelveticaBold)
+    // 3. Load your custom font file from your server directory
+    const fontPathRegular = path.join(
+      process.cwd(),
+      "public/fonts/Inter_28pt-Medium.ttf"
+    )
+    const fontPathBold = path.join(
+      process.cwd(),
+      "public/fonts/Inter_28pt-Bold.ttf"
+    ) // Added bold path
+
+    const fontBytesRegular = readFileSync(fontPathRegular)
+    const fontBytesBold = readFileSync(fontPathBold)
+
+    const regularFont = await pdf.embedFont(fontBytesRegular)
+    const boldFont = await pdf.embedFont(fontBytesBold)
 
     const pageWidth = 595.28
     const pageHeight = 841.89
@@ -116,6 +134,30 @@ export async function POST(
         y,
         size: options?.size ?? 10,
         font: options?.font ?? regularFont,
+        color: options?.color ?? darkColor,
+      })
+    }
+
+    const drawRightText = (
+      text: string,
+      rightX: number,
+      y: number,
+      options?: {
+        size?: number
+        font?: typeof regularFont
+        color?: ReturnType<typeof rgb>
+      }
+    ) => {
+      const size = options?.size ?? 10
+      const font = options?.font ?? regularFont
+
+      const textWidth = font.widthOfTextAtSize(text, size)
+
+      page.drawText(text, {
+        x: rightX - textWidth,
+        y,
+        size,
+        font,
         color: options?.color ?? darkColor,
       })
     }
@@ -223,11 +265,16 @@ export async function POST(
 
     const descriptionX = tableX + 10
 
-    const quantityX = tableX + 330
+    // const quantityX = tableX + 330
 
-    const rateX = tableX + 395
+    // const rateX = tableX + 395
 
-    const amountX = tableX + 480
+    // const amountX = tableX + 480
+
+    // Right edges of numeric columns
+    const quantityRightX = 380
+    const rateRightX = 455
+    const amountRightX = pageWidth - margin -10
 
     page.drawRectangle({
       x: tableX,
@@ -243,19 +290,37 @@ export async function POST(
       color: whiteColor,
     })
 
-    drawText("Qty", quantityX, y - 15, {
+    // drawText("Qty", quantityRightX, y - 15, {
+    //   size: 9,
+    //   font: boldFont,
+    //   color: whiteColor,
+    // })
+
+    // drawText("Rate", rateRightX, y - 15, {
+    //   size: 9,
+    //   font: boldFont,
+    //   color: whiteColor,
+    // })
+
+    // drawText("Amount", amountRightX, y - 15, {
+    //   size: 9,
+    //   font: boldFont,
+    //   color: whiteColor,
+    // })
+
+    drawRightText("Qty", quantityRightX, y - 15, {
       size: 9,
       font: boldFont,
       color: whiteColor,
     })
 
-    drawText("Rate", rateX, y - 15, {
+    drawRightText("Rate", rateRightX, y - 15, {
       size: 9,
       font: boldFont,
       color: whiteColor,
     })
 
-    drawText("Amount", amountX, y - 15, {
+    drawRightText("Amount", amountRightX, y - 15, {
       size: 9,
       font: boldFont,
       color: whiteColor,
@@ -280,19 +345,35 @@ export async function POST(
 
       const amount = quantity * rate
 
+      // drawText(item.description, descriptionX, y, {
+      //   size: 9,
+      // })
+
+      // drawText(String(quantity), quantityRightX, y, {
+      //   size: 9,
+      // })
+
+      // drawText(formatCurrency(rate), rateRightX, y, {
+      //   size: 9,
+      // })
+
+      // drawText(formatCurrency(amount), amountRightX, y, {
+      //   size: 9,
+      // })
+
       drawText(item.description, descriptionX, y, {
         size: 9,
       })
 
-      drawText(String(quantity), quantityX, y, {
+      drawRightText(String(quantity), quantityRightX, y, {
         size: 9,
       })
 
-      drawText(formatCurrency(rate), rateX, y, {
+      drawRightText(formatCurrency(rate), rateRightX, y, {
         size: 9,
       })
 
-      drawText(formatCurrency(amount), amountX, y, {
+      drawRightText(formatCurrency(amount), amountRightX, y, {
         size: 9,
       })
 
@@ -325,7 +406,7 @@ export async function POST(
       color: mutedColor,
     })
 
-    drawText(formatCurrency(subtotal), amountX, y, {
+    drawRightText(formatCurrency(subtotal), amountRightX, y, {
       size: 9,
       font: boldFont,
     })
@@ -337,7 +418,7 @@ export async function POST(
       color: mutedColor,
     })
 
-    drawText(`- ${formatCurrency(discount)}`, amountX, y, {
+    drawRightText(`- ${formatCurrency(discountAmount)}`, amountRightX, y, {
       size: 9,
       font: boldFont,
     })
@@ -349,7 +430,7 @@ export async function POST(
       color: mutedColor,
     })
 
-    drawText(formatCurrency(tax), amountX, y, {
+    drawRightText(formatCurrency(tax), amountRightX, y, {
       size: 9,
       font: boldFont,
     })
@@ -376,7 +457,12 @@ export async function POST(
       font: boldFont,
     })
 
-    drawText(formatCurrency(total), amountX, y, {
+    // drawText(formatCurrency(total), amountRightX, y, {
+    //   size: 12,
+    //   font: boldFont,
+    //   color: primaryColor,
+    // })
+    drawRightText(formatCurrency(total), amountRightX, y, {
       size: 12,
       font: boldFont,
       color: primaryColor,
@@ -468,16 +554,13 @@ export async function POST(
       },
     })
   } catch (error) {
-   console.error("Failed to generate invoice PDF:", error)
+    console.error("Failed to generate invoice PDF:", error)
 
-  return NextResponse.json(
-    {
-      error:
-        error instanceof Error
-          ? error.message
-          : "Unknown error",
-    },
-    { status: 500 }
-  )
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    )
   }
 }

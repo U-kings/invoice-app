@@ -1,0 +1,263 @@
+import { NextRequest, NextResponse } from "next/server"
+import jwt from "jsonwebtoken"
+
+import { prisma } from "@repo/db"
+
+interface AuthPayload {
+  userId: string
+}
+
+interface UpdateCustomerBody {
+  name?: string
+  email?: string
+}
+
+interface RouteContext {
+  params: Promise<{
+    id: string
+  }>
+}
+
+export async function PATCH(req: NextRequest, { params }: RouteContext) {
+  try {
+    // ---------------------------------------------
+    // 1. Authenticate
+    // ---------------------------------------------
+
+    const token = req.cookies.get("token")?.value
+
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const jwtSecret = process.env.JWT_SECRET
+
+    if (!jwtSecret) {
+      throw new Error("JWT_SECRET environment variable is missing")
+    }
+
+    let decoded: AuthPayload
+
+    try {
+      decoded = jwt.verify(token, jwtSecret) as AuthPayload
+    } catch {
+      return NextResponse.json(
+        {
+          error: "Invalid or expired authentication token",
+        },
+        { status: 401 }
+      )
+    }
+
+    if (!decoded.userId) {
+      return NextResponse.json(
+        { error: "Invalid authentication token" },
+        { status: 401 }
+      )
+    }
+
+    // ---------------------------------------------
+    // 2. Get customer ID
+    // ---------------------------------------------
+
+    const { id } = await params
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "Customer ID is required" },
+        { status: 400 }
+      )
+    }
+
+    // ---------------------------------------------
+    // 3. Parse body
+    // ---------------------------------------------
+
+    const body = (await req.json()) as UpdateCustomerBody
+
+    const name = body.name?.trim()
+    const email = body.email?.trim().toLowerCase()
+
+    if (!name && !email) {
+      return NextResponse.json(
+        {
+          error: "At least one customer field is required",
+        },
+        { status: 400 }
+      )
+    }
+
+    // ---------------------------------------------
+    // 4. Verify ownership
+    // ---------------------------------------------
+
+    const customer = await prisma.customer.findFirst({
+      where: {
+        id,
+        userId: decoded.userId,
+      },
+    })
+
+    if (!customer) {
+      return NextResponse.json({ error: "Customer not found" }, { status: 404 })
+    }
+
+    // ---------------------------------------------
+    // 5. Validate email
+    // ---------------------------------------------
+
+    if (email) {
+      const emailIsValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+
+      if (!emailIsValid) {
+        return NextResponse.json(
+          {
+            error: "Please provide a valid email address",
+          },
+          { status: 400 }
+        )
+      }
+
+      const duplicate = await prisma.customer.findFirst({
+        where: {
+          userId: decoded.userId,
+          email,
+          NOT: {
+            id,
+          },
+        },
+      })
+
+      if (duplicate) {
+        return NextResponse.json(
+          {
+            error: "A customer with this email already exists",
+          },
+          { status: 409 }
+        )
+      }
+    }
+
+    // ---------------------------------------------
+    // 6. Update customer
+    // ---------------------------------------------
+
+    const updatedCustomer = await prisma.customer.update({
+      where: {
+        id,
+      },
+      data: {
+        ...(name ? { name } : {}),
+        ...(email ? { email } : {}),
+      },
+    })
+
+    return NextResponse.json({
+      message: "Customer updated successfully",
+      customer: updatedCustomer,
+    })
+  } catch (error) {
+    console.error("Update Customer Error:", error)
+
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error ? error.message : "Failed to update customer",
+      },
+      { status: 500 }
+    )
+  }
+}
+
+
+export async function DELETE(req: NextRequest, { params }: RouteContext) {
+  try {
+    // ---------------------------------------------
+    // 1. Authenticate (Keep your existing token verification here)
+    // ---------------------------------------------
+    const token = req.cookies.get("token")?.value
+    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    const jwtSecret = process.env.JWT_SECRET
+    if (!jwtSecret) throw new Error("JWT_SECRET environment variable is missing")
+    let decoded: AuthPayload
+    try {
+      decoded = jwt.verify(token, jwtSecret) as AuthPayload
+    } catch {
+      return NextResponse.json({ error: "Invalid or expired authentication token" }, { status: 401 })
+    }
+    if (!decoded.userId) return NextResponse.json({ error: "Invalid authentication token" }, { status: 401 })
+
+    // ---------------------------------------------
+    // 2. Get customer ID
+    // ---------------------------------------------
+    const { id } = await params
+    if (!id) return NextResponse.json({ error: "Customer ID is required" }, { status: 400 })
+
+    // ---------------------------------------------
+    // 3. Verify ownership
+    // ---------------------------------------------
+    const customer = await prisma.customer.findFirst({
+      where: {
+        id,
+        userId: decoded.userId,
+      },
+      include: {
+        invoices: {
+          where: {
+            // Only fetch unpaid invoices to optimize performance
+            NOT: [
+              { status: "PAID" },
+              { status: "CANCELLED" }
+            ]
+          },
+          select: { id: true },
+          take: 1,
+        },
+      },
+    })
+
+    if (!customer) {
+      return NextResponse.json({ error: "Customer not found" }, { status: 404 })
+    }
+
+    // ---------------------------------------------
+    // 4. Prevent archiving if unpaid invoices exist
+    // ---------------------------------------------
+    // Since we filtered for non-PAID/CANCELLED invoices above, 
+    // any invoice in the array means they still owe money.
+    if (customer.invoices.length > 0) {
+      return NextResponse.json(
+        {
+          error: "Cannot archive customer with active or unpaid invoices. Please settle or cancel them first.",
+        },
+        { status: 400 }
+      )
+    }
+
+    // NOTE: Removed the block that stops deletion if ANY invoice exists,
+    // because archiving preserves historical invoice data safely!
+
+    // -------------------------s--------------------
+    // 5. Soft-delete (Archive) customer
+    // ---------------------------------------------
+    await prisma.customer.update({
+      where: {
+        id: customer.id,
+      },
+      data: {
+        status: "ARCHIVED", // <-- Changes status instead of deleting row
+      },
+    })
+
+    return NextResponse.json({
+      message: "Customer archived successfully",
+    })
+  } catch (error) {
+    console.error("Delete Customer Error:", error)
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Failed to archive customer" },
+      { status: 500 }
+    )
+  }
+}
+

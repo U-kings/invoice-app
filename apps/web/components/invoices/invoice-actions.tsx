@@ -35,20 +35,21 @@ import { getEffectiveInvoiceStatus } from "@/lib/invoices/invoice"
 import { Invoice } from "@/hooks/use-invoice"
 
 interface InvoiceActionsProps {
-  invoice: Invoice | undefined
+  invoice: Invoice
 }
 
 export function InvoiceActions({ invoice }: InvoiceActionsProps) {
   const router = useRouter()
   const effectiveStatus = getEffectiveInvoiceStatus(invoice)
   const canMarkAsPaid =
-    effectiveStatus === "Sent" || effectiveStatus === "Overdue"
+    effectiveStatus === "Sent"?.toUpperCase() ||
+    effectiveStatus === "Overdue"?.toUpperCase()
   const canCancel =
-    effectiveStatus === "Draft" ||
-    effectiveStatus === "Sent" ||
-    effectiveStatus === "Overdue"
-  const isPaid = effectiveStatus === "Paid"
-  const isCancelled = effectiveStatus === "Cancelled"
+    effectiveStatus === "Draft"?.toUpperCase() ||
+    effectiveStatus === "Sent"?.toUpperCase() ||
+    effectiveStatus === "Overdue"?.toUpperCase()
+  const isPaid = effectiveStatus === "Paid"?.toUpperCase()
+  const isCancelled = effectiveStatus === "Cancelled"?.toUpperCase()
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [sendOpen, setSendOpen] = useState(false)
   const [cancelOpen, setCancelOpen] = useState(false)
@@ -88,7 +89,9 @@ export function InvoiceActions({ invoice }: InvoiceActionsProps) {
         <Button
           variant="outline"
           nativeButton={false}
-          render={<Link href={`/dashboard/invoices/${invoice?.id}/edit`} />}
+          render={
+            <Link href={`/dashboard/invoices/${invoice?.invoiceNumber}/edit`} />
+          }
         >
           <Pencil className="mr-2 h-4 w-4" />
           Edit
@@ -152,9 +155,9 @@ export function InvoiceActions({ invoice }: InvoiceActionsProps) {
               onClick={() => handleCopyInvoiceLink(invoice?.publicToken ?? "")}
             >
               {copied ? (
-                <Check className="size-4" />
+                <Check className="mr-2 size-4" />
               ) : (
-                <Copy className="size-4" />
+                <Copy className=" mr-2 size-4" />
               )}
 
               {copied ? "Copied" : "Copy link"}
@@ -189,6 +192,7 @@ export function InvoiceActions({ invoice }: InvoiceActionsProps) {
       {/* Send dialog */}
       <InvoiceSendDialog
         invoiceId={invoice?.id}
+        invoiceNumber={invoice?.invoiceNumber}
         email={invoice?.customer?.email}
         open={sendOpen}
         onOpenChange={setSendOpen}
@@ -202,7 +206,7 @@ export function InvoiceActions({ invoice }: InvoiceActionsProps) {
 
       {/* Delete dialog */}
       <InvoiceDeleteDialog
-        invoiceId={invoice?.id}
+        invoice={invoice}
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         onDeleted={() => {

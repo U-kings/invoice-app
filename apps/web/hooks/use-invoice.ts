@@ -2,12 +2,7 @@
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query"
 
-export type InvoiceStatus =
-  | "Sent"
-  | "Paid"
-  | "Overdue"
-  | "Draft"
-  | "Cancelled"
+export type InvoiceStatus = "Sent" | "Paid" | "Overdue" | "Draft" | "Cancelled"
 
 export type InvoiceCustomer = {
   id: string
@@ -83,39 +78,31 @@ async function getInvoices({
     params.set("search", search.trim())
   }
 
+  // Ensures we only append status if it's explicitly provided and valid
   if (status) {
     params.set("status", status)
   }
 
-  const response = await fetch(
-    `/api/dashboard/invoices?${params.toString()}`,
-    {
-      method: "GET",
-      credentials: "include",
-    }
-  )
+  const response = await fetch(`/api/dashboard/invoices?${params.toString()}`, {
+    method: "GET",
+    credentials: "include", // Correctly passes HttpOnly auth cookies down
+  })
 
+  // 1. Read the JSON body payload IMMEDIATELY, exactly once
+  const result = await response.json().catch(() => null)
+
+  // 2. Validate response outcome flags using that memory cache
   if (!response.ok) {
-    const error = await response.json().catch(() => null)
-
-    throw new Error(
-      error?.error ||
-        "Failed to fetch invoices"
-    )
+    throw new Error(result?.error || "Failed to fetch invoices")
   }
 
-  return response.json()
+  // 3. Return the typed body safely without breaking stream pointers
+  return result as GetInvoicesResponse
 }
 
-export function useInvoices(
-  params: UseInvoicesParams = {}
-) {
-  const {
-    page = 1,
-    pageSize = 10,
-    search = "",
-    status,
-  } = params
+
+export function useInvoices(params: UseInvoicesParams = {}) {
+  const { page = 1, pageSize = 10, search = "", status } = params
 
   return useQuery({
     queryKey: [
@@ -137,48 +124,7 @@ export function useInvoices(
       }),
 
     placeholderData: keepPreviousData,
+    staleTime: 0, // Treats old data as instantly expired
+    gcTime: 0, // (Or cacheTime: 0 in older versions) Wipes cache instantly on page leave
   })
 }
-
-
-// "use client"
-
-// import * as React from "react"
-
-// import {
-//   getInvoices,
-//   INVOICE_STORAGE_EVENT,
-// } from "@/components/invoices/invoice-storage"
-
-// import type { Invoice } from "@/components/invoices/invoice-data"
-
-// export function useInvoices() {
-//   const [invoices, setInvoices] =
-//     React.useState<Invoice[]>([])
-
-//   const refresh = React.useCallback(() => {
-//     setInvoices(getInvoices())
-//   }, [])
-
-//   React.useEffect(() => {
-//     // eslint-disable-next-line react-hooks/set-state-in-effect
-//     refresh()
-
-//     window.addEventListener(
-//       INVOICE_STORAGE_EVENT,
-//       refresh
-//     )
-
-//     return () => {
-//       window.removeEventListener(
-//         INVOICE_STORAGE_EVENT,
-//         refresh
-//       )
-//     }
-//   }, [refresh])
-
-//   return {
-//     invoices,
-//     refresh,
-//   }
-// }

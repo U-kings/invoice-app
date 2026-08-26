@@ -12,7 +12,7 @@ async function cancelInvoice(
   id: string |undefined
 ): Promise<Invoice> {
   const response = await fetch(
-    `/api/invoices/${id}/cancel`,
+    `/api/dashboard/invoices/${id}/cancel`,
     {
       method: "POST",
     }

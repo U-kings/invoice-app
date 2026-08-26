@@ -47,6 +47,11 @@ export { Prisma }
  */
 export type User = Prisma.UserModel
 /**
+ * Model BusinessProfile
+ * 
+ */
+export type BusinessProfile = Prisma.BusinessProfileModel
+/**
  * Model Customer
  * 
  */
@@ -61,3 +66,13 @@ export type Invoice = Prisma.InvoiceModel
  * 
  */
 export type LineItem = Prisma.LineItemModel
+/**
+ * Model Payment
+ * 
+ */
+export type Payment = Prisma.PaymentModel
+/**
+ * Model PaymentProviderConfig
+ * 
+ */
+export type PaymentProviderConfig = Prisma.PaymentProviderConfigModel

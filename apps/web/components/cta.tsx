@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
-import { motion } from "motion/react";
-import { ArrowRight, Send } from "lucide-react";
-import { Button } from "@workspace/ui/components/button";
+import { motion } from "motion/react"
+import { ArrowRight, Send } from "lucide-react"
+import { Button } from "@workspace/ui/components/button"
 
 export function CTA() {
   return (
@@ -16,13 +16,11 @@ export function CTA() {
           className="relative overflow-hidden rounded-[36px] border border-border/60 bg-card/60 backdrop-blur-xl"
         >
           {/* Background Glow */}
-          <div className="absolute left-0 top-0 h-full w-1/2 bg-[radial-gradient(circle_at_left,#2EAFB4_0%,transparent_70%)] opacity-10" />
+          <div className="absolute top-0 left-0 h-full w-1/2 bg-[radial-gradient(circle_at_left,#2EAFB4_0%,transparent_70%)] opacity-10" />
 
           {/* Dot Pattern */}
-          <div className="absolute right-0 top-0 h-full w-64 opacity-40">
-            <div
-              className="h-full w-full bg-[radial-gradient(#2EAFB4_1.5px,transparent_1.5px)] bg-[length:18px_18px]"
-            />
+          <div className="absolute top-0 right-0 h-full w-64 opacity-40">
+            <div className="h-full w-full bg-[radial-gradient(#2EAFB4_1.5px,transparent_1.5px)] bg-[length:18px_18px]" />
           </div>
 
           <div className="relative flex flex-col gap-12 p-10 lg:flex-row lg:items-center lg:justify-between lg:p-16">
@@ -40,7 +38,7 @@ export function CTA() {
               </motion.div>
 
               <div className="max-w-2xl">
-                <h2 className="text-4xl font-bold leading-tight md:text-5xl">
+                <h2 className="text-4xl leading-tight font-bold md:text-5xl">
                   Ready to spend less time
                   <br />
                   chasing invoices?
@@ -60,7 +58,6 @@ export function CTA() {
                 className="group h-16 rounded-xl bg-[#2EAFB4] px-10 text-lg hover:bg-[#26989d]"
               >
                 Get Started Free
-
                 <ArrowRight className="ml-3 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
               </Button>
 
@@ -72,5 +69,5 @@ export function CTA() {
         </motion.div>
       </div>
     </section>
-  );
+  )
 }

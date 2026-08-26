@@ -34,7 +34,8 @@ import { Checkbox } from "@workspace/ui/components/checkbox"
 import { getCatalogItems, saveCatalogItems } from "./item-catalog"
 import { useRouter } from "next/navigation"
 import { useCreateInvoice } from "@/hooks/use-create-invoice"
-import { useSendInvoice } from "@/hooks/use-send-invoice"
+import { useCustomers } from "@/hooks/use-customers"
+import { toast } from "@workspace/ui/components/toast"
 
 const paymentTerms = [
   {
@@ -82,8 +83,6 @@ const currencies = [
   },
 ]
 
-const customers: any[] = []
-
 export function InvoiceForm() {
   const router = useRouter()
   const [saveToCatalog, setSaveToCatalog] = useState<Record<string, boolean>>(
@@ -96,7 +95,6 @@ export function InvoiceForm() {
   })
 
   const createInvoiceMutation = useCreateInvoice()
-  // const sendInvoiceMutation = useSendInvoice()
   const MAX_DATE_BUILT: string = new Intl.DateTimeFormat("en-CA").format(
     new Date()
   )
@@ -115,7 +113,7 @@ export function InvoiceForm() {
       currency: "NGN",
       issueDate: MAX_DATE_BUILT,
       paymentTerm: "Due-on-receipt",
-      dueDate: "",
+      dueDate: MAX_DATE_BUILT,
       status: "Draft",
 
       items: [
@@ -161,13 +159,17 @@ export function InvoiceForm() {
     control: form.control,
     name: "issueDate",
   })
+  const paymentTerm = useWatch({
+    control: form.control,
+    name: "paymentTerm",
+  })
 
   const {
     control,
-    register,
+    // register,
     handleSubmit,
-    setValue,
-    watch,
+    // setValue,
+    // watch,
     formState: { errors },
   } = form
 
@@ -185,6 +187,18 @@ export function InvoiceForm() {
   const tax = taxableAmount * (Number(taxRate) / 100)
 
   const total = taxableAmount + tax
+
+  const {
+    data: customersData,
+    isLoading: isCustomersLoading,
+    isError: isCustomersError,
+    error: customersError,
+  } = useCustomers({
+    page: 1,
+    pageSize: 100,
+  })
+
+  const customers = customersData?.customers ?? []
 
   const toggleSaveToCatalog = (index: number) => {
     setSaveToCatalog((current) => ({
@@ -257,9 +271,10 @@ export function InvoiceForm() {
         discount: values.discount,
         taxRate: values.taxRate,
         notes: values.notes,
-        sent: false,
+        send: false,
 
         items: values.items.map((item) => ({
+          name: item.name,
           description: item.description,
           quantity: item.quantity,
           rate: item.rate,
@@ -272,7 +287,7 @@ export function InvoiceForm() {
     }
   }
 
-  async function onSubmit(values: InvoiceFormValues) {
+  function onSubmit(values: InvoiceFormValues) {
     // 1. Save selected new items to catalog
     // --------------------------------
     let updatedCatalog = [...catalogItems]
@@ -306,8 +321,8 @@ export function InvoiceForm() {
     saveCatalogItems(updatedCatalog)
     setCatalogItems(updatedCatalog)
 
-    try {
-      createInvoiceMutation.mutate({
+    createInvoiceMutation.mutate(
+      {
         customerId: values.customerId,
         currency: values.currency,
         issueDate: values.issueDate,
@@ -316,17 +331,25 @@ export function InvoiceForm() {
         discount: values.discount,
         taxRate: values.taxRate,
         notes: values.notes,
-        sent: false,
+        send: true,
 
         items: values.items.map((item) => ({
+          name: item.name,
           description: item.description,
           quantity: item.quantity,
           rate: item.rate,
         })),
-      })
-    } catch (error) {
-      console.error("Failed to create and send invoice:", error)
-    }
+      },
+      {
+        onSuccess(data) {
+          toast.add({
+            title: "Invoice created",
+            description: "Your invoice has been created successfully.",
+            type: "success",
+          })
+        },
+      }
+    )
   }
 
   return (
@@ -346,36 +369,40 @@ export function InvoiceForm() {
         </div>
 
         <FieldGroup className="grid gap-5 md:grid-cols-2">
-          <Field data-invalid={!!errors.invoiceNumber}>
-            <FieldLabel htmlFor="invoice-number">
-              Invoice number{" "}
-              <span className="font-medium text-gray-400">
-                (auto-generated)
-              </span>
-            </FieldLabel>
+          <Controller
+            control={control} // Make sure 'control' is destructured from your useForm() hook
+            name="invoiceNumber"
+            render={({ field, fieldState: { error } }) => (
+              <Field data-invalid={!!error}>
+                <FieldLabel htmlFor="invoice-number">
+                  Invoice number{" "}
+                  <span className="font-medium text-gray-400">
+                    (auto-generated)
+                  </span>
+                </FieldLabel>
 
-            <Input
-              id="invoice-number"
-              placeholder="INV-001"
-              disabled
-              aria-invalid={!!errors.invoiceNumber}
-              {...register("invoiceNumber")}
-            />
+                <Input
+                  {...field}
+                  id="invoice-number"
+                  placeholder="INV-001"
+                  disabled
+                  aria-invalid={!!error}
+                />
 
-            {errors.invoiceNumber && (
-              <FieldError>{errors.invoiceNumber.message}</FieldError>
+                {error && <FieldError>{error.message}</FieldError>}
+
+                <FieldDescription>
+                  A unique identifier for this invoice.
+                </FieldDescription>
+              </Field>
             )}
-
-            <FieldDescription>
-              A unique identifier for this invoice.
-            </FieldDescription>
-          </Field>
+          />
 
           <Controller
             name="customerId"
             control={control}
             render={({ field, fieldState }) => {
-              const selectedCustomer = customers?.find(
+              const selectedCustomer = customers.find(
                 (customer) => customer.id === field.value
               )
 
@@ -407,23 +434,41 @@ export function InvoiceForm() {
                       aria-invalid={fieldState.invalid}
                       className="data-[size=default]:h-12"
                     >
-                      <SelectValue placeholder="Select a customer">
+                      <SelectValue
+                        placeholder={
+                          isCustomersLoading
+                            ? "Loading customers..."
+                            : "Select a customer"
+                        }
+                      >
                         {selectedCustomer?.name}
                       </SelectValue>
                     </SelectTrigger>
 
                     <SelectContent>
-                      {customers.map((customer) => (
-                        <SelectItem key={customer.id} value={customer.id}>
-                          <div className="flex flex-col">
-                            <span>{customer.name}</span>
+                      {isCustomersError ? (
+                        <div className="px-3 py-2 text-sm text-destructive">
+                          {customersError instanceof Error
+                            ? customersError.message
+                            : "Failed to load customers."}
+                        </div>
+                      ) : customers.length === 0 && !isCustomersLoading ? (
+                        <div className="px-3 py-2 text-sm text-muted-foreground">
+                          No customers found.
+                        </div>
+                      ) : (
+                        customers.map((customer) => (
+                          <SelectItem key={customer.id} value={customer.id}>
+                            <div className="flex flex-col">
+                              <span>{customer.name}</span>
 
-                            <span className="text-xs text-muted-foreground">
-                              {customer.email}
-                            </span>
-                          </div>
-                        </SelectItem>
-                      ))}
+                              <span className="text-xs text-muted-foreground">
+                                {customer.email}
+                              </span>
+                            </div>
+                          </SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
 
@@ -434,6 +479,7 @@ export function InvoiceForm() {
               )
             }}
           />
+
           <Controller
             control={form.control}
             name="customerEmail"
@@ -493,21 +539,34 @@ export function InvoiceForm() {
             )}
           />
 
-          <Field data-invalid={!!errors.issueDate}>
-            <FieldLabel htmlFor="issue-date">Issue date</FieldLabel>
+          <Controller
+            control={control}
+            name="issueDate"
+            render={({
+              field: { value, onChange, ...fieldProps },
+              fieldState: { error },
+            }) => (
+              <Field data-invalid={!!error}>
+                <FieldLabel htmlFor="issue-date">Issue date</FieldLabel>
 
-            <Input
-              id="issue-date"
-              type="date"
-              // max={today}
-              aria-invalid={!!errors.issueDate}
-              {...register("issueDate")}
-            />
+                <Input
+                  {...fieldProps}
+                  value={
+                    value ? new Date(value).toISOString().split("T")[0] : ""
+                  } // Ensure YYYY-MM-DD format
+                  onChange={(e) =>
+                    onChange(e.target.value ? new Date(e.target.value) : null)
+                  } // Converts back to Date object for backend/Zod
+                  id="issue-date"
+                  type="date"
+                  // max={today}
+                  aria-invalid={!!error}
+                />
 
-            {errors.issueDate && (
-              <FieldError>{errors.issueDate.message}</FieldError>
+                {error && <FieldError>{error.message}</FieldError>}
+              </Field>
             )}
-          </Field>
+          />
           <Controller
             control={form.control}
             name="paymentTerm"
@@ -523,10 +582,14 @@ export function InvoiceForm() {
                     field.onChange(value)
 
                     if (value === "Due-on-receipt") {
-                      form.setValue("dueDate", "", {
-                        shouldDirty: true,
-                        shouldValidate: true,
-                      })
+                      form.setValue(
+                        "dueDate",
+                        new Date().toISOString().split("T")[0] as string,
+                        {
+                          shouldDirty: true,
+                          shouldValidate: true,
+                        }
+                      )
 
                       return
                     }
@@ -587,6 +650,8 @@ export function InvoiceForm() {
                   type="date"
                   min={issueDate}
                   value={field.value ?? ""}
+                  disabled
+                  // disabled={paymentTerm === "Due-on-receipt"}
                   aria-invalid={fieldState.invalid}
                 />
 
@@ -896,22 +961,27 @@ export function InvoiceForm() {
       {/* Notes + totals */}
       <section className="grid gap-6 lg:grid-cols-[1fr_380px]">
         <div className="rounded-2xl border bg-background p-6">
-          <FieldGroup>
-            <Field>
-              <FieldLabel htmlFor="notes">Notes</FieldLabel>
-
-              <FieldDescription>
-                Add a message or payment instructions for your customer.
-                (optional)
-              </FieldDescription>
-
-              <Textarea
-                id="notes"
-                placeholder="Thank you for your business..."
-                className="min-h-32 resize-none"
-              />
-            </Field>
-          </FieldGroup>
+          <Controller
+            control={control}
+            name="notes"
+            render={({ field }) => (
+              <FieldGroup>
+                <Field>
+                  <FieldLabel htmlFor="notes">Notes</FieldLabel>
+                  <FieldDescription>
+                    Add a message or payment instructions for your customer.
+                    (optional)
+                  </FieldDescription>
+                  <Textarea
+                    {...field}
+                    id="notes"
+                    placeholder="Thank you for your business..."
+                    className="min-h-32 resize-none"
+                  />
+                </Field>
+              </FieldGroup>
+            )}
+          />
         </div>
 
         <div className="rounded-2xl border bg-background p-6">

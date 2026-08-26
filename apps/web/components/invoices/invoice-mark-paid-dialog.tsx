@@ -20,6 +20,7 @@ import { useMarkInvoicePaid } from "@/hooks/use-mark-invoice-paid"
 import { getInvoiceTotal } from "@/lib/invoices/invoice"
 import { formatCurrency } from "@/lib/currency"
 import { Invoice } from "@/hooks/use-invoice"
+import { toast } from "@workspace/ui/components/toast"
 
 interface InvoiceMarkPaidDialogProps {
   invoice: Invoice | undefined
@@ -36,7 +37,25 @@ export function InvoiceMarkPaidDialog({
   const total = getInvoiceTotal(invoice)
 
   async function handleMarkAsPaid() {
-    markInvoicePaidMutation.mutate(invoice?.id)
+    markInvoicePaidMutation.mutate(invoice?.id, {
+      onSuccess: (invoice) => {
+        onOpenChange(false)
+        toast.add({
+          title: "Invoice marked as paid",
+          description: `${invoice.invoiceNumber} has been marked as paid.`,
+          type: "success",
+        })
+      },
+      onError: (error) => {
+        onOpenChange(false)
+        toast.add({
+          title: "Failed to mark invoice as paid",
+          description:
+            error instanceof Error ? error.message : "Something went wrong.",
+          type: "error",
+        })
+      },
+    })
   }
 
   return (

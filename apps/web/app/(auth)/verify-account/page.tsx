@@ -43,7 +43,6 @@ export default function VerifyAccountPage({ searchParams }: PageProps) {
       return data
     },
     onSuccess: (data) => {
-      console.log(data)
       setMessage({
         type: "success",
         text: "A new verification link has been sent!",

@@ -52,9 +52,12 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   User: 'User',
+  BusinessProfile: 'BusinessProfile',
   Customer: 'Customer',
   Invoice: 'Invoice',
-  LineItem: 'LineItem'
+  LineItem: 'LineItem',
+  Payment: 'Payment',
+  PaymentProviderConfig: 'PaymentProviderConfig'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -82,6 +85,7 @@ export const UserScalarFieldEnum = {
   email: 'email',
   phoneNumber: 'phoneNumber',
   password: 'password',
+  googleId: 'googleId',
   role: 'role',
   terms: 'terms',
   isVerified: 'isVerified',
@@ -96,11 +100,26 @@ export const UserScalarFieldEnum = {
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
+export const BusinessProfileScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  businessName: 'businessName',
+  countryCode: 'countryCode',
+  currency: 'currency',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BusinessProfileScalarFieldEnum = (typeof BusinessProfileScalarFieldEnum)[keyof typeof BusinessProfileScalarFieldEnum]
+
+
 export const CustomerScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   name: 'name',
   email: 'email',
+  status: 'status',
+  countryCode: 'countryCode',
   createdAt: 'createdAt'
 } as const
 
@@ -110,7 +129,6 @@ export type CustomerScalarFieldEnum = (typeof CustomerScalarFieldEnum)[keyof typ
 export const InvoiceScalarFieldEnum = {
   id: 'id',
   invoiceNumber: 'invoiceNumber',
-  publicToken: 'publicToken',
   userId: 'userId',
   customerId: 'customerId',
   status: 'status',
@@ -123,9 +141,10 @@ export const InvoiceScalarFieldEnum = {
   notes: 'notes',
   sentAt: 'sentAt',
   paidAt: 'paidAt',
-  cancelledAt: 'cancelledAt',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  publicToken: 'publicToken',
+  cancelledAt: 'cancelledAt'
 } as const
 
 export type InvoiceScalarFieldEnum = (typeof InvoiceScalarFieldEnum)[keyof typeof InvoiceScalarFieldEnum]
@@ -136,10 +155,42 @@ export const LineItemScalarFieldEnum = {
   invoiceId: 'invoiceId',
   description: 'description',
   quantity: 'quantity',
-  rate: 'rate'
+  rate: 'rate',
+  name: 'name'
 } as const
 
 export type LineItemScalarFieldEnum = (typeof LineItemScalarFieldEnum)[keyof typeof LineItemScalarFieldEnum]
+
+
+export const PaymentScalarFieldEnum = {
+  id: 'id',
+  invoiceId: 'invoiceId',
+  provider: 'provider',
+  providerTransactionId: 'providerTransactionId',
+  providerReference: 'providerReference',
+  amount: 'amount',
+  currency: 'currency',
+  status: 'status',
+  checkoutUrl: 'checkoutUrl',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
+
+
+export const PaymentProviderConfigScalarFieldEnum = {
+  id: 'id',
+  provider: 'provider',
+  countryCode: 'countryCode',
+  currency: 'currency',
+  enabled: 'enabled',
+  priority: 'priority',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PaymentProviderConfigScalarFieldEnum = (typeof PaymentProviderConfigScalarFieldEnum)[keyof typeof PaymentProviderConfigScalarFieldEnum]
 
 
 export const SortOrder = {

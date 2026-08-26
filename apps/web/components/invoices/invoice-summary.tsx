@@ -1,3 +1,4 @@
+import { useCustomers } from "@/hooks/use-customers"
 import { Invoice } from "@/hooks/use-invoice"
 import { Mail, User } from "lucide-react"
 
@@ -5,10 +6,10 @@ interface InvoiceSummaryProps {
   invoice: Invoice | undefined
 }
 
-
 export function InvoiceSummary({ invoice }: InvoiceSummaryProps) {
-  const customers: any[] = []
-  const currentCustomer = customers.find(
+  const { data } = useCustomers({ search: invoice?.customerId })
+  // const customers: any[] = []
+  const currentCustomer = data?.customers?.find(
     (customer) => customer.id === invoice?.customerId
   )
   return (

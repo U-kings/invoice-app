@@ -4,6 +4,7 @@ import { Button } from "@workspace/ui/components/button"
 import { Badge } from "@workspace/ui/components/badge"
 import { ArrowRight, CheckCircle2, PlayCircle } from "lucide-react"
 import { motion } from "motion/react"
+import Link from "next/link"
 
 const container = {
   hidden: {},
@@ -62,14 +63,19 @@ export function HeroLeft() {
       </motion.p>
 
       <motion.div variants={item} className="mt-10 flex flex-wrap gap-4">
-        <Button
+        {/* <Button
           size="lg"
           className="rounded-xl bg-[#2EAFB4] px-8 hover:bg-[#26989d]"
+        > */}
+        <Link
+          href="/signup"
+          className="flex items-center rounded-xl bg-[#2EAFB4] px-3 py-1.5 font-medium"
         >
+          {/* Get Started */}
           Get Started
           <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
-
+        </Link>
+        {/* </Button> */}
         <Button size="lg" variant="outline" className="rounded-xl">
           <PlayCircle className="mr-2 h-5 w-5" />
           View Demo
