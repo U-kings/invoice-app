@@ -17,12 +17,12 @@ export default function Page() {
       <Navbar />
       <Hero />
       <Features />
-       <StatsSection />
-       <Integrations />
-       <Testimonials />
-       <Pricing />
-        <CTA />
-        <Footer />
+      <StatsSection />
+      <Integrations />
+      <Testimonials />
+      <Pricing />
+      <CTA />
+      <Footer />
     </main>
   )
 }
