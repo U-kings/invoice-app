@@ -5,12 +5,14 @@ import { useState } from "react"
 import { Button } from "@workspace/ui/components/button"
 import { toast } from "@workspace/ui/components/toast"
 import Link from "next/link"
+import { InvoiceStatus } from "@repo/db"
 
 type InvoiceActionsProps = {
   publicToken: string
+  status: InvoiceStatus
 }
 
-export function InvoiceActions({ publicToken }: InvoiceActionsProps) {
+export function InvoiceActions({ publicToken, status }: InvoiceActionsProps) {
   const [isDownloading, setIsDownloading] = useState(false)
 
   async function handleDownload() {
@@ -91,15 +93,17 @@ export function InvoiceActions({ publicToken }: InvoiceActionsProps) {
 
         {isDownloading ? "Downloading..." : "Download PDF"}
       </Button>
-      <Button
-        nativeButton={false}
-        render={<Link href={`/pay/${publicToken}`}></Link>}
-        disabled={isDownloading}
-        className="bg-[#2EAFB4] text-white hover:bg-[#269ca1]"
-      >
-        <CheckCircle />
-        Check out
-      </Button>
+      {status !== "PAID" && (
+        <Button
+          nativeButton={false}
+          render={<Link href={`/pay/${publicToken}`}></Link>}
+          disabled={isDownloading}
+          className="bg-[#2EAFB4] text-white hover:bg-[#269ca1]"
+        >
+          <CheckCircle />
+          Check out
+        </Button>
+      )}
     </div>
   )
 }

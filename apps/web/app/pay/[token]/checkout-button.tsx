@@ -28,7 +28,7 @@ export function CheckoutButton({
   const { mutate, isPending } = useMutation({
     mutationFn: async (payload: CheckoutPayload) => {
       // Passes invoiceId inside the dynamic URL path slug matching your route structure
-      const res = await fetch(`/api/payment/checkout/${invoiceId}`, {
+      const res = await fetch(`/api/payments/checkout/${invoiceId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -50,9 +50,12 @@ export function CheckoutButton({
         type: "success",
       })
 
+      const targetUrl = data.checkoutUrl || data.authorization_url || data.url
+
       // 🚀 2. Redirect the user to the third-party payment checkout URL (e.g. Paystack authorization URL)
-      if (data.authorization_url || data.url) {
-        window.location.href = data.authorization_url || data.url
+      if (targetUrl) {
+        window.location.href =
+          data.checkoutUrl || data.authorization_url || data.url
       } else {
         console.error(
           "Payment authorization URL missing from checkout response data profile:",

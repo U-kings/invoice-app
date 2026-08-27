@@ -1,7 +1,7 @@
 "use client"
 
-// import { prisma } from "@repo/db"
-import { notFound, redirect, useParams } from "next/navigation"
+import { useEffect, useState } from "react"
+import { useParams, useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import {
   CheckCircle2,
@@ -10,6 +10,8 @@ import {
   Calendar,
   ShieldCheck,
   Mail,
+  Loader2,
+  AlertTriangle,
 } from "lucide-react"
 import { Button } from "@workspace/ui/components/button"
 import { Badge } from "@workspace/ui/components/badge"
@@ -17,26 +19,133 @@ import { usePublicInvoice } from "@/hooks/use-public-invoice"
 
 export default function InvoicePaymentSuccessPage() {
   const params = useParams<{ token: string }>()
+  const searchParams = useSearchParams()
+  const router = useRouter()
 
   const token = params.token
-  const { data: invoice, isLoading, isError, error } = usePublicInvoice(token)
+  const reference = searchParams.get("reference")
 
-  // 1. Fetch the invoice along with the customer billing context
-  //   const invoice = await prisma.invoice.findUnique({
-  //     where: { id: invoiceId },
-  //     include: {
-  //       customer: true,
-  //     },
-  //   })
+  const [verificationState, setVerificationState] = useState<
+    "verifying" | "idle" | "error"
+  >("idle")
+  const [verificationError, setVerificationError] = useState<string | null>(
+    null
+  )
 
-  if (!invoice) {
-    // return notFound()
+  // Fetch the data layer using your existing client query hook
+  const { data: invoice, isLoading, isError } = usePublicInvoice(token)
+
+  // 1. Dedicated, clean guard effect to handle route redirects safely
+  useEffect(() => {
+    if (isLoading) return
+
+    // If the invoice is already paid and no verification is needed, let them stay
+    if (invoice?.status === "PAID") return
+
+    // If there's no reference parameter and the invoice isn't paid, send them back
+    if (!reference && verificationState === "idle") {
+      router.replace(`/pay/${token}`)
+    }
+  }, [invoice, isLoading, reference, token, router, verificationState])
+
+  // 2. Isolated transaction verification effect (Fires exactly ONCE per reference)
+  useEffect(() => {
+    if (!reference) return
+
+    // Prevent re-triggering if verification is already in progress or completed
+    if (verificationState === "verifying" || verificationState === "error")
+      return
+
+    const currentReference = reference
+
+    async function executeVerification() {
+      setVerificationState("verifying")
+      try {
+        const response = await fetch(
+          `/api/payments/verify?reference=${encodeURIComponent(currentReference)}`,
+          {
+            headers: {
+              Accept: "application/json",
+            },
+          }
+        )
+
+        const contentType = response.headers.get("content-type")
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error(
+            `Server error: Expected JSON but received ${response.status}`
+          )
+        }
+
+        const result = await response.json()
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || "Payment validation failed.")
+        }
+
+        setVerificationState("idle")
+        // Strip query parameters so refreshing the page doesn't run verification again
+        router.replace(`/pay/${token}/success`)
+      } catch (err: any) {
+        console.error("Verification screen exception:", err)
+        setVerificationState("error")
+        setVerificationError(
+          err.message || "An unexpected validation exception surfaced."
+        )
+      }
+    }
+
+    executeVerification()
+    // STRICT DEPENDENCY MATRIX: Only re-run if the URL reference token itself changes
+  }, [reference, token, router, verificationState])
+
+  // 2. Global Guard Loading State Checkpoints
+  const isGlobalLoading = isLoading || verificationState === "verifying"
+
+  if (isGlobalLoading) {
+    return (
+      <div className="flex min-h-[80vh] flex-col items-center justify-center gap-3 text-sm font-medium text-muted-foreground">
+        <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+        <span>
+          {verificationState === "verifying"
+            ? "Confirming ledger verification with gateway..."
+            : "Synchronizing state variables..."}
+        </span>
+      </div>
+    )
   }
 
-  // Optional: If a user manually visits this URL but the invoice isn't paid,
-  // redirect them back to the checkout page. (Assumes you have a status field)
-  if (invoice?.status !== "PAID") {
-    // return redirect(`/pay/${token}`)
+  // 3. Global Error Screen Boundary
+  if (verificationState === "error" || isError || !invoice) {
+    return (
+      <div className="flex min-h-[80vh] items-center justify-center p-4">
+        <div className="w-full max-w-md rounded-2xl border bg-card p-6 text-center text-card-foreground shadow-xl">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-950/50 dark:text-red-400">
+            <AlertTriangle className="h-6 w-6" />
+          </div>
+          <h2 className="text-xl font-bold tracking-tight">
+            Verification Problem
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {verificationError ||
+              "We were unable to verify this invoice payment status footprint cleanly."}
+          </p>
+          <div className="mt-6 flex flex-col gap-2">
+            <Button className="w-full">
+              <Link href={`/pay/${token}`}>Retry Payment Route</Link>
+            </Button>
+            <Button variant="outline" className="w-full">
+              <Link href="/invoices">Return to Invoices</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // 4. Final Render Safety Catch
+  if (invoice.status !== "PAID") {
+    return null
   }
 
   return (
@@ -44,7 +153,7 @@ export default function InvoicePaymentSuccessPage() {
       <div className="w-full max-w-md overflow-hidden rounded-2xl border bg-card text-card-foreground shadow-xl">
         {/* Top Decorative Gradient Hero */}
         <div className="flex flex-col items-center justify-center border-b bg-linear-to-br from-emerald-500/10 via-teal-500/5 to-transparent p-8 text-center">
-          <div className="animate-bounce-short mb-4 rounded-full bg-emerald-100 p-3 text-emerald-600 ring-8 ring-emerald-500/5 dark:bg-emerald-950/50 dark:text-emerald-400">
+          <div className="mb-4 rounded-full bg-emerald-100 p-3 text-emerald-600 ring-8 ring-emerald-500/5 dark:bg-emerald-950/50 dark:text-emerald-400">
             <CheckCircle2 className="h-10 w-10 stroke-[2.5]" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-zinc-50">
@@ -64,7 +173,7 @@ export default function InvoicePaymentSuccessPage() {
             </span>
             <span className="mt-1 block text-3xl font-extrabold text-gray-900 dark:text-zinc-50">
               {invoice?.currency || "NGN"}{" "}
-              {invoice?.total.toLocaleString(undefined, {
+              {(invoice?.total || 0).toLocaleString(undefined, {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
               })}
@@ -83,7 +192,9 @@ export default function InvoicePaymentSuccessPage() {
                   <FileText className="h-4 w-4 stroke-[1.5]" /> Invoice ID
                 </span>
                 <span className="rounded bg-muted px-2 py-0.5 font-mono text-xs font-semibold text-foreground">
-                  {invoice?.id.slice(0, 8)}...{invoice?.id.slice(-4)}
+                  {invoice?.id
+                    ? `${invoice.id.slice(0, 8)}...${invoice.id.slice(-4)}`
+                    : "N/A"}
                 </span>
               </div>
 
@@ -93,10 +204,10 @@ export default function InvoicePaymentSuccessPage() {
                 </span>
                 <div className="text-right">
                   <span className="block font-medium text-foreground">
-                    {invoice?.customer.name}
+                    {invoice?.customer?.name}
                   </span>
                   <span className="block text-xs text-muted-foreground">
-                    {invoice?.customer.email}
+                    {invoice?.customer?.email}
                   </span>
                 </div>
               </div>
@@ -136,10 +247,10 @@ export default function InvoicePaymentSuccessPage() {
         {/* Interactive Action Navigation Footers */}
         <div className="flex flex-col gap-2 border-t bg-muted/10 p-6 pt-5 sm:flex-row">
           <Button variant="outline" className="h-11 w-full sm:flex-1">
-            <Link href={`/invoices/${invoice?.id}`}>View Statement</Link>
+            <Link href={`/invoice/${token}`}>View Statement</Link>
           </Button>
           <Button className="group h-11 w-full gap-2 bg-emerald-600 text-white hover:bg-emerald-700 sm:flex-1">
-            <Link href="/invoices">
+            <Link href={`/invoice/${token}`}>
               <div className="flex items-center gap-2 leading-0">
                 <span>Go to Invoices</span>
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

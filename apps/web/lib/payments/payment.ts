@@ -52,19 +52,13 @@ export async function createCheckout(
         name: invoice.customer.name,
         email: invoice.customer.email,
       },
-      successUrl: `${process.env.NEXT_PUBLIC_APP_URL}/pay/${invoice.id}/success`,
-      cancelUrl: `${process.env.NEXT_PUBLIC_APP_URL}/pay/${invoice.id}`,
+      successUrl: `${process.env.NEXT_PUBLIC_APP_URL}/pay/${invoice.publicToken}/success`,
+      cancelUrl: `${process.env.NEXT_PUBLIC_APP_URL}/pay/${invoice.publicToken}`,
     })
     console.log("✅ Gateway initialized checkout successfully:", result)
   } catch (gatewayError: any) {
-    // =================================================================
-    // 🚀 EXPOSURE CATCHER 1: The external API call failed!
-    // =================================================================
     console.error(
       `💥 FAILURE CAUGHT INSIDE ADAPTER: [${provider.name.toUpperCase()}]`
-    )
-    console.error(
-      "The network fetch inside the adapter returned HTML text instead of JSON."
     )
     console.error("Error signature details:", gatewayError)
     throw new Error(
@@ -72,32 +66,27 @@ export async function createCheckout(
     )
   }
 
-  // =========================================================
-  // 3. PERSISTENCE STEP: Save the transaction to your Payment table
-  // =========================================================
-  // =================================================================
-  // 🚀 PERSISTENCE STEP: Guard check + Save log & Mark Invoice as PAID
-  // =================================================================
+  // 3. PERSISTENCE STEP: Save initial PENDING payment link record.
+  // DO NOT change the Invoice status to PAID here.
   try {
-    const { payment, updatedInvoice } = await prisma.$transaction(
+    const { payment } = await prisma.$transaction(
       async (tx) => {
-        // 1. 🚀 DEFENSIVE GUARD CHECK: Look for any pre-existing successful payment references
+        // Defensive check for an already settled payment
         const existingSuccessfulPayment = await tx.payment.findFirst({
           where: {
             invoiceId: invoice.id,
-            status: "SUCCESS", // Handles potential variation mappings in your Enum
+            status: "SUCCESS",
           },
         })
 
-        // If this transaction was already finalized via a webhook background check, stand down immediately
         if (existingSuccessfulPayment) {
           console.log(
-            `⚠️ Prevented double-write: Invoice ${invoice.id} has already been settled via reference ${existingSuccessfulPayment.providerReference}.`
+            `⚠️ Prevented double-write: Invoice ${invoice.id} has already been settled.`
           )
-          return { payment: existingSuccessfulPayment, updatedInvoice: invoice }
+          return { payment: existingSuccessfulPayment }
         }
 
-        // 2. Log the transaction details inside your Payment schema table if it's completely new
+        // Log the newly generated checkout attempt as PENDING
         const newPayment = await tx.payment.create({
           data: {
             invoiceId: invoice.id,
@@ -106,31 +95,19 @@ export async function createCheckout(
             amount: total,
             currency: invoice.currency || "NGN",
             checkoutUrl: result.checkoutUrl || result.url,
-            status: "PENDING", // Initial link generated state
+            status: "PENDING", // Correctly captures initial link generated state
           },
         })
 
-        // 3. Cascade update your parent Invoice state workflow cleanly
-        const newInvoice = await tx.invoice.update({
-          where: { id: invoice.id },
-          data: {
-            status: "PAID", // Syncs status matching your schema's Enum syntax
-          },
-        })
+        // REMOVED: Invoice status remains "SENT" while waiting for user interaction
 
-        return { payment: newPayment, updatedInvoice: newInvoice }
+        return { payment: newPayment }
       }
     )
 
-    console.log(
-      `✅ Database records synced atomically. Invoice ${invoice.id} status resolution: ${updatedInvoice.status}`
-    )
+    console.log(`✅ PENDING payment link record tracked for Invoice ${invoice.id}`)
   } catch (prismaError: any) {
-    // =================================================================
-    // 🚀 EXPOSURE CATCHER 2: The database write failed!
-    // =================================================================
     console.error("💥 FAILURE CAUGHT INSIDE DATABASE PERSISTENCE PASS!")
-    console.error("Prisma atomic transaction threw a mapping exception:")
     console.error(prismaError)
     throw new Error(
       `[Database Transaction Error]: Sourcing failed during records persistence pass.`

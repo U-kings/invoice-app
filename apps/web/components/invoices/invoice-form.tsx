@@ -352,7 +352,7 @@ export function InvoiceForm() {
           toast.add({
             title: "Invoice created",
             // description: ,
-            // description: "Invoice created and sent successfully",
+            description: "Invoice created and sent successfully",
             type: "success",
           })
           console.log()
@@ -1153,7 +1153,7 @@ export function InvoiceForm() {
 
         <div className="flex flex-col-reverse gap-3 sm:flex-row">
           <Button
-            disabled={isDraftLoading}
+            disabled={isDraftLoading || isSubmitLoading}
             type="button"
             className="h-10"
             variant="outline"
@@ -1164,7 +1164,7 @@ export function InvoiceForm() {
 
           <Button
             type="submit"
-            disabled={isSubmitLoading}
+            disabled={isSubmitLoading || isDraftLoading}
             // disabled={createInvoiceMutation.isPending && isDraftLoading}
             className="h-10 bg-[#2EAFB4] text-white hover:bg-[#269ba0]"
           >

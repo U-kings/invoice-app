@@ -57,7 +57,10 @@ export default async function PublicInvoicePage({
   return (
     <main className="min-h-screen bg-muted/30 py-6 sm:py-10 print:bg-white print:py-0">
       <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8">
-        <InvoiceActions publicToken={invoice.publicToken} />
+        <InvoiceActions
+          publicToken={invoice.publicToken}
+          status={invoice.status}
+        />
 
         <div
           id="invoice"

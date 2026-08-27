@@ -2,18 +2,11 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@repo/db"
 import * as crypto from "crypto"
 
-// 🚀 FIXED: Safe timing check wrapper that prevents buffer size inequality crashes
-function safeTimingCheck(
-  computedHash: string,
-  inboundSignature: string
-): boolean {
+function safeTimingCheck(computedHash: string, inboundSignature: string): boolean {
   const a = Buffer.from(computedHash, "utf8")
   const b = Buffer.from(inboundSignature, "utf8")
 
-  if (a.length !== b.length) {
-    return false // Abort gracefully without throwing runtime buffer allocation exceptions
-  }
-
+  if (a.length !== b.length) return false 
   return crypto.timingSafeEqual(a, b)
 }
 
@@ -24,16 +17,10 @@ async function verifyWebhookSignature(
   algorithm: "sha512" | "sha256" = "sha512"
 ): Promise<boolean> {
   if (!signature || !secret) return false
-
-  const hash = crypto
-    .createHmac(algorithm, secret)
-    .update(rawBody)
-    .digest("hex")
-
+  const hash = crypto.createHmac(algorithm, secret).update(rawBody).digest("hex")
   return safeTimingCheck(hash, signature)
 }
 
-// 🚀 FIXED: Lightweight native parser for Stripe's complex signed webhook payload signatures
 function verifyStripeSignature(
   rawBody: string,
   signature: string | null,
@@ -43,22 +30,16 @@ function verifyStripeSignature(
 
   const parts = signature.split(",")
   const timestamp = parts.find((p) => p.startsWith("t="))?.split("=")[1]
-
-  // 🚀 FIXED: Map down values cleanly and filter out undefined records
   const v1Signatures = parts
     .filter((p) => p.startsWith("v1="))
     .map((p) => p.split("=")[1])
-    .filter((sig): sig is string => typeof sig === "string") // Guarantees array contains ONLY strings
+    .filter((sig): sig is string => typeof sig === "string")
 
   if (!timestamp || v1Signatures.length === 0) return false
 
   const signedPayload = `${timestamp}.${rawBody}`
-  const computedHash = crypto
-    .createHmac("sha256", secret)
-    .update(signedPayload)
-    .digest("hex")
+  const computedHash = crypto.createHmac("sha256", secret).update(signedPayload).digest("hex")
 
-  // 🚀 FIXED: TypeScript now recognizes v1Sig as an absolute, non-nullable string!
   return v1Signatures.some((v1Sig) => safeTimingCheck(computedHash, v1Sig))
 }
 
@@ -87,13 +68,13 @@ export async function POST(req: NextRequest) {
 
       if (isVerified) {
         const payload = JSON.parse(rawBody)
-        if (payload.event === "charge.success") {
+        // Guard checking structure
+        if (payload.event === "charge.success" && payload.data?.status === "success") {
           providerReference = payload.data.reference
           shouldProcessTransaction = true
         }
       }
     } else if (flutterwaveSignature) {
-      // Flutterwave utilizes plain text secret string hashes for standard matching checks
       isVerified = safeTimingCheck(
         process.env.FLUTTERWAVE_SECRET_HASH || "",
         flutterwaveSignature
@@ -105,12 +86,12 @@ export async function POST(req: NextRequest) {
           payload.status === "successful" ||
           payload.event === "charge.completed"
         ) {
-          providerReference = payload.data.tx_ref || payload.data.reference
+          // Fallback sequence targeting native references
+          providerReference = payload.data?.tx_ref || payload.data?.reference
           shouldProcessTransaction = true
         }
       }
     } else if (stripeSignature) {
-      // 🚀 FIXED: Securely verifies Stripe signatures natively without requiring 'stripe' packages
       isVerified = verifyStripeSignature(
         rawBody,
         stripeSignature,
@@ -126,7 +107,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 2. Clear security wall block early to prevent spoofing attempts
+    // 2. Clear security wall block early
     if (!isVerified) {
       return NextResponse.json(
         { error: "Cryptographic signature validation failure" },
@@ -134,7 +115,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // 3. Early validation pass exit for unhandled webhook events (e.g. transfer.failed)
+    // 3. Early exit for unhandled webhook events
     if (!shouldProcessTransaction || !providerReference) {
       return NextResponse.json(
         { message: "Webhook signature verified, but event type skipped" },
@@ -146,37 +127,49 @@ export async function POST(req: NextRequest) {
     // 2. ATOMIC TRANSACTIONS PROCESSING
     // ---------------------------------------------------------
     const result = await prisma.$transaction(async (tx) => {
+      // 🚀 FIXED: Search purely by the unique reference identifier, NOT status
       const payment = await tx.payment.findFirst({
-        where: {
-          providerReference: providerReference,
-          status: "PENDING",
-        },
+        where: { providerReference: providerReference },
       })
 
-      // 🚀 FIXED: Graceful 200 response ensures providers stop event re-try cycles
       if (!payment) {
+        throw new Error(`Payment entry matching reference [${providerReference}] not found in database.`)
+      }
+
+      // 🚀 FIXED: If it's already marked as SUCCESS, exit gracefully with a clear message 
+      if (payment.status === "SUCCESS") {
         return {
-          message:
-            "Payment entry already handled or missing registration frame",
+          message: "Idempotent block: Transaction was already processed and finalized.",
+          updatedPayment: payment,
+          status: "ALREADY_PROCESSED"
         }
       }
 
+      // Update the Payment log state cleanly
       const updatedPayment = await tx.payment.update({
         where: { id: payment.id },
         data: { status: "SUCCESS" as any },
       })
 
+      // Cascade update your parent Invoice state workflow cleanly
       const updatedInvoice = await tx.invoice.update({
         where: { id: payment.invoiceId },
         data: { status: "PAID" as any },
       })
 
-      return { updatedPayment, updatedInvoice }
+      return { updatedPayment, updatedInvoice, status: "NEWLY_PROCESSED" }
     })
 
-    return NextResponse.json({ received: true, result })
-  } catch (error) {
+    return NextResponse.json({ received: true, result }, { status: 200 })
+  } catch (error: any) {
     console.error("💥 SYSTEM CRITICAL: Webhook Route Fault:", error)
+    
+    // Return a 200 even if the payment record wasn't found in your system 
+    // to prevent payment providers from continuously hammering your server.
+    if (error.message?.includes("not found in database")) {
+      return NextResponse.json({ error: error.message }, { status: 200 })
+    }
+
     return NextResponse.json(
       { error: "Webhook Processing Failed" },
       { status: 500 }
