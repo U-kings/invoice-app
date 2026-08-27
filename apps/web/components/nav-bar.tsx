@@ -155,7 +155,7 @@ export function Navbar() {
               {/* <Button className="rounded-xl  bg-[#2EAFB4]"> */}
                 <Link
                   href="/signup"
-                  className="rounded-xl w-full font-medium px-3 py-1.5 bg-[#2EAFB4]"
+                  className="rounded-xl text-white w-full font-medium px-3 py-1.5 bg-[#2EAFB4]"
                 >
                   Get Started
                 </Link>

@@ -1,7 +1,4 @@
-export type PaymentProviderName =
-  | "stripe"
-  | "paystack"
-  | "flutterwave"
+export type PaymentProviderName = "stripe" | "paystack" | "flutterwave"
 
 export interface CreateCheckoutInput {
   invoiceId: string
@@ -19,6 +16,7 @@ export interface CheckoutResult {
   provider: PaymentProviderName
   checkoutUrl: string
   reference: string
+  url?: string
 }
 
 export interface PaymentProvider {
@@ -30,7 +28,5 @@ export interface PaymentProvider {
     customerCountry: string
   }): boolean
 
-  createCheckout(
-    input: CreateCheckoutInput
-  ): Promise<CheckoutResult>
+  createCheckout(input: CreateCheckoutInput): Promise<CheckoutResult>
 }

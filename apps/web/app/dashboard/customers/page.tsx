@@ -11,6 +11,7 @@ import { useCustomers } from "@/hooks/use-customers"
 import { AddCustomerDialog } from "@/components/customers/add-customer-dialog"
 import { CustomerDataTable } from "@/components/customers/data-table"
 import { useSearchParams } from "next/navigation"
+import { CustomerSkeleton } from "@/components/customers/customer-skeleton"
 
 export default function CustomersPage() {
   const searchParams = useSearchParams()
@@ -59,9 +60,7 @@ export default function CustomersPage() {
       {/* Content */}
       <div className="overflow-clip">
         {isLoading ? (
-          <div className="p-6 text-sm text-muted-foreground">
-            Loading customers...
-          </div>
+          <CustomerSkeleton />
         ) : isError ? (
           <div className="p-6 text-sm text-destructive">
             {error.message?.toString()?.includes("Can't reach database server")

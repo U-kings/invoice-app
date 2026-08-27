@@ -42,14 +42,13 @@ export function InvoiceActions({ invoice }: InvoiceActionsProps) {
   const router = useRouter()
   const effectiveStatus = getEffectiveInvoiceStatus(invoice)
   const canMarkAsPaid =
-    effectiveStatus === "Sent"?.toUpperCase() ||
-    effectiveStatus === "Overdue"?.toUpperCase()
+    effectiveStatus === "Sent" || effectiveStatus === "Overdue"
   const canCancel =
-    effectiveStatus === "Draft"?.toUpperCase() ||
-    effectiveStatus === "Sent"?.toUpperCase() ||
-    effectiveStatus === "Overdue"?.toUpperCase()
-  const isPaid = effectiveStatus === "Paid"?.toUpperCase()
-  const isCancelled = effectiveStatus === "Cancelled"?.toUpperCase()
+    effectiveStatus === "Draft" ||
+    effectiveStatus === "Sent" ||
+    effectiveStatus === "Overdue"
+  const isPaid = effectiveStatus === "Paid"
+  const isCancelled = effectiveStatus === "Cancelled"
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [sendOpen, setSendOpen] = useState(false)
   const [cancelOpen, setCancelOpen] = useState(false)
@@ -86,16 +85,20 @@ export function InvoiceActions({ invoice }: InvoiceActionsProps) {
     <>
       <div className="flex flex-wrap items-center gap-2">
         {/* Edit */}
-        <Button
-          variant="outline"
-          nativeButton={false}
-          render={
-            <Link href={`/dashboard/invoices/${invoice?.invoiceNumber}/edit`} />
-          }
-        >
-          <Pencil className="mr-2 h-4 w-4" />
-          Edit
-        </Button>
+        {!isPaid && (
+          <Button
+            variant="outline"
+            nativeButton={false}
+            render={
+              <Link
+                href={`/dashboard/invoices/${invoice?.invoiceNumber}/edit`}
+              />
+            }
+          >
+            <Pencil className="mr-2 h-4 w-4" />
+            Edit
+          </Button>
+        )}
 
         {/* Download */}
         <Button
@@ -127,9 +130,9 @@ export function InvoiceActions({ invoice }: InvoiceActionsProps) {
 
           <DropdownMenuContent align="end" className="w-52">
             {/* Send invoice */}
-            {(!isCancelled || isPaid) && (
+            {(!isCancelled) && (
               <DropdownMenuItem
-                disabled={isCancelled || isPaid}
+                disabled={isCancelled}
                 onClick={() => {
                   setSendOpen(true)
                 }}
@@ -157,7 +160,7 @@ export function InvoiceActions({ invoice }: InvoiceActionsProps) {
               {copied ? (
                 <Check className="mr-2 size-4" />
               ) : (
-                <Copy className=" mr-2 size-4" />
+                <Copy className="mr-2 size-4" />
               )}
 
               {copied ? "Copied" : "Copy link"}

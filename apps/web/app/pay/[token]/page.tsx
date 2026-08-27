@@ -2,30 +2,21 @@
 
 import { useParams } from "next/navigation"
 import Link from "next/link"
-import {
-  ArrowLeft,
-  CheckCircle2,
-  Loader2,
-  ShieldCheck,
-} from "lucide-react"
+import { ArrowLeft, CheckCircle2, Loader2, ShieldCheck } from "lucide-react"
 
 import { Button } from "@workspace/ui/components/button"
 
 import { usePublicInvoice } from "@/hooks/use-public-invoice"
+import { CheckoutButton } from "./checkout-button"
 
 export default function PaymentPage() {
   const params = useParams<{ token: string }>()
 
   const token = params.token
 
-  const {
-    data: invoice,
-    isLoading,
-    isError,
-    error,
-  } = usePublicInvoice(token)
+  const { data: invoice, isLoading, isPending, isError, error } = usePublicInvoice(token)
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-muted/30 px-6">
         <div className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -44,9 +35,7 @@ export default function PaymentPage() {
             <CheckCircle2 className="h-6 w-6 text-red-500" />
           </div>
 
-          <h1 className="text-xl font-semibold">
-            Invoice unavailable
-          </h1>
+          <h1 className="text-xl font-semibold">Invoice unavailable</h1>
 
           <p className="mt-2 text-sm text-muted-foreground">
             {error instanceof Error
@@ -77,10 +66,7 @@ export default function PaymentPage() {
       <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:py-12">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
-          <Link
-            href="/"
-            className="text-lg font-semibold tracking-tight"
-          >
+          <Link href="/" className="text-lg font-semibold tracking-tight">
             Invoice<span className="text-[#2EAFB4]">Flow</span>
           </Link>
 
@@ -96,9 +82,7 @@ export default function PaymentPage() {
             <div className="border-b p-6 sm:p-8">
               <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">
-                    Invoice
-                  </p>
+                  <p className="text-sm text-muted-foreground">Invoice</p>
 
                   <h1 className="mt-1 text-2xl font-semibold tracking-tight">
                     {invoice.invoiceNumber}
@@ -106,9 +90,7 @@ export default function PaymentPage() {
                 </div>
 
                 <div className="text-left sm:text-right">
-                  <p className="text-sm text-muted-foreground">
-                    Due
-                  </p>
+                  <p className="text-sm text-muted-foreground">Due</p>
 
                   <p className="mt-1 font-medium">
                     {formatDate(invoice.dueDate)}
@@ -119,21 +101,19 @@ export default function PaymentPage() {
 
             <div className="grid gap-6 border-b p-6 sm:grid-cols-2 sm:p-8">
               <div>
-                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <p className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
                   Bill to
                 </p>
 
-                <p className="mt-2 font-medium">
-                  {invoice.customer.name}
-                </p>
+                <p className="mt-2 font-medium">{invoice.customer.name}</p>
 
                 <p className="mt-1 text-sm text-muted-foreground">
                   {invoice.customer.email}
                 </p>
               </div>
 
-              <div>
-                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              <div className="text-left sm:text-right">
+                <p className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
                   Payment terms
                 </p>
 
@@ -147,24 +127,21 @@ export default function PaymentPage() {
 
             {/* Items */}
             <div className="p-6 sm:p-8">
-              <h2 className="font-semibold">
-                Invoice items
-              </h2>
+              <h2 className="font-semibold">Invoice items</h2>
 
               <div className="mt-6 divide-y">
                 {invoice.items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex gap-4 py-4"
-                  >
+                  <div key={item.id} className="flex gap-4 py-4">
                     <div className="min-w-0 flex-1">
-                      <p className="font-medium">
-                        {item.description}
+                      <p className="flex flex-col font-medium">
+                        {item.name}
+                        <span className="text-sm font-light text-muted-foreground">
+                          {item.description}
+                        </span>
                       </p>
 
                       <p className="mt-1 text-sm text-muted-foreground">
-                        {item.quantity} ×{" "}
-                        {formatter.format(item.price)}
+                        {item.quantity} × {formatter.format(item.price)}
                       </p>
                     </div>
 
@@ -179,9 +156,7 @@ export default function PaymentPage() {
 
           {/* Payment summary */}
           <aside className="h-fit rounded-2xl border bg-background p-6 shadow-sm lg:sticky lg:top-6">
-            <p className="text-sm text-muted-foreground">
-              Amount due
-            </p>
+            <p className="text-sm text-muted-foreground">Amount due</p>
 
             <p className="mt-2 text-3xl font-semibold tracking-tight">
               {formatter.format(invoice.total)}
@@ -189,38 +164,26 @@ export default function PaymentPage() {
 
             <div className="my-6 space-y-3 border-y py-5 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">
-                  Subtotal
-                </span>
+                <span className="text-muted-foreground">Subtotal</span>
 
-                <span>
-                  {formatter.format(invoice.subtotal)}
-                </span>
+                <span>{formatter.format(invoice.subtotal)}</span>
               </div>
 
               {invoice.discountAmount > 0 && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">
-                    Discount
-                  </span>
+                  <span className="text-muted-foreground">Discount</span>
 
                   <span className="text-green-600">
-                    −{formatter.format(
-                      invoice.discountAmount
-                    )}
+                    −{formatter.format(invoice.discountAmount)}
                   </span>
                 </div>
               )}
 
               {invoice.tax > 0 && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">
-                    Tax
-                  </span>
+                  <span className="text-muted-foreground">Tax</span>
 
-                  <span>
-                    {formatter.format(invoice.tax)}
-                  </span>
+                  <span>{formatter.format(invoice.tax)}</span>
                 </div>
               )}
             </div>
@@ -238,12 +201,18 @@ export default function PaymentPage() {
                 </p>
               </div>
             ) : (
-              <Button
-                className="h-12 w-full bg-[#2EAFB4] text-white hover:bg-[#269ba0]"
-                size="lg"
-              >
-                Pay {formatter.format(invoice.total)}
-              </Button>
+              <CheckoutButton
+                invoice={invoice}
+                invoiceId={invoice.id}
+                businessCountry={invoice.businessProfile?.businessCountry || "NG"}
+                customerCountry={invoice.customer?.customerCountry || "NG"}
+              />
+              // <Button
+              //   className="h-12 w-full bg-[#2EAFB4] text-white hover:bg-[#269ba0]"
+              //   size="lg"
+              // >
+              //   Pay {formatter.format(invoice.total)}
+              // </Button>
             )}
 
             <p className="mt-4 text-center text-xs text-muted-foreground">

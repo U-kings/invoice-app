@@ -27,6 +27,7 @@ import {
 import { useRouter } from "next/navigation"
 import { useTransition } from "react"
 import { useAuthStore } from "@/app/store/useAuthStore"
+import { LogoutButton } from "./logout-button"
 
 export function UserMenu() {
   const userData = useAuthStore((state) => state.user)
@@ -35,8 +36,6 @@ export function UserMenu() {
 
   // Inside your Client Component:
   const [isPending, startTransition] = useTransition()
-
-  console.log(userData)
 
   const handleLogout = async () => {
     try {
@@ -54,15 +53,8 @@ export function UserMenu() {
     } catch (error) {
       console.error("Logout failed:", error)
     }
-
-    // await fetch("/api/auth/logout", {
-    //   method: "POST",
-    //   credentials: "include",
-    // })
-
-    // router.push("/")
-    // router.refresh()
   }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
@@ -71,7 +63,10 @@ export function UserMenu() {
           <Avatar className="h-10 w-10">
             <AvatarImage src="/avatars/avatar-user.png" />
 
-            <AvatarFallback>{userData?.firstName?.charAt(0)}{userData?.lastName?.charAt(0)}</AvatarFallback>
+            <AvatarFallback>
+              {userData?.firstName?.charAt(0)}
+              {userData?.lastName?.charAt(0)}
+            </AvatarFallback>
           </Avatar>
           {/* </button> */}
         </div>
@@ -81,7 +76,9 @@ export function UserMenu() {
         {/* <DropdownMenuLabel> */}
         {/* <div className="space-y-1"> */}
         <div className="px-3 py-2">
-          <p className="font-semibold">{userData?.firstName}{" "}{userData?.lastName}</p>
+          <p className="font-semibold">
+            {userData?.firstName} {userData?.lastName}
+          </p>
 
           <p className="text-xs text-muted-foreground">{userData?.email}</p>
         </div>
@@ -118,13 +115,7 @@ export function UserMenu() {
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem
-          className="text-red-500 focus:text-red-500"
-          onClick={handleLogout}
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          Logout
-        </DropdownMenuItem>
+        <LogoutButton />
       </DropdownMenuContent>
     </DropdownMenu>
   )

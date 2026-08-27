@@ -15,10 +15,12 @@ export interface PublicInvoice {
   customer: {
     name: string
     email: string
+    customerCountry: string
   }
 
   items: {
     id: string
+    name: string
     description: string
     quantity: number
     price: number
@@ -31,21 +33,19 @@ export interface PublicInvoice {
   taxRate: number
   tax: number
   total: number
+
+  businessProfile: {
+    businessCountry: string
+  }
 }
 
-async function fetchPublicInvoice(
-  token: string
-): Promise<PublicInvoice> {
-  const response = await fetch(
-    `/api/dashboard/invoices/pay/${token}`
-  )
+async function fetchPublicInvoice(token: string): Promise<PublicInvoice> {
+  const response = await fetch(`/api/dashboard/invoices/pay/${token}`)
 
   const result = await response.json()
 
   if (!response.ok) {
-    throw new Error(
-      result.error || "Failed to load invoice"
-    )
+    throw new Error(result.error || "Failed to load invoice")
   }
 
   return result.invoice

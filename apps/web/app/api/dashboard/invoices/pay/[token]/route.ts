@@ -22,6 +22,11 @@ export async function GET(
       include: {
         lineItems: true,
         customer: true,
+        user: {
+        include: {
+          businessProfile: true, // Access user.businessProfile.countryCode
+        },
+      },
       },
     })
 
@@ -73,6 +78,7 @@ export async function GET(
 
         items: invoice.lineItems.map((item) => ({
           id: item.id,
+          name: item.name,
           description: item.description,
           quantity: item.quantity,
           price: Number(item.rate),

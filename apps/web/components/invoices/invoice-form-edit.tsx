@@ -322,7 +322,7 @@ export function InvoiceFormEdit({ invoice }: InvoiceFormProps) {
     <form
       id="invoice-form"
       onSubmit={form.handleSubmit(onSubmit, (errors) => {
-        console.log("Invoice validation errors:", errors)
+        // console.log("Invoice validation errors:", errors)
       })}
       className="space-y-6"
     >

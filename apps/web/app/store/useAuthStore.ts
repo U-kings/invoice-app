@@ -1,4 +1,3 @@
-// store/useAuthStore.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -12,7 +11,9 @@ interface User {
 interface AuthState {
   user: User | null;
   token: string | null;
+  isLoggingOut: boolean; // 🚀 Added tracking flag state
   setAuth: (user: User, token: string) => void;
+  setLoggingOut: (status: boolean) => void; // 🚀 Added state setter action
   logout: () => void;
 }
 
@@ -21,20 +22,20 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       token: null,
-      setAuth: (user, token) => set({ user, token }),
-      logout: () => set({ user: null, token: null }),
+      isLoggingOut: false, // Initialized safely to false
+      setAuth: (user, token) => set({ user, token, isLoggingOut: false }),
+      setLoggingOut: (status) => set({ isLoggingOut: status }),
+      logout: () => set({ user: null, token: null, isLoggingOut: false }),
     }),
     {
       name: 'auth-storage', // Unique key for the localStorage item
-      // Optional: You can choose sessionStorage instead by adding:
-      // storage: createJSONStorage(() => sessionStorage)
+      
+      // 🚀 THE SECURITY FIX: Only persist user and token. 
+      // This completely prevents 'isLoggingOut: true' from getting stuck in localStorage!
+      partialize: (state) => ({
+        user: state.user,
+        token: state.token,
+      }),
     }
   )
 );
-
-// export const useAuthStore = create<AuthState>((set) => ({
-//   user: null,
-//   token: null,
-//   setAuth: (user, token) => set({ user, token }),
-//   logout: () => set({ user: null, token: null }),
-// }));

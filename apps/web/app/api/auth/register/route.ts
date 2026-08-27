@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    console.log("Created user with Prisma:", user);
+    // console.log("Created user with Prisma:", user);
 
     // 5. Build dynamic communication link details
     const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/verify-email?token=${verificationToken}`;

@@ -20,7 +20,7 @@ export function InvoiceItems({ invoice }: InvoiceItemsProps) {
   return (
     <div className="rounded-2xl border bg-background">
       {/* Desktop/tablet header */}
-      <div className="hidden grid-cols-[1fr_100px_140px_140px] gap-4 border-b bg-muted/30 px-6 py-3 text-xs font-medium tracking-wider text-muted-foreground uppercase sm:grid">
+      <div className="hidden rounded-e-2xl grid-cols-[1fr_100px_140px_140px] gap-4 border-b bg-wihte px-6 py-3 text-xs font-medium tracking-wider text-muted-foreground uppercase sm:grid">
         <span>Item/Description</span>
         <span className="text-right">Qty</span>
         <span className="text-right">Rate</span>
@@ -40,7 +40,7 @@ export function InvoiceItems({ invoice }: InvoiceItemsProps) {
               <div>
                 <div className="flex flex-col">
                   <p className="font-medium">{item.name}</p>
-                  <p className="font-light text-sm">{item.description}</p>
+                  <p className="font-light text-sm text-muted-foreground">{item.description}</p>
                 </div>
 
                 {/* Mobile-only metadata */}

@@ -24,7 +24,6 @@ export default async function PublicInvoicePage({
       lineItems: true,
     },
   })
-  
 
   if (!invoice) {
     notFound()
@@ -39,14 +38,20 @@ export default async function PublicInvoicePage({
     0
   )
 
-  const discount = Number(invoice.discount)
-
-  const taxableAmount = Math.max(subtotal - discount, 0)
-
+  // 1. Convert percentage values safely into numeric formats
+  const discountPercent = Number(invoice.discount)
   const taxRate = Number(invoice.taxRate)
 
+  // 2. 🚀 THE FIX: Calculate the relative currency discount amount from the percentage
+  const discountAmount = subtotal * (discountPercent / 100)
+
+  // 3. Deduct the discount amount to compute your taxable line items baseline
+  const taxableAmount = Math.max(subtotal - discountAmount, 0)
+
+  // 4. Factor tax on top of your modified, discounted taxable base amount
   const tax = taxableAmount * (taxRate / 100)
 
+  // 5. Build final ultimate calculation totals
   const total = taxableAmount + tax
 
   return (
@@ -177,10 +182,10 @@ export default async function PublicInvoicePage({
                   value={formatCurrency(subtotal, invoice.currency)}
                 />
 
-                {discount > 0 && (
+                {discountAmount > 0 && (
                   <SummaryRow
                     label="Discount"
-                    value={`- ${formatCurrency(discount, invoice.currency)}`}
+                    value={`- ${formatCurrency(discountAmount, invoice.currency)}`}
                   />
                 )}
 

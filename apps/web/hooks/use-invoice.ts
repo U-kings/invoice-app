@@ -100,7 +100,6 @@ async function getInvoices({
   return result as GetInvoicesResponse
 }
 
-
 export function useInvoices(params: UseInvoicesParams = {}) {
   const { page = 1, pageSize = 10, search = "", status } = params
 

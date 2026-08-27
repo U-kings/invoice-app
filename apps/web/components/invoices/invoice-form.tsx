@@ -100,6 +100,7 @@ export function InvoiceForm() {
   )
 
   const [isDraftLoading, setIsDraftLoading] = useState(false)
+  const [isSubmitLoading, setIsSubmitLoading] = useState(false)
 
   const invoiceNumber = crypto.randomUUID()
 
@@ -261,8 +262,8 @@ export function InvoiceForm() {
     saveCatalogItems(updatedCatalog)
     setCatalogItems(updatedCatalog)
 
-    try {
-      createInvoiceMutation.mutate({
+    createInvoiceMutation.mutate(
+      {
         customerId: values.customerId,
         currency: values.currency,
         issueDate: values.issueDate,
@@ -279,12 +280,16 @@ export function InvoiceForm() {
           quantity: item.quantity,
           rate: item.rate,
         })),
-      })
-    } catch (error) {
-      console.error("Failed to create invoice:", error)
-    } finally {
-      setTimeout(() => setIsDraftLoading(false), 1000)
-    }
+      },
+      {
+        onSuccess(data, variables, onMutateResult, context) {
+          setIsDraftLoading(false)
+        },
+        onError(error, variables, onMutateResult, context) {
+          setIsDraftLoading(false)
+        },
+      }
+    )
   }
 
   function onSubmit(values: InvoiceFormValues) {
@@ -293,6 +298,7 @@ export function InvoiceForm() {
     let updatedCatalog = [...catalogItems]
 
     values.items.forEach((item, index) => {
+      setIsSubmitLoading(true)
       if (!saveToCatalog[index]) {
         return
       }
@@ -341,12 +347,18 @@ export function InvoiceForm() {
         })),
       },
       {
-        onSuccess(data) {
+        onSuccess(data, variables, onMutateResult, context) {
+          setIsSubmitLoading(false)
           toast.add({
             title: "Invoice created",
-            description: "Your invoice has been created successfully.",
+            // description: ,
+            // description: "Invoice created and sent successfully",
             type: "success",
           })
+          console.log()
+        },
+        onError(error, variables, onMutateResult, context) {
+          setIsSubmitLoading(false)
         },
       }
     )
@@ -1152,10 +1164,11 @@ export function InvoiceForm() {
 
           <Button
             type="submit"
-            disabled={createInvoiceMutation.isPending && isDraftLoading}
+            disabled={isSubmitLoading}
+            // disabled={createInvoiceMutation.isPending && isDraftLoading}
             className="h-10 bg-[#2EAFB4] text-white hover:bg-[#269ba0]"
           >
-            {createInvoiceMutation.isPending ? "Creating..." : "Create & Send"}
+            {isSubmitLoading ? "Creating..." : "Create & Send"}
           </Button>
         </div>
       </div>

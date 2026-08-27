@@ -2,74 +2,51 @@
 
 import { motion } from "motion/react"
 import { FcGoogle } from "react-icons/fc"
-import { useEffect } from "react"
-import Script from "next/script"
-import { useGoogleAuth } from "@/hooks/use-google-auth"
 import { Button } from "@workspace/ui/components/button"
-import { AuthLoader } from "./auth-loader"
+import { toast } from "@workspace/ui/components/toast"
 
 interface SocialLoginProps {
   termsAccepted?: boolean
 }
 
 export function SocialLogin({ termsAccepted = true }: SocialLoginProps) {
-  const { mutate, isPending } = useGoogleAuth()
+  const handleGoogleRedirectLogin = () => {
+    // 1. Get the current page route path
+    const isSignupPage = window.location.pathname.includes("signup")
 
-  useEffect(() => {
-    // 1. Initialize the global configuration variables on the client window object
-    if (typeof window !== "undefined" && (window as any).google?.accounts?.id) {
-      (window as any).google.accounts.id.initialize({
-        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-        callback: (response: any) => {
-          mutate({
-            idToken: response.credential,
-            terms: termsAccepted,
-          })
-        },
+    // 2. 🚀 THE CONDITIONAL FIX: Only block the user if they are actively trying to register
+    if (isSignupPage && !termsAccepted) {
+      toast.add({
+        title: "Accept Terms and Conditions",
+        description:
+          "You must accept the terms and conditions before connecting with Google.",
+        type: "error",
       })
+      // alert(
+      //   "You must accept the terms and conditions before connecting with Google."
+      // )
+      return
     }
-  }, [mutate, termsAccepted])
 
-  // 2. Custom Click Handler to trigger Google's official login popup manually 🚀
-  const handleCustomGoogleClick = () => {
-    if (typeof window !== "undefined" && (window as any).google?.accounts?.id) {
-      // Re-run initialization to make sure the runtime holds the latest terms condition state
-      (window as any).google.accounts.id.initialize({
-        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-        callback: (response: any) => {
-          mutate({
-            idToken: response.credential,
-            terms: termsAccepted,
-          })
-        },
-      })
-      
-      // Open the standard Google sign-in window prompt overlay natively
-      (window as any).google.accounts.id.prompt()
-    } else {
-      console.error("Google script layer has not finished initializing yet.")
-    }
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
+    const redirectUri = `${window.location.origin}/api/auth/google/callback`
+    const googleAuthUrl = new URL(
+      "https://accounts.google.com/o/oauth2/v2/auth"
+    )
+
+    googleAuthUrl.searchParams.append("client_id", clientId || "")
+    googleAuthUrl.searchParams.append("redirect_uri", redirectUri)
+    googleAuthUrl.searchParams.append("response_type", "code")
+    googleAuthUrl.searchParams.append("scope", "openid email profile")
+    googleAuthUrl.searchParams.append("access_type", "offline")
+    googleAuthUrl.searchParams.append("prompt", "select_account")
+
+    // Send the user to the correct page
+    window.location.href = googleAuthUrl.toString()
   }
 
   return (
     <div className="w-full space-y-3">
-      {/* Asynchronously fetch the script background worker */}
-      <Script 
-        src="https://google.com" 
-        strategy="afterInteractive"
-        onLoad={() => {
-          if ((window as any).google?.accounts?.id) {
-            (window as any).google.accounts.id.initialize({
-              client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-              callback: (response: any) => {
-                mutate({ idToken: response.credential, terms: termsAccepted })
-              },
-            })
-          }
-        }}
-      />
-
-      {/* 🚀 CUSTOM ACTION BUTTON: Replaces the broken iframe anchor */}
       <motion.div
         whileHover={{ scale: 1.02, y: -2 }}
         whileTap={{ scale: 0.98 }}
@@ -77,18 +54,16 @@ export function SocialLogin({ termsAccepted = true }: SocialLoginProps) {
         <Button
           type="button"
           variant="outline"
-          disabled={isPending}
-          onClick={handleCustomGoogleClick}
-          className="h-12 w-full justify-center gap-3 bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm"
+          onClick={handleGoogleRedirectLogin}
+          className="h-12 w-full justify-center gap-3 border border-gray-200 bg-white text-gray-700 shadow-sm hover:bg-gray-50 dark:text-gray-300"
         >
-          {isPending ? <AuthLoader /> : <FcGoogle className="text-xl" />}
-          <span>{isPending ? "Authenticating..." : "Continue with Google"}</span>
+          <FcGoogle className="text-xl" />
+          <span>Continue with Google</span>
         </Button>
       </motion.div>
     </div>
   )
 }
-
 
 // {providers.map(({ name, icon: Icon }) => (
 //   <motion.div

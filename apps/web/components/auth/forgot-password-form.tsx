@@ -64,7 +64,7 @@ export function ForgotPasswordForm() {
   const { mutate, isPending, error, isError, isSuccess } = useMutation({
     mutationFn: forgotPassword,
     onSuccess: (data) => {
-      console.log(data)
+      // console.log(data)
       toast.add({
         title: "Reset link",
         description: data?.message || "Check your inbox for a reset link!",

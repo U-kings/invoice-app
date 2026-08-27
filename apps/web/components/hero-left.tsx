@@ -69,7 +69,7 @@ export function HeroLeft() {
         > */}
         <Link
           href="/signup"
-          className="flex items-center rounded-xl bg-[#2EAFB4] px-3 py-1.5 font-medium"
+          className="flex text-white items-center rounded-xl bg-[#2EAFB4] px-3 py-1.5 font-medium"
         >
           {/* Get Started */}
           Get Started
