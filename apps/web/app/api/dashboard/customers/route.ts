@@ -347,7 +347,7 @@ export async function POST(req: NextRequest) {
     // ---------------------------------------------
     // 5. Create customer
     // ---------------------------------------------
-
+    console.error(decoded.userId)
     const customer = await prisma.customer.create({
       data: {
         userId: decoded.userId,

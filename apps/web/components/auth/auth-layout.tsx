@@ -1,21 +1,19 @@
-"use client";
+"use client"
 
-import { ReactNode } from "react";
-import { motion } from "motion/react";
-import { AuthBackground } from "./auth-background";
-import { BackgroundGlow } from "../background-glow";
+import { ReactNode } from "react"
+import { motion } from "motion/react"
+import { AuthBackground } from "./auth-background"
+import { BackgroundGlow } from "../background-glow"
+import { usePathname } from "next/navigation"
 
-export function AuthLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export function AuthLayout({ children }: { children: ReactNode }) {
+  const pathname = usePathname()
   return (
-    <main className="relative min-h-screen overflow-hidden">
+    <main key={pathname} className="relative min-h-screen overflow-hidden">
       <AuthBackground />
       {/* <BackgroundGlow /> */}
 
-      <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl items-center px-4 lg:px-6 py-10">
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl items-center px-4 py-10 lg:px-6">
         <div className="grid w-full gap-12 lg:grid-cols-2 lg:items-center">
           {/* Left Side */}
           <motion.div
@@ -32,36 +30,28 @@ export function AuthLayout({
                 Welcome Back 👋
               </span>
 
-              <h1 className="mt-8 text-5xl font-bold leading-tight xl:text-6xl">
+              <h1 className="mt-8 text-5xl leading-tight font-bold xl:text-6xl">
                 Manage invoices
                 <br />
                 effortlessly.
               </h1>
 
               <p className="mt-6 text-lg leading-8 text-muted-foreground">
-                Create invoices, track payments, automate reminders,
-                and grow your business with a modern invoicing platform.
+                Create invoices, track payments, automate reminders, and grow
+                your business with a modern invoicing platform.
               </p>
 
               <div className="mt-10 flex items-center gap-8">
                 <div>
-                  <h3 className="text-4xl font-bold text-[#2EAFB4]">
-                    20k+
-                  </h3>
+                  <h3 className="text-4xl font-bold text-[#2EAFB4]">20k+</h3>
 
-                  <p className="text-muted-foreground">
-                    Businesses
-                  </p>
+                  <p className="text-muted-foreground">Businesses</p>
                 </div>
 
                 <div>
-                  <h3 className="text-4xl font-bold text-[#2EAFB4]">
-                    $50M+
-                  </h3>
+                  <h3 className="text-4xl font-bold text-[#2EAFB4]">$50M+</h3>
 
-                  <p className="text-muted-foreground">
-                    Invoices Processed
-                  </p>
+                  <p className="text-muted-foreground">Invoices Processed</p>
                 </div>
               </div>
             </div>
@@ -92,5 +82,5 @@ export function AuthLayout({
         </div>
       </div>
     </main>
-  );
+  )
 }
