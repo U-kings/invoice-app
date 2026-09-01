@@ -1101,8 +1101,13 @@ export function InvoiceFormEdit({ invoice }: InvoiceFormProps) {
         </div>
       </section>
       <div className="flex flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">
-        <Button type="button" className="h-10" variant="ghost">
-          <Link href="/dashboard/invoices">Cancel</Link>
+        <Button
+          nativeButton={false}
+          type="button"
+          className="h-10"
+          variant="ghost"
+          render={<Link href="/dashboard/invoices" />}
+        >
           Cancel
         </Button>
 

@@ -75,7 +75,7 @@ export const columns = columnHelper.columns([
     ),
   }),
 
-  columnHelper.accessor("id", {
+  columnHelper.accessor("invoiceNumber", {
     header: "Invoice",
 
     cell: ({ row }) => {
@@ -86,9 +86,10 @@ export const columns = columnHelper.columns([
           href={`/dashboard/invoices/${invoice.invoiceNumber}`}
           className="font-medium transition-colors hover:text-[#2EAFB4]"
         >
-          {invoice.id?.includes("INV")
+          {invoice.invoiceNumber}
+          {/* {invoice.id?.includes("INV")
             ? invoice.id
-            : `INV-${invoice.id?.slice(0, 3)}`}
+            : `INV-${invoice.id?.slice(0, 3)}`} */}
         </Link>
       )
     },

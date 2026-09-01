@@ -9,6 +9,15 @@
 * 🟢 You can import this file directly.
 */
 
+export const InvoiceReminderType = {
+  BEFORE_DUE: 'BEFORE_DUE',
+  DUE_DATE: 'DUE_DATE',
+  OVERDUE: 'OVERDUE'
+} as const
+
+export type InvoiceReminderType = (typeof InvoiceReminderType)[keyof typeof InvoiceReminderType]
+
+
 export const PaymentProvider = {
   PAYSTACK: 'PAYSTACK',
   STRIPE: 'STRIPE',

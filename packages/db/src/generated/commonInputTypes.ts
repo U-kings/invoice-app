@@ -236,6 +236,23 @@ export type IntWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedIntFilter<$PrismaModel>
 }
 
+export type EnumInvoiceReminderTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.InvoiceReminderType | Prisma.EnumInvoiceReminderTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.InvoiceReminderType[] | Prisma.ListEnumInvoiceReminderTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.InvoiceReminderType[] | Prisma.ListEnumInvoiceReminderTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumInvoiceReminderTypeFilter<$PrismaModel> | $Enums.InvoiceReminderType
+}
+
+export type EnumInvoiceReminderTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.InvoiceReminderType | Prisma.EnumInvoiceReminderTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.InvoiceReminderType[] | Prisma.ListEnumInvoiceReminderTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.InvoiceReminderType[] | Prisma.ListEnumInvoiceReminderTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumInvoiceReminderTypeWithAggregatesFilter<$PrismaModel> | $Enums.InvoiceReminderType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumInvoiceReminderTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumInvoiceReminderTypeFilter<$PrismaModel>
+}
+
 export type EnumPaymentProviderFilter<$PrismaModel = never> = {
   equals?: $Enums.PaymentProvider | Prisma.EnumPaymentProviderFieldRefInput<$PrismaModel>
   in?: $Enums.PaymentProvider[] | Prisma.ListEnumPaymentProviderFieldRefInput<$PrismaModel>
@@ -503,6 +520,23 @@ export type NestedFloatFilter<$PrismaModel = never> = {
   gt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
   gte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
   not?: Prisma.NestedFloatFilter<$PrismaModel> | number
+}
+
+export type NestedEnumInvoiceReminderTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.InvoiceReminderType | Prisma.EnumInvoiceReminderTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.InvoiceReminderType[] | Prisma.ListEnumInvoiceReminderTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.InvoiceReminderType[] | Prisma.ListEnumInvoiceReminderTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumInvoiceReminderTypeFilter<$PrismaModel> | $Enums.InvoiceReminderType
+}
+
+export type NestedEnumInvoiceReminderTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.InvoiceReminderType | Prisma.EnumInvoiceReminderTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.InvoiceReminderType[] | Prisma.ListEnumInvoiceReminderTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.InvoiceReminderType[] | Prisma.ListEnumInvoiceReminderTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumInvoiceReminderTypeWithAggregatesFilter<$PrismaModel> | $Enums.InvoiceReminderType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumInvoiceReminderTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumInvoiceReminderTypeFilter<$PrismaModel>
 }
 
 export type NestedEnumPaymentProviderFilter<$PrismaModel = never> = {

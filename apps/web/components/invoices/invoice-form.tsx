@@ -20,7 +20,7 @@ import {
 import { Textarea } from "@workspace/ui/components/textarea"
 import { Plus, Trash2 } from "lucide-react"
 import Link from "next/link"
-import { useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import {
   InvoiceItem,
   invoiceItems,
@@ -36,6 +36,7 @@ import { useRouter } from "next/navigation"
 import { useCreateInvoice } from "@/hooks/use-create-invoice"
 import { useCustomers } from "@/hooks/use-customers"
 import { toast } from "@workspace/ui/components/toast"
+import { useInvoiceSettings } from "@/hooks/use-invoice-settings"
 
 const paymentTerms = [
   {
@@ -55,8 +56,16 @@ const paymentTerms = [
     label: "Net-30",
   },
   {
+    value: "Net-45",
+    label: "Net-45",
+  },
+  {
     value: "Net-60",
     label: "Net-60",
+  },
+  {
+    value: "Net-90",
+    label: "Net-90",
   },
 ]
 
@@ -83,6 +92,30 @@ const currencies = [
   },
 ]
 
+function calculateDueDate(issueDate: string, paymentTerm: string) {
+  if (!issueDate) {
+    return ""
+  }
+
+  const date = new Date(`${issueDate}T00:00:00`)
+
+  if (paymentTerm === "Due-on-receipt") {
+    return issueDate
+  }
+
+  const match = paymentTerm.match(/^Net-(\d+)$/)
+
+  if (!match) {
+    return issueDate
+  }
+
+  const days = Number(match[1])
+
+  date.setDate(date.getDate() + days)
+
+  return date.toISOString().split("T")[0] ?? ""
+}
+
 export function InvoiceForm() {
   const router = useRouter()
   const [saveToCatalog, setSaveToCatalog] = useState<Record<string, boolean>>(
@@ -95,6 +128,14 @@ export function InvoiceForm() {
   })
 
   const createInvoiceMutation = useCreateInvoice()
+
+  const {
+    data: invoiceSettingsData,
+    isLoading: isInvoiceSettingsLoading,
+    isError: isInvoiceSettingsError,
+    error: invoiceSettingsError,
+  } = useInvoiceSettings()
+
   const MAX_DATE_BUILT: string = new Intl.DateTimeFormat("en-CA").format(
     new Date()
   )
@@ -102,13 +143,11 @@ export function InvoiceForm() {
   const [isDraftLoading, setIsDraftLoading] = useState(false)
   const [isSubmitLoading, setIsSubmitLoading] = useState(false)
 
-  const invoiceNumber = crypto.randomUUID()
-
   const form = useForm<InvoiceFormValues>({
     resolver: zodResolver(invoiceSchema),
 
     defaultValues: {
-      invoiceNumber: `INV-${invoiceNumber?.slice(0, 3)}`,
+      invoiceNumber: "",
       customerId: "",
       customerEmail: "",
       currency: "NGN",
@@ -165,12 +204,54 @@ export function InvoiceForm() {
     name: "paymentTerm",
   })
 
+  useEffect(() => {
+    const settings = invoiceSettingsData?.invoiceSettings
+
+    if (!settings) {
+      return
+    }
+
+    form.reset(
+      {
+        ...form.getValues(),
+
+        currency: settings.defaultCurrency || "NGN",
+
+        paymentTerm: settings.defaultPaymentTerm || "Due-on-receipt",
+
+        discount: Number(settings.defaultDiscount) || 0,
+
+        taxRate: Number(settings.defaultTaxRate) || 0,
+
+        notes: settings.defaultNotes || "",
+      },
+      {
+        keepDirtyValues: true,
+      }
+    )
+  }, [invoiceSettingsData, form])
+
+  useEffect(() => {
+    if (!issueDate || !paymentTerm) {
+      return
+    }
+
+    const dueDate = calculateDueDate(issueDate, paymentTerm)
+
+    const currentDueDate = form.getValues("dueDate")
+
+    if (currentDueDate === dueDate) {
+      return
+    }
+
+    form.setValue("dueDate", dueDate, {
+      shouldValidate: true,
+    })
+  }, [issueDate, paymentTerm, form])
+
   const {
     control,
-    // register,
     handleSubmit,
-    // setValue,
-    // watch,
     formState: { errors },
   } = form
 
@@ -282,11 +363,29 @@ export function InvoiceForm() {
         })),
       },
       {
-        onSuccess(data, variables, onMutateResult, context) {
+        onSuccess() {
           setIsDraftLoading(false)
+
+          toast.add({
+            title: "Invoice saved",
+            description: "Invoice saved as draft successfully.",
+            type: "success",
+          })
+
+          router.push("/dashboard/invoices")
         },
-        onError(error, variables, onMutateResult, context) {
+
+        onError(error) {
           setIsDraftLoading(false)
+
+          toast.add({
+            title: "Failed to save invoice",
+            description:
+              error instanceof Error
+                ? error.message
+                : "Something went wrong while saving the invoice.",
+            type: "error",
+          })
         },
       }
     )
@@ -295,10 +394,11 @@ export function InvoiceForm() {
   function onSubmit(values: InvoiceFormValues) {
     // 1. Save selected new items to catalog
     // --------------------------------
+    setIsSubmitLoading(true)
+
     let updatedCatalog = [...catalogItems]
 
     values.items.forEach((item, index) => {
-      setIsSubmitLoading(true)
       if (!saveToCatalog[index]) {
         return
       }
@@ -347,7 +447,7 @@ export function InvoiceForm() {
         })),
       },
       {
-        onSuccess(data, variables, onMutateResult, context) {
+        onSuccess() {
           setIsSubmitLoading(false)
           toast.add({
             title: "Invoice created",
@@ -355,10 +455,17 @@ export function InvoiceForm() {
             description: "Invoice created and sent successfully",
             type: "success",
           })
-          console.log()
         },
-        onError(error, variables, onMutateResult, context) {
+        onError(error) {
           setIsSubmitLoading(false)
+          toast.add({
+            title: "Failed to create invoice",
+            description:
+              error instanceof Error
+                ? error.message
+                : "Something went wrong while creating the invoice.",
+            type: "error",
+          })
         },
       }
     )
@@ -389,14 +496,14 @@ export function InvoiceForm() {
                 <FieldLabel htmlFor="invoice-number">
                   Invoice number{" "}
                   <span className="font-medium text-gray-400">
-                    (auto-generated)
+                    (Auto-generated when invoice is created)
                   </span>
                 </FieldLabel>
 
                 <Input
                   {...field}
                   id="invoice-number"
-                  placeholder="INV-001"
+                  placeholder="INV-1"
                   disabled
                   aria-invalid={!!error}
                 />
@@ -404,7 +511,7 @@ export function InvoiceForm() {
                 {error && <FieldError>{error.message}</FieldError>}
 
                 <FieldDescription>
-                  A unique identifier for this invoice.
+                  Your invoice number will be generated automatically.
                 </FieldDescription>
               </Field>
             )}
@@ -589,40 +696,11 @@ export function InvoiceForm() {
                 <Select
                   value={field.value || null}
                   onValueChange={(value) => {
-                    if (!value) return
-
-                    field.onChange(value)
-
-                    if (value === "Due-on-receipt") {
-                      form.setValue(
-                        "dueDate",
-                        new Date().toISOString().split("T")[0] as string,
-                        {
-                          shouldDirty: true,
-                          shouldValidate: true,
-                        }
-                      )
-
+                    if (!value) {
                       return
                     }
 
-                    const days = Number(value.replace("Net-", ""))
-
-                    const issueDate = form.getValues("issueDate")
-
-                    if (!issueDate) return
-
-                    const date = new Date(`${issueDate}T00:00:00`)
-
-                    date.setDate(date.getDate() + days)
-
-                    const formattedDate = date.toISOString().split("T")[0] ?? ""
-
-                    form.setValue("dueDate", formattedDate, {
-                      shouldDirty: true,
-                      shouldValidate: true,
-                    })
-                    // field.onChange(value ?? "")
+                    field.onChange(value)
                   }}
                 >
                   <SelectTrigger
@@ -1146,8 +1224,13 @@ export function InvoiceForm() {
         </div>
       </section>
       <div className="flex flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">
-        <Button type="button" className="h-10" variant="ghost">
-          <Link href="/dashboard/invoices">Cancel</Link>
+        <Button
+        nativeButton={false}
+          type="button"
+          className="h-10"
+          variant="ghost"
+          render={<Link href="/dashboard/invoices" />}
+        >
           Cancel
         </Button>
 

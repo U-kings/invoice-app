@@ -80,12 +80,12 @@ export type PrismaVersion = {
 }
 
 /**
- * Prisma Client JS version: 7.9.1
- * Query Engine version: e922089b7d7502aff4249d5da3420f6fa55fc6ad
+ * Prisma Client JS version: 7.10.0
+ * Query Engine version: 0edf323efd1d98336f3f0a68684b56f689b900d3
  */
 export const prismaVersion: PrismaVersion = {
-  client: "7.9.1",
-  engine: "e922089b7d7502aff4249d5da3420f6fa55fc6ad"
+  client: "7.10.0",
+  engine: "0edf323efd1d98336f3f0a68684b56f689b900d3"
 }
 
 /**
@@ -402,6 +402,9 @@ export const ModelName = {
   Customer: 'Customer',
   Invoice: 'Invoice',
   LineItem: 'LineItem',
+  InvoiceSettings: 'InvoiceSettings',
+  InvoiceReminderSettings: 'InvoiceReminderSettings',
+  InvoiceReminder: 'InvoiceReminder',
   Payment: 'Payment',
   PaymentProviderConfig: 'PaymentProviderConfig'
 } as const
@@ -419,7 +422,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "businessProfile" | "customer" | "invoice" | "lineItem" | "payment" | "paymentProviderConfig"
+    modelProps: "user" | "businessProfile" | "customer" | "invoice" | "lineItem" | "invoiceSettings" | "invoiceReminderSettings" | "invoiceReminder" | "payment" | "paymentProviderConfig"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -793,6 +796,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    InvoiceSettings: {
+      payload: Prisma.$InvoiceSettingsPayload<ExtArgs>
+      fields: Prisma.InvoiceSettingsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.InvoiceSettingsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceSettingsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.InvoiceSettingsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceSettingsPayload>
+        }
+        findFirst: {
+          args: Prisma.InvoiceSettingsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceSettingsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.InvoiceSettingsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceSettingsPayload>
+        }
+        findMany: {
+          args: Prisma.InvoiceSettingsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceSettingsPayload>[]
+        }
+        create: {
+          args: Prisma.InvoiceSettingsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceSettingsPayload>
+        }
+        createMany: {
+          args: Prisma.InvoiceSettingsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.InvoiceSettingsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceSettingsPayload>[]
+        }
+        delete: {
+          args: Prisma.InvoiceSettingsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceSettingsPayload>
+        }
+        update: {
+          args: Prisma.InvoiceSettingsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceSettingsPayload>
+        }
+        deleteMany: {
+          args: Prisma.InvoiceSettingsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.InvoiceSettingsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.InvoiceSettingsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceSettingsPayload>[]
+        }
+        upsert: {
+          args: Prisma.InvoiceSettingsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceSettingsPayload>
+        }
+        aggregate: {
+          args: Prisma.InvoiceSettingsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateInvoiceSettings>
+        }
+        groupBy: {
+          args: Prisma.InvoiceSettingsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InvoiceSettingsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.InvoiceSettingsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InvoiceSettingsCountAggregateOutputType> | number
+        }
+      }
+    }
+    InvoiceReminderSettings: {
+      payload: Prisma.$InvoiceReminderSettingsPayload<ExtArgs>
+      fields: Prisma.InvoiceReminderSettingsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.InvoiceReminderSettingsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceReminderSettingsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.InvoiceReminderSettingsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceReminderSettingsPayload>
+        }
+        findFirst: {
+          args: Prisma.InvoiceReminderSettingsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceReminderSettingsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.InvoiceReminderSettingsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceReminderSettingsPayload>
+        }
+        findMany: {
+          args: Prisma.InvoiceReminderSettingsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceReminderSettingsPayload>[]
+        }
+        create: {
+          args: Prisma.InvoiceReminderSettingsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceReminderSettingsPayload>
+        }
+        createMany: {
+          args: Prisma.InvoiceReminderSettingsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.InvoiceReminderSettingsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceReminderSettingsPayload>[]
+        }
+        delete: {
+          args: Prisma.InvoiceReminderSettingsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceReminderSettingsPayload>
+        }
+        update: {
+          args: Prisma.InvoiceReminderSettingsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceReminderSettingsPayload>
+        }
+        deleteMany: {
+          args: Prisma.InvoiceReminderSettingsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.InvoiceReminderSettingsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.InvoiceReminderSettingsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceReminderSettingsPayload>[]
+        }
+        upsert: {
+          args: Prisma.InvoiceReminderSettingsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceReminderSettingsPayload>
+        }
+        aggregate: {
+          args: Prisma.InvoiceReminderSettingsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateInvoiceReminderSettings>
+        }
+        groupBy: {
+          args: Prisma.InvoiceReminderSettingsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InvoiceReminderSettingsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.InvoiceReminderSettingsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InvoiceReminderSettingsCountAggregateOutputType> | number
+        }
+      }
+    }
+    InvoiceReminder: {
+      payload: Prisma.$InvoiceReminderPayload<ExtArgs>
+      fields: Prisma.InvoiceReminderFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.InvoiceReminderFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceReminderPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.InvoiceReminderFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceReminderPayload>
+        }
+        findFirst: {
+          args: Prisma.InvoiceReminderFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceReminderPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.InvoiceReminderFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceReminderPayload>
+        }
+        findMany: {
+          args: Prisma.InvoiceReminderFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceReminderPayload>[]
+        }
+        create: {
+          args: Prisma.InvoiceReminderCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceReminderPayload>
+        }
+        createMany: {
+          args: Prisma.InvoiceReminderCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.InvoiceReminderCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceReminderPayload>[]
+        }
+        delete: {
+          args: Prisma.InvoiceReminderDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceReminderPayload>
+        }
+        update: {
+          args: Prisma.InvoiceReminderUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceReminderPayload>
+        }
+        deleteMany: {
+          args: Prisma.InvoiceReminderDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.InvoiceReminderUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.InvoiceReminderUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceReminderPayload>[]
+        }
+        upsert: {
+          args: Prisma.InvoiceReminderUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceReminderPayload>
+        }
+        aggregate: {
+          args: Prisma.InvoiceReminderAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateInvoiceReminder>
+        }
+        groupBy: {
+          args: Prisma.InvoiceReminderGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InvoiceReminderGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.InvoiceReminderCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InvoiceReminderCountAggregateOutputType> | number
+        }
+      }
+    }
     Payment: {
       payload: Prisma.$PaymentPayload<ExtArgs>
       fields: Prisma.PaymentFieldRefs
@@ -1010,6 +1235,15 @@ export const BusinessProfileScalarFieldEnum = {
   businessName: 'businessName',
   countryCode: 'countryCode',
   currency: 'currency',
+  email: 'email',
+  phone: 'phone',
+  website: 'website',
+  address: 'address',
+  city: 'city',
+  state: 'state',
+  postalCode: 'postalCode',
+  taxId: 'taxId',
+  logoUrl: 'logoUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1064,6 +1298,60 @@ export const LineItemScalarFieldEnum = {
 } as const
 
 export type LineItemScalarFieldEnum = (typeof LineItemScalarFieldEnum)[keyof typeof LineItemScalarFieldEnum]
+
+
+export const InvoiceSettingsScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  invoiceNumberPrefix: 'invoiceNumberPrefix',
+  nextInvoiceNumber: 'nextInvoiceNumber',
+  defaultCurrency: 'defaultCurrency',
+  defaultPaymentTerm: 'defaultPaymentTerm',
+  defaultTaxRate: 'defaultTaxRate',
+  defaultDiscount: 'defaultDiscount',
+  defaultNotes: 'defaultNotes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type InvoiceSettingsScalarFieldEnum = (typeof InvoiceSettingsScalarFieldEnum)[keyof typeof InvoiceSettingsScalarFieldEnum]
+
+
+export const InvoiceReminderSettingsScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  enabled: 'enabled',
+  beforeDueEnabled: 'beforeDueEnabled',
+  beforeDueDays: 'beforeDueDays',
+  dueDateEnabled: 'dueDateEnabled',
+  overdueEnabled: 'overdueEnabled',
+  overdueAfterDays: 'overdueAfterDays',
+  overdueRepeatDays: 'overdueRepeatDays',
+  maxOverdueReminders: 'maxOverdueReminders',
+  emailSubject: 'emailSubject',
+  emailMessage: 'emailMessage',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type InvoiceReminderSettingsScalarFieldEnum = (typeof InvoiceReminderSettingsScalarFieldEnum)[keyof typeof InvoiceReminderSettingsScalarFieldEnum]
+
+
+export const InvoiceReminderScalarFieldEnum = {
+  id: 'id',
+  invoiceId: 'invoiceId',
+  userId: 'userId',
+  type: 'type',
+  scheduledFor: 'scheduledFor',
+  attempts: 'attempts',
+  lastError: 'lastError',
+  processingAt: 'processingAt',
+  sentAt: 'sentAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type InvoiceReminderScalarFieldEnum = (typeof InvoiceReminderScalarFieldEnum)[keyof typeof InvoiceReminderScalarFieldEnum]
 
 
 export const PaymentScalarFieldEnum = {
@@ -1215,6 +1503,20 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
  * Reference to a field of type 'Int[]'
  */
 export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
+ * Reference to a field of type 'InvoiceReminderType'
+ */
+export type EnumInvoiceReminderTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InvoiceReminderType'>
+    
+
+
+/**
+ * Reference to a field of type 'InvoiceReminderType[]'
+ */
+export type ListEnumInvoiceReminderTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InvoiceReminderType[]'>
     
 
 
@@ -1415,6 +1717,9 @@ export type GlobalOmitConfig = {
   customer?: Prisma.CustomerOmit
   invoice?: Prisma.InvoiceOmit
   lineItem?: Prisma.LineItemOmit
+  invoiceSettings?: Prisma.InvoiceSettingsOmit
+  invoiceReminderSettings?: Prisma.InvoiceReminderSettingsOmit
+  invoiceReminder?: Prisma.InvoiceReminderOmit
   payment?: Prisma.PaymentOmit
   paymentProviderConfig?: Prisma.PaymentProviderConfigOmit
 }

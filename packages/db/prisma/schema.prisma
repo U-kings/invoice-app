@@ -11,37 +11,54 @@ datasource db {
 }
 
 model User {
-  id                       String           @id @default(uuid())
+  id                       String                   @id @default(uuid())
   firstName                String
   middleName               String?
   lastName                 String
   class                    String?
-  email                    String           @unique
+  email                    String                   @unique
   phoneNumber              String?
   password                 String?
-  googleId                 String?          @unique
-  role                     String?          @default("USER")
-  terms                    Boolean          @default(false)
-  isVerified               Boolean          @default(false)
+  googleId                 String?                  @unique
+  role                     String?                  @default("USER")
+  terms                    Boolean                  @default(false)
+  isVerified               Boolean                  @default(false)
   verificationToken        String?
   verificationTokenExpires DateTime?
-  resetToken               String?          @unique
+  resetToken               String?                  @unique
   resetTokenExpires        DateTime?
-  createdAt                DateTime         @default(now())
-  updatedAt                DateTime         @updatedAt
+  createdAt                DateTime                 @default(now())
+  updatedAt                DateTime                 @updatedAt
   businessProfile          BusinessProfile?
   customers                Customer[]
   invoices                 Invoice[]
+  invoiceReminderSettings  InvoiceReminderSettings?
+  invoiceSettings          InvoiceSettings?
+  invoiceReminders         InvoiceReminder[]
 }
 
 model BusinessProfile {
-  id           String   @id @default(uuid())
-  userId       String   @unique
+  id     String @id @default(uuid())
+  userId String @unique
+
   businessName String
-  countryCode  String // NG, US, GB, etc.
-  currency     String // NGN, USD, GBP, etc.
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  countryCode  String
+  currency     String
+
+  email   String?
+  phone   String?
+  website String?
+
+  address    String?
+  city       String?
+  state      String?
+  postalCode String?
+
+  taxId   String?
+  logoUrl String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -59,28 +76,31 @@ model Customer {
 }
 
 model Invoice {
-  id            String        @id @default(uuid())
-  invoiceNumber String        @unique
-  userId        String
-  customerId    String
-  status        InvoiceStatus @default(DRAFT)
-  currency      String
-  issueDate     DateTime
-  dueDate       DateTime
-  paymentTerm   String?
-  discount      Decimal       @default(0) @db.Decimal(10, 2)
-  taxRate       Decimal       @default(0) @db.Decimal(5, 2)
-  notes         String?
-  sentAt        DateTime?
-  paidAt        DateTime?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  publicToken   String        @unique @default(uuid())
-  cancelledAt   DateTime?
-  customer      Customer      @relation(fields: [customerId], references: [id])
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  lineItems     LineItem[]
-  payments      Payment[]
+  id               String            @id @default(uuid())
+  invoiceNumber    String
+  userId           String
+  customerId       String
+  status           InvoiceStatus     @default(DRAFT)
+  currency         String
+  issueDate        DateTime
+  dueDate          DateTime
+  paymentTerm      String?
+  discount         Decimal           @default(0) @db.Decimal(10, 2)
+  taxRate          Decimal           @default(0) @db.Decimal(5, 2)
+  notes            String?
+  sentAt           DateTime?
+  paidAt           DateTime?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  publicToken      String            @unique @default(uuid())
+  cancelledAt      DateTime?
+  customer         Customer          @relation(fields: [customerId], references: [id])
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lineItems        LineItem[]
+  payments         Payment[]
+  invoiceReminders InvoiceReminder[]
+
+  @@unique([userId, invoiceNumber])
 }
 
 model LineItem {
@@ -91,6 +111,87 @@ model LineItem {
   rate        Decimal @db.Decimal(10, 2)
   name        String
   invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
+model InvoiceSettings {
+  id String @id @default(uuid())
+
+  userId String @unique
+
+  // Numbering
+  invoiceNumberPrefix String @default("INV-")
+  nextInvoiceNumber   Int    @default(1)
+
+  // Defaults
+  defaultCurrency    String  @default("NGN")
+  defaultPaymentTerm String  @default("Due-on-receipt")
+  defaultTaxRate     Decimal @default(0) @db.Decimal(5, 2)
+  defaultDiscount    Decimal @default(0) @db.Decimal(5, 2)
+
+  // Content
+  defaultNotes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model InvoiceReminderSettings {
+  id String @id @default(uuid())
+
+  userId String @unique
+
+  enabled Boolean @default(true)
+
+  beforeDueEnabled Boolean @default(true)
+  beforeDueDays    Int     @default(3)
+
+  dueDateEnabled Boolean @default(true)
+
+  overdueEnabled      Boolean @default(true)
+  overdueAfterDays    Int     @default(1)
+  overdueRepeatDays   Int     @default(7)
+  maxOverdueReminders Int     @default(3)
+
+  emailSubject String?
+  emailMessage String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model InvoiceReminder {
+  id String @id @default(uuid())
+
+  invoiceId String
+  userId    String
+
+  type         InvoiceReminderType
+  scheduledFor DateTime
+
+  attempts  Int     @default(0)
+  lastError String?
+
+  processingAt DateTime?
+  sentAt       DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([scheduledFor, sentAt])
+  @@index([invoiceId])
+  @@index([userId])
+}
+
+enum InvoiceReminderType {
+  BEFORE_DUE
+  DUE_DATE
+  OVERDUE
 }
 
 model Payment {

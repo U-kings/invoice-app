@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
 import jwt from "jsonwebtoken"
 
-import { prisma } from "@repo/db"
+import { Prisma, prisma } from "@repo/db"
 import { sendInvoice } from "@/lib/invoices/send-invoice"
+
+import { getInvoiceReminderSettings } from "@/lib/invoice-reminders/get-reminder-settings"
+import { scheduleInvoiceReminders } from "@/lib/invoice-reminders/schedule-invoice-reminders"
 
 interface AuthPayload {
   userId: string
@@ -262,7 +265,9 @@ export async function POST(req: NextRequest) {
       decoded = jwt.verify(token, jwtSecret) as AuthPayload
     } catch {
       return NextResponse.json(
-        { error: "Invalid or expired authentication token" },
+        {
+          error: "Invalid or expired authentication token",
+        },
         { status: 401 }
       )
     }
@@ -271,7 +276,9 @@ export async function POST(req: NextRequest) {
 
     if (!userId) {
       return NextResponse.json(
-        { error: "Invalid authentication token" },
+        {
+          error: "Invalid authentication token",
+        },
         { status: 401 }
       )
     }
@@ -288,24 +295,16 @@ export async function POST(req: NextRequest) {
       issueDate,
       dueDate,
       paymentTerm,
-      discount = 0,
-      taxRate = 0,
+      discount,
+      taxRate,
       notes,
       items,
-      status = "DRAFT",
       send = false,
     } = body
 
     // --------------------------------------------------
     // 3. Basic validation
     // --------------------------------------------------
-
-    if (status !== "DRAFT" && status !== "SENT") {
-      return NextResponse.json(
-        { error: "Invalid invoice status" },
-        { status: 400 }
-      )
-    }
 
     if (!customerId) {
       return NextResponse.json(
@@ -314,29 +313,86 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    if (!currency) {
-      return NextResponse.json(
-        { error: "Currency is required" },
-        { status: 400 }
-      )
-    }
-
     if (!issueDate || !dueDate) {
       return NextResponse.json(
-        { error: "Issue date and due date are required" },
+        {
+          error: "Issue date and due date are required",
+        },
         { status: 400 }
       )
     }
 
     if (!Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
-        { error: "At least one invoice item is required" },
+        {
+          error: "At least one invoice item is required",
+        },
         { status: 400 }
       )
     }
 
     // --------------------------------------------------
-    // 4. Validate dates
+    // 4. Load invoice settings
+    // --------------------------------------------------
+
+    const invoiceSettings = await prisma.invoiceSettings.findUnique({
+      where: {
+        userId,
+      },
+    })
+
+    // --------------------------------------------------
+    // 5. Resolve defaults
+    // --------------------------------------------------
+
+    const finalCurrency = currency || invoiceSettings?.defaultCurrency || "NGN"
+
+    const finalPaymentTerm =
+      paymentTerm || invoiceSettings?.defaultPaymentTerm || "Due-on-receipt"
+
+    const finalTaxRate =
+      typeof taxRate === "number"
+        ? taxRate
+        : Number(invoiceSettings?.defaultTaxRate ?? 0)
+
+    const finalDiscount =
+      typeof discount === "number"
+        ? discount
+        : Number(invoiceSettings?.defaultDiscount ?? 0)
+
+    const finalNotes = notes?.trim() || invoiceSettings?.defaultNotes || null
+
+    // --------------------------------------------------
+    // 6. Validate resolved values
+    // --------------------------------------------------
+
+    if (!finalCurrency.trim()) {
+      return NextResponse.json(
+        { error: "Currency is required" },
+        { status: 400 }
+      )
+    }
+
+    if (
+      typeof finalDiscount !== "number" ||
+      !Number.isFinite(finalDiscount) ||
+      finalDiscount < 0 ||
+      finalDiscount > 100
+    ) {
+      return NextResponse.json({ error: "Invalid discount" }, { status: 400 })
+    }
+
+    if (
+      typeof finalTaxRate !== "number" ||
+      !Number.isFinite(finalTaxRate) ||
+      finalTaxRate < 0 ||
+      finalTaxRate > 100
+    ) {
+      return NextResponse.json({ error: "Invalid tax rate" }, { status: 400 })
+    }
+
+    // --------------------------------------------------
+    // 7. Validate dates
     // --------------------------------------------------
 
     const parsedIssueDate = new Date(issueDate)
@@ -354,34 +410,32 @@ export async function POST(req: NextRequest) {
 
     if (parsedDueDate < parsedIssueDate) {
       return NextResponse.json(
-        { error: "Due date cannot be before issue date" },
+        {
+          error: "Due date cannot be before issue date",
+        },
         { status: 400 }
       )
     }
 
     // --------------------------------------------------
-    // 5. Validate numbers
+    // 8. Validate line items
     // --------------------------------------------------
-
-    if (typeof discount !== "number" || discount < 0) {
-      return NextResponse.json({ error: "Invalid discount" }, { status: 400 })
-    }
-
-    if (typeof taxRate !== "number" || taxRate < 0) {
-      return NextResponse.json({ error: "Invalid tax rate" }, { status: 400 })
-    }
 
     for (const item of items) {
       if (!item.description || typeof item.description !== "string") {
         return NextResponse.json(
-          { error: "Each item requires a description" },
+          {
+            error: "Each item requires a description",
+          },
           { status: 400 }
         )
       }
 
       if (!Number.isInteger(item.quantity) || item.quantity <= 0) {
         return NextResponse.json(
-          { error: "Item quantity must be a positive integer" },
+          {
+            error: "Item quantity must be a positive integer",
+          },
           { status: 400 }
         )
       }
@@ -392,14 +446,25 @@ export async function POST(req: NextRequest) {
         !Number.isFinite(item.rate)
       ) {
         return NextResponse.json(
-          { error: "Item rate must be a valid number" },
+          {
+            error: "Item rate must be a valid number",
+          },
+          { status: 400 }
+        )
+      }
+
+      if (!item.name || typeof item.name !== "string") {
+        return NextResponse.json(
+          {
+            error: "Each item requires a name",
+          },
           { status: 400 }
         )
       }
     }
 
     // --------------------------------------------------
-    // 6. Verify customer belongs to authenticated user
+    // 9. Verify customer belongs to user
     // --------------------------------------------------
 
     const customer = await prisma.customer.findFirst({
@@ -414,67 +479,135 @@ export async function POST(req: NextRequest) {
     }
 
     // --------------------------------------------------
-    // 7. Generate invoice number
+    // 10. Create invoice transactionally
     // --------------------------------------------------
 
-    const invoiceNumber = await generateInvoiceNumber()
+    const reminderSettings = await getInvoiceReminderSettings(userId)
 
-    // --------------------------------------------------
-    // 8. Create invoice + items transactionally
-    // --------------------------------------------------
+    const invoice = await prisma.$transaction(
+      async (tx) => {
+        // ----------------------------------------------
+        // Get or create invoice settings
+        // ----------------------------------------------
 
-    const invoice = await prisma.$transaction(async (tx) => {
-      const createdInvoice = await tx.invoice.create({
-        data: {
-          invoiceNumber,
-
-          userId,
-
-          customerId,
-
-          // IMPORTANT:
-          // The client cannot choose the initial status.
-          status: "DRAFT",
-
-          currency,
-
-          issueDate: parsedIssueDate,
-
-          dueDate: parsedDueDate,
-
-          paymentTerm: paymentTerm || null,
-
-          discount,
-
-          taxRate,
-
-          notes: notes?.trim() || null,
-
-          sentAt: status === "SENT" ? new Date() : null,
-
-          lineItems: {
-            create: items.map((item) => ({
-              name: item.name.trim(),
-
-              description: item.description.trim(),
-
-              quantity: item.quantity,
-
-              rate: item.rate,
-            })),
+        const settings = await tx.invoiceSettings.upsert({
+          where: {
+            userId,
           },
-        },
 
-        include: {
-          customer: true,
-          lineItems: true,
-        },
-      })
+          create: {
+            userId,
+            invoiceNumberPrefix: "INV-",
+            nextInvoiceNumber: 1,
+            defaultCurrency: "NGN",
+            defaultPaymentTerm: "Due-on-receipt",
+            defaultTaxRate: 0,
+            defaultDiscount: 0,
+            defaultNotes: null,
+          },
 
-      return createdInvoice
-    })
+          update: {},
+        })
+
+        // ----------------------------------------------
+        // Reserve invoice number
+        // ----------------------------------------------
+
+        const invoiceNumber = `${settings.invoiceNumberPrefix}${settings.nextInvoiceNumber}`
+
+        // ----------------------------------------------
+        // Increment counter
+        // ----------------------------------------------
+
+        await tx.invoiceSettings.update({
+          where: {
+            userId,
+          },
+
+          data: {
+            nextInvoiceNumber: {
+              increment: 1,
+            },
+          },
+        })
+
+        // ----------------------------------------------
+        // Create invoice
+        // ----------------------------------------------
+
+        const createdInvoice = await tx.invoice.create({
+          data: {
+            invoiceNumber,
+
+            userId,
+
+            customerId,
+
+            status: "DRAFT",
+
+            currency: finalCurrency,
+
+            issueDate: parsedIssueDate,
+
+            dueDate: parsedDueDate,
+
+            paymentTerm: finalPaymentTerm || null,
+
+            discount: finalDiscount,
+
+            taxRate: finalTaxRate,
+
+            notes: finalNotes,
+
+            sentAt: null,
+
+            lineItems: {
+              create: items.map((item) => ({
+                name: item.name.trim(),
+                description: item.description.trim(),
+                quantity: item.quantity,
+                rate: item.rate,
+              })),
+            },
+          },
+
+          include: {
+            customer: true,
+            lineItems: true,
+          },
+        })
+
+        // ----------------------------------------------
+        // Schedule reminders
+        // ----------------------------------------------
+
+        if (send) {
+          await scheduleInvoiceReminders({
+            tx,
+            invoiceId: createdInvoice.id,
+            userId,
+            issueDate: parsedIssueDate,
+            dueDate: parsedDueDate,
+            settings: reminderSettings,
+          })
+        }
+
+        return createdInvoice
+      },
+      {
+        isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      }
+    )
+
+    // --------------------------------------------------
+    // Send invoice if requested
+    // --------------------------------------------------
 
     if (send) {
+      // ----------------------------------------------
+      // 1. Send invoice
+      // ----------------------------------------------
+
       const sentInvoice = await sendInvoice(invoice.id, userId)
 
       return NextResponse.json(
@@ -487,12 +620,13 @@ export async function POST(req: NextRequest) {
     }
 
     // --------------------------------------------------
-    // 9. Return created invoice
+    // 12. Return created invoice
     // --------------------------------------------------
 
     return NextResponse.json(
       {
         message: "Invoice created successfully",
+
         invoice,
       },
       { status: 201 }
@@ -510,17 +644,17 @@ export async function POST(req: NextRequest) {
   }
 }
 
-async function generateInvoiceNumber() {
-  const year = new Date().getFullYear()
+// async function generateInvoiceNumber() {
+//   const year = new Date().getFullYear()
 
-  const count = await prisma.invoice.count({
-    where: {
-      createdAt: {
-        gte: new Date(`${year}-01-01T00:00:00.000Z`),
-        lt: new Date(`${year + 1}-01-01T00:00:00.000Z`),
-      },
-    },
-  })
+//   const count = await prisma.invoice.count({
+//     where: {
+//       createdAt: {
+//         gte: new Date(`${year}-01-01T00:00:00.000Z`),
+//         lt: new Date(`${year + 1}-01-01T00:00:00.000Z`),
+//       },
+//     },
+//   })
 
-  return `INV-${year}-${String(count + 1).padStart(4, "0")}`
-}
+//   return `INV-${year}-${String(count + 1).padStart(4, "0")}`
+// }

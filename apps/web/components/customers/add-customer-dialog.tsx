@@ -87,39 +87,39 @@ export function AddCustomerDialog({
   }, [open, reset])
 
   function onSubmit(values: CustomerFormValues) {
-    // if (isEditing) {
-    //   const payload = {
-    //     customerId: customerId,
-    //     name: values.name,
-    //     email: values.email,
-    //   }
-    //   updateCustomerMutation.mutate(payload, {
-    //     onSuccess: (customer) => {
-    //       toast.add({
-    //         title: "Customer Updated",
-    //         description: `${customer.name} has been updated.`,
-    //         type: "success",
-    //       })
+    if (isEditing) {
+      const payload = {
+        customerId: customerId,
+        name: values.name,
+        email: values.email,
+      }
+      updateCustomerMutation.mutate(payload, {
+        onSuccess: (customer) => {
+          toast.add({
+            title: "Customer Updated",
+            description: `${customer.name} has been updated.`,
+            type: "success",
+          })
 
-    //       reset()
-    //       onOpenChange(false)
-    //       router.replace(
-    //         `/dashboard/customers?id=${customerId}&email=${customerEmail}&edit=false`
-    //       )
-    //     },
+          reset()
+          onOpenChange(false)
+          router.replace(
+            `/dashboard/customers?id=${customerId}&email=${customerEmail}&edit=false`
+          )
+        },
 
-    //     onError: (error) => {
-    //       toast.add({
-    //         title: "Failed to Update customer",
-    //         description:
-    //           error instanceof Error
-    //             ? error.message
-    //             : "Something went wrong while updating the customer.",
-    //         type: "error",
-    //       })
-    //     },
-    //   })
-    // } else {
+        onError: (error) => {
+          toast.add({
+            title: "Failed to Update customer",
+            description:
+              error instanceof Error
+                ? error.message
+                : "Something went wrong while updating the customer.",
+            type: "error",
+          })
+        },
+      })
+    } else {
       createCustomerMutation.mutate(values, {
         onSuccess: (customer) => {
           toast.add({
@@ -143,7 +143,7 @@ export function AddCustomerDialog({
           })
         },
       })
-    // }
+    }
   }
 
   return (

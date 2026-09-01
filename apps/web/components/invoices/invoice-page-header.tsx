@@ -22,11 +22,13 @@ export function InvoicePageHeader() {
         </p>
       </div>
 
-      <Button className="w-full bg-[#2EAFB4] text-white hover:bg-[#26969a] sm:w-auto">
-        <Link href="/dashboard/invoices/new" className="flex">
-          <Plus className="mr-2 h-4 w-4" />
-          <span className="flex items-center leading-0">Create invoice</span>
-        </Link>
+      <Button
+        nativeButton={false}
+        className="w-full bg-[#2EAFB4] text-white hover:bg-[#26969a] sm:w-auto"
+        render={<Link href="/dashboard/invoices/new" className="flex" />}
+      >
+        <Plus className="mr-2 h-4 w-4" />
+        <span className="flex items-center leading-0">Create invoice</span>
       </Button>
     </motion.div>
   )

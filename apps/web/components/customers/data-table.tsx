@@ -61,7 +61,7 @@ export function CustomerDataTable({
     page,
     pageSize,
     search: debouncedSearch,
-    status : status,
+    status: status,
   })
   //   const data = { data: [], pagination: { totalPages: 1 } }
 
@@ -309,7 +309,7 @@ export function CustomerDataTable({
                           variant="outline"
                           onClick={() => setAddCustomerOpen(true)}
                           //   href="/dashboard/customers/new"
-                          className="inline-flex h-8 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium transition-colors hover:bg-primary/90"
+                          className="inline-flex h-8 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-gray-200 transition-colors hover:bg-primary/90 hover:text-gray-200"
                         >
                           Add customer
                         </Button>

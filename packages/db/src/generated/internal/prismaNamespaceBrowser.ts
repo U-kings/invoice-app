@@ -56,6 +56,9 @@ export const ModelName = {
   Customer: 'Customer',
   Invoice: 'Invoice',
   LineItem: 'LineItem',
+  InvoiceSettings: 'InvoiceSettings',
+  InvoiceReminderSettings: 'InvoiceReminderSettings',
+  InvoiceReminder: 'InvoiceReminder',
   Payment: 'Payment',
   PaymentProviderConfig: 'PaymentProviderConfig'
 } as const
@@ -106,6 +109,15 @@ export const BusinessProfileScalarFieldEnum = {
   businessName: 'businessName',
   countryCode: 'countryCode',
   currency: 'currency',
+  email: 'email',
+  phone: 'phone',
+  website: 'website',
+  address: 'address',
+  city: 'city',
+  state: 'state',
+  postalCode: 'postalCode',
+  taxId: 'taxId',
+  logoUrl: 'logoUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -160,6 +172,60 @@ export const LineItemScalarFieldEnum = {
 } as const
 
 export type LineItemScalarFieldEnum = (typeof LineItemScalarFieldEnum)[keyof typeof LineItemScalarFieldEnum]
+
+
+export const InvoiceSettingsScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  invoiceNumberPrefix: 'invoiceNumberPrefix',
+  nextInvoiceNumber: 'nextInvoiceNumber',
+  defaultCurrency: 'defaultCurrency',
+  defaultPaymentTerm: 'defaultPaymentTerm',
+  defaultTaxRate: 'defaultTaxRate',
+  defaultDiscount: 'defaultDiscount',
+  defaultNotes: 'defaultNotes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type InvoiceSettingsScalarFieldEnum = (typeof InvoiceSettingsScalarFieldEnum)[keyof typeof InvoiceSettingsScalarFieldEnum]
+
+
+export const InvoiceReminderSettingsScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  enabled: 'enabled',
+  beforeDueEnabled: 'beforeDueEnabled',
+  beforeDueDays: 'beforeDueDays',
+  dueDateEnabled: 'dueDateEnabled',
+  overdueEnabled: 'overdueEnabled',
+  overdueAfterDays: 'overdueAfterDays',
+  overdueRepeatDays: 'overdueRepeatDays',
+  maxOverdueReminders: 'maxOverdueReminders',
+  emailSubject: 'emailSubject',
+  emailMessage: 'emailMessage',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type InvoiceReminderSettingsScalarFieldEnum = (typeof InvoiceReminderSettingsScalarFieldEnum)[keyof typeof InvoiceReminderSettingsScalarFieldEnum]
+
+
+export const InvoiceReminderScalarFieldEnum = {
+  id: 'id',
+  invoiceId: 'invoiceId',
+  userId: 'userId',
+  type: 'type',
+  scheduledFor: 'scheduledFor',
+  attempts: 'attempts',
+  lastError: 'lastError',
+  processingAt: 'processingAt',
+  sentAt: 'sentAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type InvoiceReminderScalarFieldEnum = (typeof InvoiceReminderScalarFieldEnum)[keyof typeof InvoiceReminderScalarFieldEnum]
 
 
 export const PaymentScalarFieldEnum = {

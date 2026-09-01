@@ -33,7 +33,7 @@ import { columns } from "./columns"
 import { invoiceTableFeatures } from "./table-config"
 
 import { Search } from "lucide-react"
-import { DataTablePagination } from "./data-table-pagination"
+import { DataTablePagination } from "../common/data-table-pagination"
 import { InvoiceBulkActions } from "./invoice-bulk-actions"
 import Link from "next/link"
 import { Invoice, InvoiceStatus, useInvoices } from "@/hooks/use-invoice"

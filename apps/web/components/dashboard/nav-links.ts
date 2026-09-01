@@ -7,6 +7,7 @@ import {
   Package,
   BarChart3,
   Settings,
+  AlarmClock,
 } from "lucide-react";
 
 export const navLinks = [
@@ -44,6 +45,11 @@ export const navLinks = [
     title: "Reports",
     href: "/dashboard/reports",
     icon: BarChart3,
+  },
+  {
+    title: "Reminder Management",
+    href: "/dashboard/reminders",
+    icon: AlarmClock,
   },
   {
     title: "Settings",

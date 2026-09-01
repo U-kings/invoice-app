@@ -16,11 +16,16 @@ interface NavItemProps {
 export function NavItem({ href, title, icon: Icon }: NavItemProps) {
   const pathname = usePathname()
 
-  // const active =
-  //   pathname === href ||
-  //   pathname.startsWith(`${href}/`);
-  // const dashboardUrl: string = href?.split("/")[2] ?? ""
-  const active = pathname === href || pathname?.includes(href?.split("/")[2] ?? "Default")
+  const isActive = (href: string) => {
+    if (href === "/dashboard") {
+      return pathname === "/dashboard"
+    }
+
+    return pathname === href || pathname.startsWith(`${href}/`)
+  }
+
+  const active = isActive(href)
+
   return (
     <Link href={href}>
       <motion.div
@@ -33,8 +38,8 @@ export function NavItem({ href, title, icon: Icon }: NavItemProps) {
         className={cn(
           "group flex items-center gap-3 rounded-2xl px-4 py-3 transition-all duration-300",
           active
-            // ? "bg-[#2EAFB4] text-white shadow-lg shadow-[#2EAFB4]/25"
-            ? "bg-[#2EAFB4] text-white "
+            ? // ? "bg-[#2EAFB4] text-white shadow-lg shadow-[#2EAFB4]/25"
+              "bg-[#2EAFB4] text-white"
             : "text-muted-foreground hover:bg-muted hover:text-foreground"
         )}
       >

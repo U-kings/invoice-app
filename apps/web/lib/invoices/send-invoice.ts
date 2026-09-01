@@ -52,7 +52,8 @@ export async function sendInvoice(invoiceId: string, userId: string) {
   // ---------------------------------------------
 
   const subtotal = invoice.lineItems.reduce(
-    (total, item) => total + Number(item.quantity) * Number(item.rate),
+    (total, item) =>
+      total + Number(item.quantity) * Number(item.rate),
     0
   )
 
