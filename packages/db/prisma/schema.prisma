@@ -11,30 +11,34 @@ datasource db {
 }
 
 model User {
-  id                       String                   @id @default(uuid())
-  firstName                String
-  middleName               String?
-  lastName                 String
-  class                    String?
-  email                    String                   @unique
-  phoneNumber              String?
-  password                 String?
-  googleId                 String?                  @unique
-  role                     String?                  @default("USER")
-  terms                    Boolean                  @default(false)
-  isVerified               Boolean                  @default(false)
-  verificationToken        String?
-  verificationTokenExpires DateTime?
-  resetToken               String?                  @unique
-  resetTokenExpires        DateTime?
-  createdAt                DateTime                 @default(now())
-  updatedAt                DateTime                 @updatedAt
-  businessProfile          BusinessProfile?
-  customers                Customer[]
-  invoices                 Invoice[]
-  invoiceReminderSettings  InvoiceReminderSettings?
-  invoiceSettings          InvoiceSettings?
-  invoiceReminders         InvoiceReminder[]
+  id                         String                      @id @default(uuid())
+  firstName                  String
+  middleName                 String?
+  lastName                   String
+  class                      String?
+  email                      String                      @unique
+  phoneNumber                String?
+  password                   String?
+  googleId                   String?                     @unique
+  role                       String?                     @default("USER")
+  terms                      Boolean                     @default(false)
+  isVerified                 Boolean                     @default(false)
+  verificationToken          String?
+  verificationTokenExpires   DateTime?
+  resetToken                 String?                     @unique
+  resetTokenExpires          DateTime?
+  profileImageUrl            String?
+  profileImagePublicId       String?
+  createdAt                  DateTime                    @default(now())
+  updatedAt                  DateTime                    @updatedAt
+  businessProfile            BusinessProfile?
+  customers                  Customer[]
+  invoices                   Invoice[]
+  invoiceReminderSettings    InvoiceReminderSettings?
+  invoiceSettings            InvoiceSettings?
+  invoiceReminders           InvoiceReminder[]
+  paymentSettings            PaymentSettings?
+  paymentProviderConnections PaymentProviderConnection[]
 }
 
 model BusinessProfile {
@@ -54,8 +58,9 @@ model BusinessProfile {
   state      String?
   postalCode String?
 
-  taxId   String?
-  logoUrl String?
+  taxId        String?
+  logoUrl      String?
+  logoPublicId String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -68,6 +73,8 @@ model Customer {
   userId      String
   name        String
   email       String
+  phone       String?
+  address     String?
   status      CustomerStatus @default(ACTIVE)
   countryCode String?
   createdAt   DateTime       @default(now())
@@ -192,6 +199,70 @@ enum InvoiceReminderType {
   BEFORE_DUE
   DUE_DATE
   OVERDUE
+}
+
+model PaymentSettings {
+  id     String @id @default(uuid())
+  userId String @unique
+
+  // Online payment providers
+  paystackEnabled Boolean @default(false)
+  stripeEnabled   Boolean @default(false)
+  paypalEnabled   Boolean @default(false)
+
+  // Payment methods
+  cardPayments Boolean @default(true)
+  bankTransfer Boolean @default(true)
+  cashPayments Boolean @default(false)
+
+  // Payment behavior
+  onlinePayments               Boolean @default(true)
+  paymentLinks                 Boolean @default(true)
+  partialPayments              Boolean @default(false)
+  automaticPaymentConfirmation Boolean @default(true)
+
+  // Bank transfer information
+  bankName              String?
+  accountName           String?
+  accountNumber         String?
+  additionalInformation String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum PaymentConnectionStatus {
+  PENDING
+  CONNECTED
+  DISCONNECTED
+  ERROR
+}
+
+model PaymentProviderConnection {
+  id       String                  @id @default(uuid())
+  userId   String
+  provider PaymentProvider
+  status   PaymentConnectionStatus @default(PENDING)
+
+  providerAccountId  String?
+  providerMerchantId String?
+
+  accessToken    String?
+  refreshToken   String?
+  tokenExpiresAt DateTime?
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider])
+  @@index([provider])
+  @@index([providerAccountId])
 }
 
 model Payment {

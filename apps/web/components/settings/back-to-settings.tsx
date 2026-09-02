@@ -9,6 +9,7 @@ export default function BackToSettings() {
   return (
     <>
       <Button
+        nativeButton={false}
         variant="ghost"
         render={(props) => (
           <Link

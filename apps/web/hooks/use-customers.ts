@@ -13,6 +13,8 @@ export interface CustomerListItem {
   id: string
   name: string
   email: string
+  phone: string
+  address: string
   status: CustomerStatus
   createdAt: string
   invoiceCount: number

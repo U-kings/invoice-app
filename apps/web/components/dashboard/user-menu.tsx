@@ -24,36 +24,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu"
-import { useRouter } from "next/navigation"
-import { useTransition } from "react"
 import { useAuthStore } from "@/app/store/useAuthStore"
 import { LogoutButton } from "./logout-button"
+import { useProfile } from "@/hooks/use-profile"
 
 export function UserMenu() {
-  const userData = useAuthStore((state) => state.user)
+  // const userData = useAuthStore((state) => state.user)
 
-  const router = useRouter()
+  const profileQuery = useProfile()
 
-  // Inside your Client Component:
-  const [isPending, startTransition] = useTransition()
-
-  const handleLogout = async () => {
-    try {
-      // 1. Clear the HttpOnly session cookie on the server
-      await fetch("/api/auth/logout", {
-        method: "POST",
-        credentials: "include",
-      })
-
-      // 2. Safe navigation wrapper to clear the layout caches seamlessly
-      startTransition(() => {
-        router.push("/")
-        router.refresh()
-      })
-    } catch (error) {
-      console.error("Logout failed:", error)
-    }
-  }
+  const userData = profileQuery.data
 
   return (
     <DropdownMenu>
@@ -61,7 +41,8 @@ export function UserMenu() {
         <div className="cursor-pointer rounded-full focus:outline-none">
           {/* <button className="rounded-full focus:outline-none"> */}
           <Avatar className="h-10 w-10">
-            <AvatarImage src="/avatars/avatar-user.png" />
+            <AvatarImage src={userData?.profileImageUrl ?? ""} />
+            {/* <AvatarImage src="/avatars/avatar-user.png" /> */}
 
             <AvatarFallback>
               {userData?.firstName?.charAt(0)}

@@ -41,3 +41,21 @@ export const invoiceTableFeatures = tableFeatures({
     status: statusFilter,
   },
 });
+
+export const paymentTableFeatures = tableFeatures({
+  columnFilteringFeature,
+  columnVisibilityFeature,
+  globalFilteringFeature,
+  rowPaginationFeature,
+  rowSelectionFeature,
+  rowSortingFeature,
+
+  filteredRowModel: createFilteredRowModel(),
+  paginatedRowModel: createPaginatedRowModel(),
+  sortedRowModel: createSortedRowModel(),
+
+  filterFns: {
+    includesString: filterFn_includesString,
+    status: statusFilter,
+  },
+});

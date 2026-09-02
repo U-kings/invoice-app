@@ -1,8 +1,27 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { flexRender, useTable } from "@tanstack/react-table"
+import {
+  ArrowDown,
+  ArrowUp,
+  Check,
+  Columns3,
+  ListFilter,
+  Search,
+} from "lucide-react"
 
 import { Input } from "@workspace/ui/components/input"
+import { Button } from "@workspace/ui/components/button"
+
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@workspace/ui/components/dropdown-menu"
 
 import {
   Table,
@@ -13,117 +32,118 @@ import {
   TableRow,
 } from "@workspace/ui/components/table"
 
-import { Check, Columns3 } from "lucide-react"
+import { columns } from "./columns"
+import { paymentTableFeatures } from "../common/table-config"
+
+import { DataTablePagination } from "../common/data-table-pagination"
+import { PaymentBulkActions } from "../common/bulk-actions"
 
 import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@workspace/ui/components/dropdown-menu"
+  PaymentStatus,
+  usePayments,
+} from "@/hooks/use-payment"
 
-import { Button } from "@workspace/ui/components/button"
-
-import { ArrowDown, ArrowUp, ListFilter } from "lucide-react"
-
-import { columns } from "./columns"
-import { invoiceTableFeatures } from "../common/table-config"
-
-import { Search } from "lucide-react"
-import { DataTablePagination } from "../common/data-table-pagination"
-import { InvoiceBulkActions } from "../common/bulk-actions"
-import Link from "next/link"
-import { Invoice, InvoiceStatus, useInvoices } from "@/hooks/use-invoice"
-import { useEffect, useState } from "react"
 import { useDebounce } from "@/hooks/use-debounce"
 
-// interface DataTableProps {
-//   data: Invoice[] | undefined
-// }
-
-// export function DataTable({ data }: DataTableProps) {
-export function DataTable() {
+export function PaymentDataTable() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [searchInput, setSearchInput] = useState("")
-  const [status, setStatus] = useState<InvoiceStatus | undefined>(undefined)
+  const [status, setStatus] = useState<PaymentStatus | undefined>(
+    undefined
+  )
+
   const debouncedSearch = useDebounce(searchInput, 400)
 
-  // Reset to first page on search or status change
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1)
   }, [debouncedSearch, status])
 
-  // 2. Fetch server data using your TanStack Query hook
-  const { data, isLoading, isFetching } = useInvoices({
+  const {
+    data,
+    isLoading,
+    isFetching,
+  } = usePayments({
     page,
     pageSize,
     search: debouncedSearch,
     status,
   })
 
-  // Extract the response items and the server metadata
-  const invoicesList = data?.data ?? []
+  const paymentsList = data?.payments ?? []
   const serverPagination = data?.pagination
 
   const table = useTable(
     {
-      features: invoiceTableFeatures,
-      data: invoicesList,
-      // data: data ?? [],
+      features: paymentTableFeatures,
+      data: paymentsList,
       columns,
+
       globalFilterFn: "includesString",
 
-      // Tell your table architecture to listen to remote state changes
       state: {
-        globalFilter: searchInput, // Feeds back into table.state.globalFilter for the Input
-        columnFilters: status ? [{ id: "status", value: status }] : [], // Maps to statusColumn filter value
+        globalFilter: searchInput,
+
+        columnFilters: status
+          ? [{ id: "status", value: status }]
+          : [],
+
         pagination: {
-          pageIndex: page - 1, // Tables use 0-indexed values usually
-          pageSize: pageSize,
+          pageIndex: page - 1,
+          pageSize,
         },
       },
-      // Mirror structural limits from your server response meta
+
       pageCount: serverPagination?.totalPages ?? -1,
 
       manualFiltering: true,
       manualPagination: true,
 
-      // Intercept when table.setGlobalFilter() is executed by the search Input component
       onGlobalFilterChange: (updater) => {
         const nextValue =
-          typeof updater === "function" ? updater(searchInput) : updater
+          typeof updater === "function"
+            ? updater(searchInput)
+            : updater
+
         setSearchInput(nextValue)
       },
 
-      // Intercept when statusColumn.setFilterValue() is executed by the DropdownMenu component
       onColumnFiltersChange: (updater) => {
-        const currentFilters = status ? [{ id: "status", value: status }] : []
+        const currentFilters = status
+          ? [{ id: "status", value: status }]
+          : []
+
         const nextFilters =
-          typeof updater === "function" ? updater(currentFilters) : updater
-
-        // Look for the "status" column filter in the new filters array
-        const statusFilterObj = nextFilters.find((f) => f.id === "status")
-        setStatus(statusFilterObj?.value as InvoiceStatus | undefined)
-      },
-
-      // Intercept navigation button actions (nextPage, previousPage) executed by sub-components
-      onPaginationChange: (updater) => {
-        // Handle both functional updaters and plain object assignments
-        const nextState =
           typeof updater === "function"
-            ? updater({ pageIndex: page - 1, pageSize })
+            ? updater(currentFilters)
             : updater
 
-        // Translate 0-index table position back to 1-index API query state
+        const statusFilterObj = nextFilters.find(
+          (filter) => filter.id === "status"
+        )
+
+        setStatus(
+          statusFilterObj?.value as
+            | PaymentStatus
+            | undefined
+        )
+      },
+
+      onPaginationChange: (updater) => {
+        const nextState =
+          typeof updater === "function"
+            ? updater({
+                pageIndex: page - 1,
+                pageSize,
+              })
+            : updater
+
         setPage(nextState.pageIndex + 1)
         setPageSize(nextState.pageSize)
       },
     },
+
     (state) => ({
       globalFilter: state.globalFilter,
       columnFilters: state.columnFilters,
@@ -136,13 +156,23 @@ export function DataTable() {
 
   const statusColumn = table.getColumn("status")
 
-  const statusFilter = statusColumn?.getFilterValue() as string | undefined
+  const statusFilter =
+    statusColumn?.getFilterValue() as
+      | PaymentStatus
+      | undefined
 
-  const globalFilter = table.state.globalFilter ?? ""
+  const globalFilter =
+    table.state.globalFilter ?? ""
 
-  const hasFilters = globalFilter.trim().length > 0 || Boolean(statusFilter)
+  const hasFilters =
+    globalFilter.trim().length > 0 ||
+    Boolean(statusFilter)
 
-  function SortIcon({ direction }: { direction: false | "asc" | "desc" }) {
+  function SortIcon({
+    direction,
+  }: {
+    direction: false | "asc" | "desc"
+  }) {
     if (direction === "asc") {
       return <ArrowUp className="h-3.5 w-3.5" />
     }
@@ -157,12 +187,12 @@ export function DataTable() {
   return (
     <div className="space-y-4">
       {/* Toolbar */}
-
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative flex w-full sm:max-w-sm">
           <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+
           <Input
-            placeholder="Search invoices..."
+            placeholder="Search payments..."
             value={table.state.globalFilter ?? ""}
             onChange={(event) => {
               table.setGlobalFilter(event.target.value)
@@ -172,6 +202,7 @@ export function DataTable() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          {/* Status filter */}
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
@@ -187,7 +218,7 @@ export function DataTable() {
                 {statusFilter
                   ? `Status: ${
                       statusFilter.charAt(0).toUpperCase() +
-                      statusFilter.slice(1)
+                      statusFilter.slice(1).toLowerCase()
                     }`
                   : "Status"}
               </span>
@@ -199,81 +230,99 @@ export function DataTable() {
                   statusColumn?.setFilterValue(undefined)
                 }}
               >
-                <span className="flex-1">All statuses</span>
+                <span className="flex-1">
+                  All statuses
+                </span>
 
-                {statusFilter === undefined && <Check className="h-4 w-4" />}
+                {statusFilter === undefined && (
+                  <Check className="h-4 w-4" />
+                )}
               </DropdownMenuItem>
 
               <DropdownMenuItem
                 onClick={() => {
-                  statusColumn?.setFilterValue("Draft")
+                  statusColumn?.setFilterValue("PENDING")
                 }}
               >
-                <span className="flex-1">Draft</span>
-                {statusFilter === "Draft" && <Check className="h-4 w-4" />}
+                <span className="flex-1">Pending</span>
+
+                {statusFilter === "PENDING" && (
+                  <Check className="h-4 w-4" />
+                )}
               </DropdownMenuItem>
 
               <DropdownMenuItem
                 onClick={() => {
-                  statusColumn?.setFilterValue("Sent")
+                  statusColumn?.setFilterValue("SUCCESS")
                 }}
               >
-                <span className="flex-1">Sent</span>
+                <span className="flex-1">Success</span>
 
-                {statusFilter === "Sent" && <Check className="h-4 w-4" />}
+                {statusFilter === "SUCCESS" && (
+                  <Check className="h-4 w-4" />
+                )}
               </DropdownMenuItem>
 
               <DropdownMenuItem
                 onClick={() => {
-                  statusColumn?.setFilterValue("Paid")
+                  statusColumn?.setFilterValue("FAILED")
                 }}
               >
-                <span className="flex-1">Paid</span>
-                {statusFilter === "Paid" && <Check className="h-4 w-4" />}
+                <span className="flex-1">Failed</span>
+
+                {statusFilter === "FAILED" && (
+                  <Check className="h-4 w-4" />
+                )}
               </DropdownMenuItem>
 
               <DropdownMenuItem
                 onClick={() => {
-                  statusColumn?.setFilterValue("Overdue")
-                }}
-              >
-                <span className="flex-1">Overdue</span>
-
-                {statusFilter === "Overdue" && <Check className="h-4 w-4" />}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  statusColumn?.setFilterValue("Cancelled")
+                  statusColumn?.setFilterValue("CANCELLED")
                 }}
               >
                 <span className="flex-1">Cancelled</span>
 
-                {statusFilter === "Cancelled" && <Check className="h-4 w-4" />}
+                {statusFilter === "CANCELLED" && (
+                  <Check className="h-4 w-4" />
+                )}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
           {/* Column visibility */}
           <DropdownMenu>
             <DropdownMenuTrigger
-              render={<Button variant="outline" className="h-10 gap-2" />}
+              render={
+                <Button
+                  variant="outline"
+                  className="h-10 gap-2"
+                />
+              }
             >
               <Columns3 className="h-4 w-4" />
               <span>Columns</span>
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuContent
+              align="end"
+              className="w-48"
+            >
               <DropdownMenuGroup>
                 {table
                   .getAllLeafColumns()
                   .filter(
                     (column) =>
-                      column.id !== "actions" && column.id !== "select"
+                      column.id !== "actions" &&
+                      column.id !== "select"
                   )
                   .map((column) => {
-                    const header = column.columnDef.header
+                    const header =
+                      column.columnDef.header
 
                     const label =
-                      typeof header === "string" ? header : column.id
+                      typeof header === "string"
+                        ? header
+                        : column.id
 
                     return (
                       <DropdownMenuCheckboxItem
@@ -281,7 +330,9 @@ export function DataTable() {
                         checked={column.getIsVisible()}
                         disabled={!column.getCanHide()}
                         onCheckedChange={(checked) => {
-                          column.toggleVisibility(!!checked)
+                          column.toggleVisibility(
+                            !!checked
+                          )
                         }}
                       >
                         {label}
@@ -294,8 +345,11 @@ export function DataTable() {
         </div>
       </div>
 
-      <InvoiceBulkActions
-        selectedCount={table.getSelectedRowModel().rows.length}
+      {/* Bulk actions */}
+      <PaymentBulkActions
+        selectedCount={
+          table.getSelectedRowModel().rows.length
+        }
         onClear={() => {
           table.resetRowSelection()
         }}
@@ -309,36 +363,48 @@ export function DataTable() {
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
-                    const canSort = header.column.getCanSort()
+                    const canSort =
+                      header.column.getCanSort()
 
                     return (
-                      <TableHead key={header.id} className="whitespace-nowrap">
-                        {header.isPlaceholder ? null : canSort ? (
-                          <button
-                            type="button"
-                            onClick={header.column.getToggleSortingHandler()}
-                            className="inline-flex items-center gap-1.5 text-sm font-medium transition-colors hover:text-[#2EAFB4]"
-                            title={
-                              header.column.getNextSortingOrder() === "asc"
-                                ? "Sort ascending"
-                                : header.column.getNextSortingOrder() === "desc"
-                                  ? "Sort descending"
-                                  : "Clear sorting"
-                            }
-                          >
-                            {flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
+                      <TableHead
+                        key={header.id}
+                        className="whitespace-nowrap"
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : canSort
+                            ? (
+                                <button
+                                  type="button"
+                                  onClick={header.column.getToggleSortingHandler()}
+                                  className="inline-flex items-center gap-1.5 text-sm font-medium transition-colors hover:text-[#2EAFB4]"
+                                  title={
+                                    header.column.getNextSortingOrder() ===
+                                    "asc"
+                                      ? "Sort ascending"
+                                      : header.column.getNextSortingOrder() ===
+                                          "desc"
+                                        ? "Sort descending"
+                                        : "Clear sorting"
+                                  }
+                                >
+                                  {flexRender(
+                                    header.column
+                                      .columnDef.header,
+                                    header.getContext()
+                                  )}
 
-                            <SortIcon direction={header.column.getIsSorted()} />
-                          </button>
-                        ) : (
-                          flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )
-                        )}
+                                  <SortIcon
+                                    direction={header.column.getIsSorted()}
+                                  />
+                                </button>
+                              )
+                            : flexRender(
+                                header.column
+                                  .columnDef.header,
+                                header.getContext()
+                              )}
                       </TableHead>
                     )
                   })}
@@ -351,7 +417,10 @@ export function DataTable() {
                 table.getRowModel().rows.map((row) => (
                   <TableRow key={row.id}>
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="whitespace-nowrap">
+                      <TableCell
+                        key={cell.id}
+                        className="whitespace-nowrap"
+                      >
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
@@ -363,7 +432,9 @@ export function DataTable() {
               ) : (
                 <TableRow>
                   <TableCell
-                    colSpan={table.getVisibleLeafColumns().length}
+                    colSpan={
+                      table.getVisibleLeafColumns().length
+                    }
                     className="h-64 text-center"
                   >
                     <div className="mx-auto flex max-w-sm flex-col items-center justify-center space-y-4">
@@ -373,33 +444,30 @@ export function DataTable() {
 
                       <div className="space-y-1">
                         <p className="font-medium">
-                          {hasFilters ? "No invoices found" : "No invoices yet"}
+                          {hasFilters
+                            ? "No payments found"
+                            : "No payments yet"}
                         </p>
 
                         <p className="text-sm text-muted-foreground">
                           {hasFilters
-                            ? "We couldn't find any invoices matching your filters."
-                            : "Create your first invoice to get started."}
+                            ? "We couldn't find any payments matching your filters."
+                            : "Payments will appear here when customers pay your invoices."}
                         </p>
                       </div>
 
-                      {hasFilters ? (
+                      {hasFilters && (
                         <Button
                           variant="outline"
                           onClick={() => {
                             table.setGlobalFilter("")
-                            statusColumn?.setFilterValue(undefined)
+                            statusColumn?.setFilterValue(
+                              undefined
+                            )
                           }}
                         >
                           Clear filters
                         </Button>
-                      ) : (
-                        <Link
-                          href="/dashboard/invoices/new"
-                          className="inline-flex h-8 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-                        >
-                          Create invoice
-                        </Link>
                       )}
                     </div>
                   </TableCell>
@@ -409,6 +477,7 @@ export function DataTable() {
           </Table>
         </div>
       </div>
+
       <DataTablePagination table={table} />
     </div>
   )

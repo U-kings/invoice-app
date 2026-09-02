@@ -1,8 +1,9 @@
 "use client"
 
+import { PaymentDataTable } from "@/components/payments/data-table"
 import { PaymentPageHeader } from "@/components/payments/payment-page-header"
+import { PaymentSkeleton } from "@/components/payments/payment-skeleton"
 import { PaymentStats } from "@/components/payments/payment-stats"
-// import { PaymentDataTable } from "@/components/payments/payment-data-table"
 import { usePayments } from "@/hooks/use-payment"
 // import { PaymentSkeleton } from "@/components/payments/payment-skeleton"
 
@@ -26,14 +27,13 @@ export default function PaymentsPage() {
             <PaymentPageHeader />
 
             {isLoading ? (
-              <></>
-              // <PaymentSkeleton />
+              <PaymentSkeleton />
             ) : (
               <>
                 <PaymentStats payments={data?.payments} />
 
                 <section className="space-y-4">
-                  {/* <PaymentDataTable data={data?.payments ?? []} /> */}
+                  <PaymentDataTable />
                 </section>
               </>
             )}

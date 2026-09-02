@@ -59,6 +59,7 @@ export const ModelName = {
   InvoiceSettings: 'InvoiceSettings',
   InvoiceReminderSettings: 'InvoiceReminderSettings',
   InvoiceReminder: 'InvoiceReminder',
+  PaymentSettings: 'PaymentSettings',
   Payment: 'Payment',
   PaymentProviderConfig: 'PaymentProviderConfig'
 } as const
@@ -96,6 +97,8 @@ export const UserScalarFieldEnum = {
   verificationTokenExpires: 'verificationTokenExpires',
   resetToken: 'resetToken',
   resetTokenExpires: 'resetTokenExpires',
+  profileImageUrl: 'profileImageUrl',
+  profileImagePublicId: 'profileImagePublicId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -118,6 +121,7 @@ export const BusinessProfileScalarFieldEnum = {
   postalCode: 'postalCode',
   taxId: 'taxId',
   logoUrl: 'logoUrl',
+  logoPublicId: 'logoPublicId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -130,6 +134,8 @@ export const CustomerScalarFieldEnum = {
   userId: 'userId',
   name: 'name',
   email: 'email',
+  phone: 'phone',
+  address: 'address',
   status: 'status',
   countryCode: 'countryCode',
   createdAt: 'createdAt'
@@ -226,6 +232,30 @@ export const InvoiceReminderScalarFieldEnum = {
 } as const
 
 export type InvoiceReminderScalarFieldEnum = (typeof InvoiceReminderScalarFieldEnum)[keyof typeof InvoiceReminderScalarFieldEnum]
+
+
+export const PaymentSettingsScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  paystackEnabled: 'paystackEnabled',
+  stripeEnabled: 'stripeEnabled',
+  paypalEnabled: 'paypalEnabled',
+  cardPayments: 'cardPayments',
+  bankTransfer: 'bankTransfer',
+  cashPayments: 'cashPayments',
+  onlinePayments: 'onlinePayments',
+  paymentLinks: 'paymentLinks',
+  partialPayments: 'partialPayments',
+  automaticPaymentConfirmation: 'automaticPaymentConfirmation',
+  bankName: 'bankName',
+  accountName: 'accountName',
+  accountNumber: 'accountNumber',
+  additionalInformation: 'additionalInformation',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PaymentSettingsScalarFieldEnum = (typeof PaymentSettingsScalarFieldEnum)[keyof typeof PaymentSettingsScalarFieldEnum]
 
 
 export const PaymentScalarFieldEnum = {

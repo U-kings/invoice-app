@@ -39,6 +39,7 @@ export type BusinessProfileMinAggregateOutputType = {
   postalCode: string | null
   taxId: string | null
   logoUrl: string | null
+  logoPublicId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -58,6 +59,7 @@ export type BusinessProfileMaxAggregateOutputType = {
   postalCode: string | null
   taxId: string | null
   logoUrl: string | null
+  logoPublicId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -77,6 +79,7 @@ export type BusinessProfileCountAggregateOutputType = {
   postalCode: number
   taxId: number
   logoUrl: number
+  logoPublicId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -98,6 +101,7 @@ export type BusinessProfileMinAggregateInputType = {
   postalCode?: true
   taxId?: true
   logoUrl?: true
+  logoPublicId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -117,6 +121,7 @@ export type BusinessProfileMaxAggregateInputType = {
   postalCode?: true
   taxId?: true
   logoUrl?: true
+  logoPublicId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -136,6 +141,7 @@ export type BusinessProfileCountAggregateInputType = {
   postalCode?: true
   taxId?: true
   logoUrl?: true
+  logoPublicId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -228,6 +234,7 @@ export type BusinessProfileGroupByOutputType = {
   postalCode: string | null
   taxId: string | null
   logoUrl: string | null
+  logoPublicId: string | null
   createdAt: Date
   updatedAt: Date
   _count: BusinessProfileCountAggregateOutputType | null
@@ -268,6 +275,7 @@ export type BusinessProfileWhereInput = {
   postalCode?: Prisma.StringNullableFilter<"BusinessProfile"> | string | null
   taxId?: Prisma.StringNullableFilter<"BusinessProfile"> | string | null
   logoUrl?: Prisma.StringNullableFilter<"BusinessProfile"> | string | null
+  logoPublicId?: Prisma.StringNullableFilter<"BusinessProfile"> | string | null
   createdAt?: Prisma.DateTimeFilter<"BusinessProfile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"BusinessProfile"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -288,6 +296,7 @@ export type BusinessProfileOrderByWithRelationInput = {
   postalCode?: Prisma.SortOrderInput | Prisma.SortOrder
   taxId?: Prisma.SortOrderInput | Prisma.SortOrder
   logoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  logoPublicId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -311,6 +320,7 @@ export type BusinessProfileWhereUniqueInput = Prisma.AtLeast<{
   postalCode?: Prisma.StringNullableFilter<"BusinessProfile"> | string | null
   taxId?: Prisma.StringNullableFilter<"BusinessProfile"> | string | null
   logoUrl?: Prisma.StringNullableFilter<"BusinessProfile"> | string | null
+  logoPublicId?: Prisma.StringNullableFilter<"BusinessProfile"> | string | null
   createdAt?: Prisma.DateTimeFilter<"BusinessProfile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"BusinessProfile"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -331,6 +341,7 @@ export type BusinessProfileOrderByWithAggregationInput = {
   postalCode?: Prisma.SortOrderInput | Prisma.SortOrder
   taxId?: Prisma.SortOrderInput | Prisma.SortOrder
   logoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  logoPublicId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.BusinessProfileCountOrderByAggregateInput
@@ -356,6 +367,7 @@ export type BusinessProfileScalarWhereWithAggregatesInput = {
   postalCode?: Prisma.StringNullableWithAggregatesFilter<"BusinessProfile"> | string | null
   taxId?: Prisma.StringNullableWithAggregatesFilter<"BusinessProfile"> | string | null
   logoUrl?: Prisma.StringNullableWithAggregatesFilter<"BusinessProfile"> | string | null
+  logoPublicId?: Prisma.StringNullableWithAggregatesFilter<"BusinessProfile"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"BusinessProfile"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"BusinessProfile"> | Date | string
 }
@@ -374,6 +386,7 @@ export type BusinessProfileCreateInput = {
   postalCode?: string | null
   taxId?: string | null
   logoUrl?: string | null
+  logoPublicId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutBusinessProfileInput
@@ -394,6 +407,7 @@ export type BusinessProfileUncheckedCreateInput = {
   postalCode?: string | null
   taxId?: string | null
   logoUrl?: string | null
+  logoPublicId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -412,6 +426,7 @@ export type BusinessProfileUpdateInput = {
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutBusinessProfileNestedInput
@@ -432,6 +447,7 @@ export type BusinessProfileUncheckedUpdateInput = {
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -451,6 +467,7 @@ export type BusinessProfileCreateManyInput = {
   postalCode?: string | null
   taxId?: string | null
   logoUrl?: string | null
+  logoPublicId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -469,6 +486,7 @@ export type BusinessProfileUpdateManyMutationInput = {
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -488,6 +506,7 @@ export type BusinessProfileUncheckedUpdateManyInput = {
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -512,6 +531,7 @@ export type BusinessProfileCountOrderByAggregateInput = {
   postalCode?: Prisma.SortOrder
   taxId?: Prisma.SortOrder
   logoUrl?: Prisma.SortOrder
+  logoPublicId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -531,6 +551,7 @@ export type BusinessProfileMaxOrderByAggregateInput = {
   postalCode?: Prisma.SortOrder
   taxId?: Prisma.SortOrder
   logoUrl?: Prisma.SortOrder
+  logoPublicId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -550,6 +571,7 @@ export type BusinessProfileMinOrderByAggregateInput = {
   postalCode?: Prisma.SortOrder
   taxId?: Prisma.SortOrder
   logoUrl?: Prisma.SortOrder
+  logoPublicId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -600,6 +622,7 @@ export type BusinessProfileCreateWithoutUserInput = {
   postalCode?: string | null
   taxId?: string | null
   logoUrl?: string | null
+  logoPublicId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -618,6 +641,7 @@ export type BusinessProfileUncheckedCreateWithoutUserInput = {
   postalCode?: string | null
   taxId?: string | null
   logoUrl?: string | null
+  logoPublicId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -652,6 +676,7 @@ export type BusinessProfileUpdateWithoutUserInput = {
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -670,6 +695,7 @@ export type BusinessProfileUncheckedUpdateWithoutUserInput = {
   postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   taxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoPublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -691,6 +717,7 @@ export type BusinessProfileSelect<ExtArgs extends runtime.Types.Extensions.Inter
   postalCode?: boolean
   taxId?: boolean
   logoUrl?: boolean
+  logoPublicId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -711,6 +738,7 @@ export type BusinessProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   postalCode?: boolean
   taxId?: boolean
   logoUrl?: boolean
+  logoPublicId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -731,6 +759,7 @@ export type BusinessProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   postalCode?: boolean
   taxId?: boolean
   logoUrl?: boolean
+  logoPublicId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -751,11 +780,12 @@ export type BusinessProfileSelectScalar = {
   postalCode?: boolean
   taxId?: boolean
   logoUrl?: boolean
+  logoPublicId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type BusinessProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "businessName" | "countryCode" | "currency" | "email" | "phone" | "website" | "address" | "city" | "state" | "postalCode" | "taxId" | "logoUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["businessProfile"]>
+export type BusinessProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "businessName" | "countryCode" | "currency" | "email" | "phone" | "website" | "address" | "city" | "state" | "postalCode" | "taxId" | "logoUrl" | "logoPublicId" | "createdAt" | "updatedAt", ExtArgs["result"]["businessProfile"]>
 export type BusinessProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -786,6 +816,7 @@ export type $BusinessProfilePayload<ExtArgs extends runtime.Types.Extensions.Int
     postalCode: string | null
     taxId: string | null
     logoUrl: string | null
+    logoPublicId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["businessProfile"]>
@@ -1226,6 +1257,7 @@ export interface BusinessProfileFieldRefs {
   readonly postalCode: Prisma.FieldRef<"BusinessProfile", 'String'>
   readonly taxId: Prisma.FieldRef<"BusinessProfile", 'String'>
   readonly logoUrl: Prisma.FieldRef<"BusinessProfile", 'String'>
+  readonly logoPublicId: Prisma.FieldRef<"BusinessProfile", 'String'>
   readonly createdAt: Prisma.FieldRef<"BusinessProfile", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"BusinessProfile", 'DateTime'>
 }

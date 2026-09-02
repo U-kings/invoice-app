@@ -1,20 +1,21 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand"
+import { persist } from "zustand/middleware"
 
 interface User {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  profileImageUrl: string
 }
 
 interface AuthState {
-  user: User | null;
-  token: string | null;
-  isLoggingOut: boolean; // 🚀 Added tracking flag state
-  setAuth: (user: User, token: string) => void;
-  setLoggingOut: (status: boolean) => void; // 🚀 Added state setter action
-  logout: () => void;
+  user: User | null
+  token: string | null
+  isLoggingOut: boolean // 🚀 Added tracking flag state
+  setAuth: (user: User, token: string) => void
+  setLoggingOut: (status: boolean) => void // 🚀 Added state setter action
+  logout: () => void
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -28,9 +29,9 @@ export const useAuthStore = create<AuthState>()(
       logout: () => set({ user: null, token: null, isLoggingOut: false }),
     }),
     {
-      name: 'auth-storage', // Unique key for the localStorage item
-      
-      // 🚀 THE SECURITY FIX: Only persist user and token. 
+      name: "auth-storage", // Unique key for the localStorage item
+
+      // 🚀 THE SECURITY FIX: Only persist user and token.
       // This completely prevents 'isLoggingOut: true' from getting stuck in localStorage!
       partialize: (state) => ({
         user: state.user,
@@ -38,4 +39,4 @@ export const useAuthStore = create<AuthState>()(
       }),
     }
   )
-);
+)

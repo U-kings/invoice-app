@@ -1,9 +1,15 @@
 "use client"
 
 import { useEffect } from "react"
+import { useRef, useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Loader2 } from "lucide-react"
+import { ImagePlus, Loader2, Trash2, Upload } from "lucide-react"
+
+import {
+  useRemoveBusinessLogo,
+  useUploadBusinessLogo,
+} from "@/hooks/use-business-profile"
 
 import { Button } from "@workspace/ui/components/button"
 import {
@@ -86,6 +92,10 @@ const defaultValues: BusinessProfileFormValues = {
 
 export function BusinessProfileSettings() {
   const queryClient = useQueryClient()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const uploadBusinessLogo = useUploadBusinessLogo()
+  const removeBusinessLogo = useRemoveBusinessLogo()
 
   const form = useForm<BusinessProfileFormValues>({
     resolver: zodResolver(businessProfileSchema),
@@ -297,6 +307,136 @@ export function BusinessProfileSettings() {
         </CardHeader>
 
         <CardContent className="space-y-5">
+          <div className="rounded-xl border bg-muted/20 p-5">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-4">
+                <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-xl border bg-background">
+                  {data?.businessProfile?.logoUrl ? (
+                    <img
+                      src={data.businessProfile.logoUrl}
+                      alt={`${data.businessProfile.businessName || "Business"} logo`}
+                      className="size-full object-contain p-2"
+                    />
+                  ) : (
+                    <ImagePlus className="size-7 text-muted-foreground" />
+                  )}
+                </div>
+
+                <div>
+                  <p className="text-sm font-medium">Business logo</p>
+
+                  <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+                    Upload your logo to display it on invoices and other
+                    business documents.
+                  </p>
+
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    JPG, PNG or WEBP · Maximum 5 MB
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex shrink-0 gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0]
+
+                    if (!file) return
+
+                    uploadBusinessLogo.mutate(file, {
+                      onSuccess: () => {
+                        toast.add({
+                          title: "Logo uploaded",
+                          description:
+                            "Your business logo has been updated successfully.",
+                          type: "success",
+                        })
+                      },
+
+                      onError: (error) => {
+                        toast.add({
+                          title: "Upload failed",
+                          description:
+                            error instanceof Error
+                              ? error.message
+                              : "Failed to upload business logo.",
+                          type: "error",
+                        })
+                      },
+
+                      onSettled: () => {
+                        if (fileInputRef.current) {
+                          fileInputRef.current.value = ""
+                        }
+                      },
+                    })
+                  }}
+                />
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={uploadBusinessLogo.isPending}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  {uploadBusinessLogo.isPending ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Upload className="size-4" />
+                  )}
+
+                  {uploadBusinessLogo.isPending
+                    ? "Uploading..."
+                    : data?.businessProfile?.logoUrl
+                      ? "Change logo"
+                      : "Upload logo"}
+                </Button>
+
+                {data?.businessProfile?.logoUrl && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    disabled={removeBusinessLogo.isPending}
+                    onClick={() => {
+                      removeBusinessLogo.mutate(undefined, {
+                        onSuccess: () => {
+                          toast.add({
+                            title: "Logo removed",
+                            description: "Your business logo has been removed.",
+                            type: "success",
+                          })
+                        },
+
+                        onError: (error) => {
+                          toast.add({
+                            title: "Failed to remove logo",
+                            description:
+                              error instanceof Error
+                                ? error.message
+                                : "Failed to remove business logo.",
+                            type: "error",
+                          })
+                        },
+                      })
+                    }}
+                    aria-label="Remove business logo"
+                  >
+                    {removeBusinessLogo.isPending ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="size-4" />
+                    )}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+
           <Field>
             <FieldLabel htmlFor="businessName">Business name</FieldLabel>
 

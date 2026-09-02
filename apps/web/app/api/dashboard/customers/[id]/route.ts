@@ -10,6 +10,8 @@ interface AuthPayload {
 interface UpdateCustomerBody {
   name?: string
   email?: string
+  phone?: string
+  address?: string
 }
 
 interface RouteContext {
@@ -77,8 +79,10 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
 
     const name = body.name?.trim()
     const email = body.email?.trim().toLowerCase()
+    const phone = body.phone?.trim()
+    const address = body.address?.trim()
 
-    if (!name && !email) {
+    if (!name && !email && !phone && !address) {
       return NextResponse.json(
         {
           error: "At least one customer field is required",
@@ -149,6 +153,8 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
       data: {
         ...(name ? { name } : {}),
         ...(email ? { email } : {}),
+        ...(phone ? { phone } : {}),
+        ...(address ? { address } : {}),
       },
     })
 
@@ -169,29 +175,41 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
   }
 }
 
-
 export async function DELETE(req: NextRequest, { params }: RouteContext) {
   try {
     // ---------------------------------------------
     // 1. Authenticate (Keep your existing token verification here)
     // ---------------------------------------------
     const token = req.cookies.get("token")?.value
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (!token)
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     const jwtSecret = process.env.JWT_SECRET
-    if (!jwtSecret) throw new Error("JWT_SECRET environment variable is missing")
+    if (!jwtSecret)
+      throw new Error("JWT_SECRET environment variable is missing")
     let decoded: AuthPayload
     try {
       decoded = jwt.verify(token, jwtSecret) as AuthPayload
     } catch {
-      return NextResponse.json({ error: "Invalid or expired authentication token" }, { status: 401 })
+      return NextResponse.json(
+        { error: "Invalid or expired authentication token" },
+        { status: 401 }
+      )
     }
-    if (!decoded.userId) return NextResponse.json({ error: "Invalid authentication token" }, { status: 401 })
+    if (!decoded.userId)
+      return NextResponse.json(
+        { error: "Invalid authentication token" },
+        { status: 401 }
+      )
 
     // ---------------------------------------------
     // 2. Get customer ID
     // ---------------------------------------------
     const { id } = await params
-    if (!id) return NextResponse.json({ error: "Customer ID is required" }, { status: 400 })
+    if (!id)
+      return NextResponse.json(
+        { error: "Customer ID is required" },
+        { status: 400 }
+      )
 
     // ---------------------------------------------
     // 3. Verify ownership
@@ -205,10 +223,7 @@ export async function DELETE(req: NextRequest, { params }: RouteContext) {
         invoices: {
           where: {
             // Only fetch unpaid invoices to optimize performance
-            NOT: [
-              { status: "PAID" },
-              { status: "CANCELLED" }
-            ]
+            NOT: [{ status: "PAID" }, { status: "CANCELLED" }],
           },
           select: { id: true },
           take: 1,
@@ -223,12 +238,13 @@ export async function DELETE(req: NextRequest, { params }: RouteContext) {
     // ---------------------------------------------
     // 4. Prevent archiving if unpaid invoices exist
     // ---------------------------------------------
-    // Since we filtered for non-PAID/CANCELLED invoices above, 
+    // Since we filtered for non-PAID/CANCELLED invoices above,
     // any invoice in the array means they still owe money.
     if (customer.invoices.length > 0) {
       return NextResponse.json(
         {
-          error: "Cannot archive customer with active or unpaid invoices. Please settle or cancel them first.",
+          error:
+            "Cannot archive customer with active or unpaid invoices. Please settle or cancel them first.",
         },
         { status: 400 }
       )
@@ -255,9 +271,11 @@ export async function DELETE(req: NextRequest, { params }: RouteContext) {
   } catch (error) {
     console.error("Delete Customer Error:", error)
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to archive customer" },
+      {
+        error:
+          error instanceof Error ? error.message : "Failed to archive customer",
+      },
       { status: 500 }
     )
   }
 }
-

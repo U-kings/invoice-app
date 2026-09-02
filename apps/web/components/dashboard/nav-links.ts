@@ -47,7 +47,7 @@ export const navLinks = [
     icon: BarChart3,
   },
   {
-    title: "Reminder Management",
+    title: "Reminders",
     href: "/dashboard/reminders",
     icon: AlarmClock,
   },

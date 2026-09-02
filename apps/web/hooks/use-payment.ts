@@ -10,6 +10,7 @@ export interface PaymentListItem {
   reference: string
   provider: "STRIPE" | "PAYSTACK" | "FLUTTERWAVE"
   providerReference: string | null
+  providerTransactionId: string | null
 
   amount: string
   currency: string

@@ -1,4 +1,4 @@
-import { PDFDocument, StandardFonts, rgb } from "pdf-lib"
+import { PDFDocument, rgb } from "pdf-lib"
 import { NextResponse } from "next/server"
 import { prisma } from "@repo/db"
 import fontkit from "@pdf-lib/fontkit"
@@ -6,7 +6,7 @@ import path from "path"
 import { readFileSync } from "fs"
 
 export async function POST(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -18,7 +18,7 @@ export async function POST(
 
     const invoice = await prisma.invoice.findUnique({
       where: {
-        id: id,
+        id,
       },
       include: {
         customer: true,
@@ -38,7 +38,29 @@ export async function POST(
     }
 
     // ---------------------------------------------------------
-    // 2. Calculate invoice totals
+    // 2. Get business profile
+    // ---------------------------------------------------------
+
+    const businessProfile = await prisma.businessProfile.findUnique({
+      where: {
+        userId: invoice.userId,
+      },
+      select: {
+        businessName: true,
+        email: true,
+        phone: true,
+        website: true,
+        address: true,
+        city: true,
+        state: true,
+        postalCode: true,
+        taxId: true,
+        logoUrl: true,
+      },
+    })
+
+    // ---------------------------------------------------------
+    // 3. Calculate invoice totals
     // ---------------------------------------------------------
 
     const subtotal = invoice.lineItems.reduce<number>((sum, item) => {
@@ -51,28 +73,27 @@ export async function POST(
     const subtotalAfterDiscount = Math.max(subtotal - discountAmount, 0)
 
     const taxRate = Number(invoice.taxRate)
-
     const tax = subtotalAfterDiscount * (taxRate / 100)
 
     const total = subtotalAfterDiscount + tax
 
     // ---------------------------------------------------------
-    // 3. Create PDF
+    // 4. Create PDF
     // ---------------------------------------------------------
 
     const pdf = await PDFDocument.create()
 
     pdf.registerFontkit(fontkit)
 
-    // 3. Load your custom font file from your server directory
     const fontPathRegular = path.join(
       process.cwd(),
       "public/fonts/Inter_28pt-Medium.ttf"
     )
+
     const fontPathBold = path.join(
       process.cwd(),
       "public/fonts/Inter_28pt-Bold.ttf"
-    ) // Added bold path
+    )
 
     const fontBytesRegular = readFileSync(fontPathRegular)
     const fontBytesBold = readFileSync(fontPathBold)
@@ -87,21 +108,18 @@ export async function POST(
     let page = pdf.addPage([pageWidth, pageHeight])
 
     // ---------------------------------------------------------
-    // 4. Colors
+    // 5. Colors
     // ---------------------------------------------------------
 
     const primaryColor = rgb(0.18, 0.69, 0.71)
-
     const darkColor = rgb(0.12, 0.12, 0.14)
-
     const mutedColor = rgb(0.45, 0.45, 0.48)
-
-    const lightColor = rgb(0.92, 0.92, 0.93)
-
+    const lightColor = rgb(0.9, 0.9, 0.92)
+    const cardBackground = rgb(0.97, 0.97, 0.98)
     const whiteColor = rgb(1, 1, 1)
 
     // ---------------------------------------------------------
-    // 5. Helpers
+    // 6. Helpers
     // ---------------------------------------------------------
 
     const formatCurrency = (value: number) => {
@@ -162,119 +180,273 @@ export async function POST(
       })
     }
 
+    const drawCenteredText = (
+      text: string,
+      centerX: number,
+      y: number,
+      options?: {
+        size?: number
+        font?: typeof regularFont
+        color?: ReturnType<typeof rgb>
+      }
+    ) => {
+      const size = options?.size ?? 10
+      const font = options?.font ?? regularFont
+
+      const textWidth = font.widthOfTextAtSize(text, size)
+
+      page.drawText(text, {
+        x: centerX - textWidth / 2,
+        y,
+        size,
+        font,
+        color: options?.color ?? darkColor,
+      })
+    }
+
     // ---------------------------------------------------------
-    // 6. Header
+    // 7. Load business logo
     // ---------------------------------------------------------
 
-    drawText("INVOICE", margin, pageHeight - 70, {
+    let businessLogo:
+      | Awaited<ReturnType<typeof pdf.embedPng>>
+      | Awaited<ReturnType<typeof pdf.embedJpg>>
+      | null = null
+
+    if (businessProfile?.logoUrl) {
+      try {
+        const logoResponse = await fetch(businessProfile.logoUrl)
+
+        if (logoResponse.ok) {
+          const logoBuffer = await logoResponse.arrayBuffer()
+          const logoBytes = new Uint8Array(logoBuffer)
+
+          const contentType =
+            logoResponse.headers.get("content-type")?.toLowerCase() ?? ""
+
+          if (contentType.includes("png")) {
+            businessLogo = await pdf.embedPng(logoBytes)
+          } else if (
+            contentType.includes("jpeg") ||
+            contentType.includes("jpg")
+          ) {
+            businessLogo = await pdf.embedJpg(logoBytes)
+          }
+        }
+      } catch (error) {
+        console.warn("Failed to load business logo:", error)
+
+        // Logo failure should never prevent invoice generation.
+        businessLogo = null
+      }
+    }
+
+    // ---------------------------------------------------------
+    // 8. Dynamic header positioning
+    // ---------------------------------------------------------
+
+    const hasLogo = Boolean(businessLogo)
+
+    /*
+     * With logo:
+     *
+     * Logo
+     * INVOICE
+     * INV-0001
+     *
+     * Without logo:
+     *
+     * INVOICE
+     * INV-0001
+     *
+     * This prevents an empty logo area from being reserved.
+     */
+
+    const invoiceTitleY = hasLogo ? pageHeight - 125 : pageHeight - 70
+
+    const invoiceNumberY = invoiceTitleY - 25
+
+    const dividerY = hasLogo ? pageHeight - 160 : pageHeight - 130
+
+    const infoY = hasLogo ? pageHeight - 200 : pageHeight - 170
+
+    // ---------------------------------------------------------
+    // 9. Business logo
+    // ---------------------------------------------------------
+
+    if (businessLogo) {
+      const maxLogoWidth = 95
+      const maxLogoHeight = 55
+
+      const logoWidth = businessLogo.width
+      const logoHeight = businessLogo.height
+
+      const scale = Math.min(
+        maxLogoWidth / logoWidth,
+        maxLogoHeight / logoHeight,
+        1
+      )
+
+      const displayWidth = logoWidth * scale
+      const displayHeight = logoHeight * scale
+
+      page.drawImage(businessLogo, {
+        x: margin,
+        y: pageHeight - 70 - displayHeight,
+        width: displayWidth,
+        height: displayHeight,
+      })
+    }
+
+    // ---------------------------------------------------------
+    // 10. Invoice title
+    // ---------------------------------------------------------
+
+    drawText("INVOICE", margin, invoiceTitleY, {
       size: 28,
       font: boldFont,
       color: primaryColor,
     })
 
-    drawText(invoice.invoiceNumber, margin, pageHeight - 95, {
+    drawText(invoice.invoiceNumber, margin, invoiceNumberY, {
       size: 10,
       color: mutedColor,
     })
 
     // ---------------------------------------------------------
-    // 7. Customer information
+    // 11. Customer information
     // ---------------------------------------------------------
 
-    const customerX = pageWidth - margin - 200
+    const customerWidth = 200
+    const customerX = pageWidth - margin
+    // const customerX = pageWidth - margin - customerWidth
 
-    drawText("BILL TO", customerX, pageHeight - 70, {
-      size: 9,
-      font: boldFont,
-      color: primaryColor,
-    })
+    drawRightText(
+      "BILL TO",
+      customerX,
+      hasLogo ? pageHeight - 60 : pageHeight - 60,
+      {
+        size: 9,
+        font: boldFont,
+        color: primaryColor,
+      }
+    )
 
-    drawText(invoice.customer.name, customerX, pageHeight - 90, {
+    drawRightText(invoice.customer.name, customerX, pageHeight - 80, {
       size: 12,
       font: boldFont,
     })
 
+    let customerY = pageHeight - 97
+
     if (invoice.customer.email) {
-      drawText(invoice.customer.email, customerX, pageHeight - 107, {
+      drawRightText(invoice.customer.email, customerX, customerY, {
+        size: 9,
+        color: mutedColor,
+      })
+
+      customerY -= 14
+    }
+
+    // ---------------------------------------------------------
+    // 12. Customer phone/address
+    // ---------------------------------------------------------
+
+    if ("phone" in invoice.customer && invoice.customer.phone) {
+      drawText(invoice.customer.phone, customerX, customerY, {
+        size: 9,
+        color: mutedColor,
+      })
+
+      customerY -= 14
+    }
+
+    if ("address" in invoice.customer && invoice.customer.address) {
+      drawText(invoice.customer.address, customerX, customerY, {
         size: 9,
         color: mutedColor,
       })
     }
 
     // ---------------------------------------------------------
-    // 8. Divider
+    // 13. Divider
     // ---------------------------------------------------------
 
     page.drawLine({
       start: {
         x: margin,
-        y: pageHeight - 130,
+        y: dividerY,
       },
       end: {
         x: pageWidth - margin,
-        y: pageHeight - 130,
+        y: dividerY,
       },
       thickness: 1,
       color: lightColor,
     })
 
     // ---------------------------------------------------------
-    // 9. Invoice information
+    // 14. Invoice information cards
     // ---------------------------------------------------------
 
-    let y = pageHeight - 170
+    const infoCardY = infoY - 42
+    const infoCardHeight = 58
+    const infoGap = 12
 
-    drawText("Issue Date", margin, y, {
-      size: 9,
-      color: mutedColor,
-    })
+    const totalInfoWidth = pageWidth - margin * 2
+    const infoCardWidth = (totalInfoWidth - infoGap * 2) / 3
 
-    drawText(formatDate(invoice.issueDate), margin, y - 18, {
-      size: 10,
-      font: boldFont,
-    })
+    const drawInfoCard = (x: number, label: string, value: string) => {
+      page.drawRectangle({
+        x,
+        y: infoCardY,
+        width: infoCardWidth,
+        height: infoCardHeight,
+        color: cardBackground,
+        borderColor: lightColor,
+        borderWidth: 0.8,
+      })
 
-    drawText("Due Date", 190, y, {
-      size: 9,
-      color: mutedColor,
-    })
+      drawText(label.toUpperCase(), x + 12, infoCardY + 38, {
+        size: 7.5,
+        font: boldFont,
+        color: mutedColor,
+      })
 
-    drawText(formatDate(invoice.dueDate), 190, y - 18, {
-      size: 10,
-      font: boldFont,
-    })
+      drawText(value, x + 12, infoCardY + 18, {
+        size: 10,
+        font: boldFont,
+        color: darkColor,
+      })
+    }
 
-    drawText("Payment Terms", 350, y, {
-      size: 9,
-      color: mutedColor,
-    })
+    drawInfoCard(margin, "Issue Date", formatDate(invoice.issueDate))
 
-    drawText(invoice.paymentTerm ?? "Due on receipt", 350, y - 18, {
-      size: 10,
-      font: boldFont,
-    })
+    drawInfoCard(
+      margin + infoCardWidth + infoGap,
+      "Due Date",
+      formatDate(invoice.dueDate)
+    )
+
+    drawInfoCard(
+      margin + (infoCardWidth + infoGap) * 2,
+      "Payment Terms",
+      invoice.paymentTerm ?? "Due on receipt"
+    )
 
     // ---------------------------------------------------------
-    // 10. Line items table
+    // 15. Line items table
     // ---------------------------------------------------------
 
-    y -= 80
+    let y = infoCardY - 35
 
     const tableX = margin
     const tableWidth = pageWidth - margin * 2
-
     const descriptionX = tableX + 10
 
-    // const quantityX = tableX + 330
-
-    // const rateX = tableX + 395
-
-    // const amountX = tableX + 480
-
-    // Right edges of numeric columns
     const quantityRightX = 380
     const rateRightX = 455
-    const amountRightX = pageWidth - margin -10
+    const amountRightX = pageWidth - margin - 10
 
     page.drawRectangle({
       x: tableX,
@@ -284,29 +456,11 @@ export async function POST(
       color: primaryColor,
     })
 
-    drawText("Description", descriptionX, y - 15, {
+    drawText("Item/Description", descriptionX, y - 15, {
       size: 9,
       font: boldFont,
       color: whiteColor,
     })
-
-    // drawText("Qty", quantityRightX, y - 15, {
-    //   size: 9,
-    //   font: boldFont,
-    //   color: whiteColor,
-    // })
-
-    // drawText("Rate", rateRightX, y - 15, {
-    //   size: 9,
-    //   font: boldFont,
-    //   color: whiteColor,
-    // })
-
-    // drawText("Amount", amountRightX, y - 15, {
-    //   size: 9,
-    //   font: boldFont,
-    //   color: whiteColor,
-    // })
 
     drawRightText("Qty", quantityRightX, y - 15, {
       size: 9,
@@ -329,40 +483,26 @@ export async function POST(
     y -= 45
 
     // ---------------------------------------------------------
-    // 11. Line items
+    // 16. Line items
     // ---------------------------------------------------------
 
     for (const item of invoice.lineItems) {
       if (y < 120) {
         page = pdf.addPage([pageWidth, pageHeight])
-
         y = pageHeight - margin
       }
 
       const quantity = item.quantity
-
       const rate = Number(item.rate)
-
       const amount = quantity * rate
 
-      // drawText(item.description, descriptionX, y, {
-      //   size: 9,
-      // })
-
-      // drawText(String(quantity), quantityRightX, y, {
-      //   size: 9,
-      // })
-
-      // drawText(formatCurrency(rate), rateRightX, y, {
-      //   size: 9,
-      // })
-
-      // drawText(formatCurrency(amount), amountRightX, y, {
-      //   size: 9,
-      // })
-
-      drawText(item.description, descriptionX, y, {
+      drawText(item.name, descriptionX, y, {
         size: 9,
+      })
+
+      drawText(item.description, descriptionX, y - 14, {
+        size: 9,
+        color: mutedColor,
       })
 
       drawRightText(String(quantity), quantityRightX, y, {
@@ -380,11 +520,11 @@ export async function POST(
       page.drawLine({
         start: {
           x: tableX,
-          y: y - 10,
+          y: y - 24,
         },
         end: {
           x: tableX + tableWidth,
-          y: y - 10,
+          y: y - 24,
         },
         thickness: 0.5,
         color: lightColor,
@@ -394,7 +534,7 @@ export async function POST(
     }
 
     // ---------------------------------------------------------
-    // 12. Totals
+    // 17. Totals
     // ---------------------------------------------------------
 
     y -= 20
@@ -457,11 +597,6 @@ export async function POST(
       font: boldFont,
     })
 
-    // drawText(formatCurrency(total), amountRightX, y, {
-    //   size: 12,
-    //   font: boldFont,
-    //   color: primaryColor,
-    // })
     drawRightText(formatCurrency(total), amountRightX, y, {
       size: 12,
       font: boldFont,
@@ -469,7 +604,7 @@ export async function POST(
     })
 
     // ---------------------------------------------------------
-    // 13. Notes
+    // 18. Notes
     // ---------------------------------------------------------
 
     if (invoice.notes) {
@@ -489,7 +624,7 @@ export async function POST(
     }
 
     // ---------------------------------------------------------
-    // 14. Footer
+    // 19. Footer
     // ---------------------------------------------------------
 
     const pages = pdf.getPages()
@@ -516,8 +651,12 @@ export async function POST(
         color: mutedColor,
       })
 
-      pdfPage.drawText(`Page ${index + 1} of ${pages.length}`, {
-        x: pageWidth - margin - 65,
+      const pageText = `Page ${index + 1} of ${pages.length}`
+
+      const pageTextWidth = regularFont.widthOfTextAtSize(pageText, 8)
+
+      pdfPage.drawText(pageText, {
+        x: pageWidth - margin - pageTextWidth,
         y: 25,
         size: 8,
         font: regularFont,
@@ -526,30 +665,25 @@ export async function POST(
     })
 
     // ---------------------------------------------------------
-    // 15. Save PDF
+    // 20. Save PDF
     // ---------------------------------------------------------
 
     const pdfBytes = await pdf.save()
 
-    // Fix TypeScript's
-    // Uint8Array<ArrayBufferLike> issue
     const pdfBuffer = new ArrayBuffer(pdfBytes.byteLength)
 
     new Uint8Array(pdfBuffer).set(pdfBytes)
 
     // ---------------------------------------------------------
-    // 16. Return PDF
+    // 21. Return PDF
     // ---------------------------------------------------------
 
     return new Response(pdfBuffer, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-
         "Content-Disposition": `attachment; filename="${invoice.invoiceNumber}.pdf"`,
-
         "Content-Length": String(pdfBytes.byteLength),
-
         "Cache-Control": "no-store",
       },
     })
@@ -560,7 +694,9 @@ export async function POST(
       {
         error: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      {
+        status: 500,
+      }
     )
   }
 }

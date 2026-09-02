@@ -20,6 +20,7 @@
     "@workspace/payment-adapters": "workspace:*",
     "@workspace/ui": "workspace:*",
     "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.11.0",
     "cmdk": "^1.1.1",
     "embla-carousel-react": "^8.6.0",
     "google-auth-library": "^11.0.2",

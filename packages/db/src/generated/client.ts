@@ -82,6 +82,11 @@ export type InvoiceReminderSettings = Prisma.InvoiceReminderSettingsModel
  */
 export type InvoiceReminder = Prisma.InvoiceReminderModel
 /**
+ * Model PaymentSettings
+ * 
+ */
+export type PaymentSettings = Prisma.PaymentSettingsModel
+/**
  * Model Payment
  * 
  */

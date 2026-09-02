@@ -33,10 +33,7 @@ export async function GET(req: NextRequest) {
     const userId = await getAuthenticatedUserId(req)
 
     if (!userId) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const user = await prisma.user.findUnique({
@@ -50,14 +47,12 @@ export async function GET(req: NextRequest) {
         lastName: true,
         email: true,
         phoneNumber: true,
+        profileImageUrl: true,
       },
     })
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
     return NextResponse.json({
@@ -69,9 +64,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(
       {
         error:
-          error instanceof Error
-            ? error.message
-            : "Failed to fetch profile",
+          error instanceof Error ? error.message : "Failed to fetch profile",
       },
       { status: 500 }
     )
@@ -83,20 +76,12 @@ export async function PATCH(req: NextRequest) {
     const userId = await getAuthenticatedUserId(req)
 
     if (!userId) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const body = await req.json()
 
-    const {
-      firstName,
-      middleName,
-      lastName,
-      phoneNumber,
-    } = body
+    const { firstName, middleName, lastName, phoneNumber } = body
 
     if (!firstName?.trim()) {
       return NextResponse.json(
@@ -149,9 +134,7 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json(
       {
         error:
-          error instanceof Error
-            ? error.message
-            : "Failed to update profile",
+          error instanceof Error ? error.message : "Failed to update profile",
       },
       { status: 500 }
     )

@@ -196,6 +196,8 @@ export async function GET(req: NextRequest) {
         id: customer.id,
         name: customer.name,
         email: customer.email,
+        phone: customer.phone,
+        address: customer.address,
         status: customer.status,
         createdAt: customer.createdAt,
         invoiceCount: customer._count.invoices,

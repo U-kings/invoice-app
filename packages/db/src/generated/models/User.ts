@@ -41,6 +41,8 @@ export type UserMinAggregateOutputType = {
   verificationTokenExpires: Date | null
   resetToken: string | null
   resetTokenExpires: Date | null
+  profileImageUrl: string | null
+  profileImagePublicId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -62,6 +64,8 @@ export type UserMaxAggregateOutputType = {
   verificationTokenExpires: Date | null
   resetToken: string | null
   resetTokenExpires: Date | null
+  profileImageUrl: string | null
+  profileImagePublicId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -83,6 +87,8 @@ export type UserCountAggregateOutputType = {
   verificationTokenExpires: number
   resetToken: number
   resetTokenExpires: number
+  profileImageUrl: number
+  profileImagePublicId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -106,6 +112,8 @@ export type UserMinAggregateInputType = {
   verificationTokenExpires?: true
   resetToken?: true
   resetTokenExpires?: true
+  profileImageUrl?: true
+  profileImagePublicId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -127,6 +135,8 @@ export type UserMaxAggregateInputType = {
   verificationTokenExpires?: true
   resetToken?: true
   resetTokenExpires?: true
+  profileImageUrl?: true
+  profileImagePublicId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -148,6 +158,8 @@ export type UserCountAggregateInputType = {
   verificationTokenExpires?: true
   resetToken?: true
   resetTokenExpires?: true
+  profileImageUrl?: true
+  profileImagePublicId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -242,6 +254,8 @@ export type UserGroupByOutputType = {
   verificationTokenExpires: Date | null
   resetToken: string | null
   resetTokenExpires: Date | null
+  profileImageUrl: string | null
+  profileImagePublicId: string | null
   createdAt: Date
   updatedAt: Date
   _count: UserCountAggregateOutputType | null
@@ -284,6 +298,8 @@ export type UserWhereInput = {
   verificationTokenExpires?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   resetToken?: Prisma.StringNullableFilter<"User"> | string | null
   resetTokenExpires?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  profileImageUrl?: Prisma.StringNullableFilter<"User"> | string | null
+  profileImagePublicId?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   businessProfile?: Prisma.XOR<Prisma.BusinessProfileNullableScalarRelationFilter, Prisma.BusinessProfileWhereInput> | null
@@ -292,6 +308,7 @@ export type UserWhereInput = {
   invoiceReminderSettings?: Prisma.XOR<Prisma.InvoiceReminderSettingsNullableScalarRelationFilter, Prisma.InvoiceReminderSettingsWhereInput> | null
   invoiceSettings?: Prisma.XOR<Prisma.InvoiceSettingsNullableScalarRelationFilter, Prisma.InvoiceSettingsWhereInput> | null
   invoiceReminders?: Prisma.InvoiceReminderListRelationFilter
+  paymentSettings?: Prisma.XOR<Prisma.PaymentSettingsNullableScalarRelationFilter, Prisma.PaymentSettingsWhereInput> | null
 }
 
 export type UserOrderByWithRelationInput = {
@@ -311,6 +328,8 @@ export type UserOrderByWithRelationInput = {
   verificationTokenExpires?: Prisma.SortOrderInput | Prisma.SortOrder
   resetToken?: Prisma.SortOrderInput | Prisma.SortOrder
   resetTokenExpires?: Prisma.SortOrderInput | Prisma.SortOrder
+  profileImageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  profileImagePublicId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   businessProfile?: Prisma.BusinessProfileOrderByWithRelationInput
@@ -319,6 +338,7 @@ export type UserOrderByWithRelationInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsOrderByWithRelationInput
   invoiceSettings?: Prisma.InvoiceSettingsOrderByWithRelationInput
   invoiceReminders?: Prisma.InvoiceReminderOrderByRelationAggregateInput
+  paymentSettings?: Prisma.PaymentSettingsOrderByWithRelationInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -341,6 +361,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   verificationToken?: Prisma.StringNullableFilter<"User"> | string | null
   verificationTokenExpires?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   resetTokenExpires?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  profileImageUrl?: Prisma.StringNullableFilter<"User"> | string | null
+  profileImagePublicId?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   businessProfile?: Prisma.XOR<Prisma.BusinessProfileNullableScalarRelationFilter, Prisma.BusinessProfileWhereInput> | null
@@ -349,6 +371,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   invoiceReminderSettings?: Prisma.XOR<Prisma.InvoiceReminderSettingsNullableScalarRelationFilter, Prisma.InvoiceReminderSettingsWhereInput> | null
   invoiceSettings?: Prisma.XOR<Prisma.InvoiceSettingsNullableScalarRelationFilter, Prisma.InvoiceSettingsWhereInput> | null
   invoiceReminders?: Prisma.InvoiceReminderListRelationFilter
+  paymentSettings?: Prisma.XOR<Prisma.PaymentSettingsNullableScalarRelationFilter, Prisma.PaymentSettingsWhereInput> | null
 }, "id" | "email" | "googleId" | "resetToken">
 
 export type UserOrderByWithAggregationInput = {
@@ -368,6 +391,8 @@ export type UserOrderByWithAggregationInput = {
   verificationTokenExpires?: Prisma.SortOrderInput | Prisma.SortOrder
   resetToken?: Prisma.SortOrderInput | Prisma.SortOrder
   resetTokenExpires?: Prisma.SortOrderInput | Prisma.SortOrder
+  profileImageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  profileImagePublicId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
@@ -395,6 +420,8 @@ export type UserScalarWhereWithAggregatesInput = {
   verificationTokenExpires?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   resetToken?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   resetTokenExpires?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+  profileImageUrl?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  profileImagePublicId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
@@ -416,6 +443,8 @@ export type UserCreateInput = {
   verificationTokenExpires?: Date | string | null
   resetToken?: string | null
   resetTokenExpires?: Date | string | null
+  profileImageUrl?: string | null
+  profileImagePublicId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   businessProfile?: Prisma.BusinessProfileCreateNestedOneWithoutUserInput
@@ -424,6 +453,7 @@ export type UserCreateInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsCreateNestedOneWithoutUserInput
   invoiceSettings?: Prisma.InvoiceSettingsCreateNestedOneWithoutUserInput
   invoiceReminders?: Prisma.InvoiceReminderCreateNestedManyWithoutUserInput
+  paymentSettings?: Prisma.PaymentSettingsCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -443,6 +473,8 @@ export type UserUncheckedCreateInput = {
   verificationTokenExpires?: Date | string | null
   resetToken?: string | null
   resetTokenExpires?: Date | string | null
+  profileImageUrl?: string | null
+  profileImagePublicId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   businessProfile?: Prisma.BusinessProfileUncheckedCreateNestedOneWithoutUserInput
@@ -451,6 +483,7 @@ export type UserUncheckedCreateInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUncheckedCreateNestedOneWithoutUserInput
   invoiceSettings?: Prisma.InvoiceSettingsUncheckedCreateNestedOneWithoutUserInput
   invoiceReminders?: Prisma.InvoiceReminderUncheckedCreateNestedManyWithoutUserInput
+  paymentSettings?: Prisma.PaymentSettingsUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -470,6 +503,8 @@ export type UserUpdateInput = {
   verificationTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   businessProfile?: Prisma.BusinessProfileUpdateOneWithoutUserNestedInput
@@ -478,6 +513,7 @@ export type UserUpdateInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUpdateOneWithoutUserNestedInput
   invoiceSettings?: Prisma.InvoiceSettingsUpdateOneWithoutUserNestedInput
   invoiceReminders?: Prisma.InvoiceReminderUpdateManyWithoutUserNestedInput
+  paymentSettings?: Prisma.PaymentSettingsUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -497,6 +533,8 @@ export type UserUncheckedUpdateInput = {
   verificationTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   businessProfile?: Prisma.BusinessProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -505,6 +543,7 @@ export type UserUncheckedUpdateInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUncheckedUpdateOneWithoutUserNestedInput
   invoiceSettings?: Prisma.InvoiceSettingsUncheckedUpdateOneWithoutUserNestedInput
   invoiceReminders?: Prisma.InvoiceReminderUncheckedUpdateManyWithoutUserNestedInput
+  paymentSettings?: Prisma.PaymentSettingsUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -524,6 +563,8 @@ export type UserCreateManyInput = {
   verificationTokenExpires?: Date | string | null
   resetToken?: string | null
   resetTokenExpires?: Date | string | null
+  profileImageUrl?: string | null
+  profileImagePublicId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -545,6 +586,8 @@ export type UserUpdateManyMutationInput = {
   verificationTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -566,6 +609,8 @@ export type UserUncheckedUpdateManyInput = {
   verificationTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -587,6 +632,8 @@ export type UserCountOrderByAggregateInput = {
   verificationTokenExpires?: Prisma.SortOrder
   resetToken?: Prisma.SortOrder
   resetTokenExpires?: Prisma.SortOrder
+  profileImageUrl?: Prisma.SortOrder
+  profileImagePublicId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -608,6 +655,8 @@ export type UserMaxOrderByAggregateInput = {
   verificationTokenExpires?: Prisma.SortOrder
   resetToken?: Prisma.SortOrder
   resetTokenExpires?: Prisma.SortOrder
+  profileImageUrl?: Prisma.SortOrder
+  profileImagePublicId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -629,6 +678,8 @@ export type UserMinOrderByAggregateInput = {
   verificationTokenExpires?: Prisma.SortOrder
   resetToken?: Prisma.SortOrder
   resetTokenExpires?: Prisma.SortOrder
+  profileImageUrl?: Prisma.SortOrder
+  profileImagePublicId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -742,6 +793,20 @@ export type UserUpdateOneRequiredWithoutInvoiceRemindersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutInvoiceRemindersInput, Prisma.UserUpdateWithoutInvoiceRemindersInput>, Prisma.UserUncheckedUpdateWithoutInvoiceRemindersInput>
 }
 
+export type UserCreateNestedOneWithoutPaymentSettingsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPaymentSettingsInput, Prisma.UserUncheckedCreateWithoutPaymentSettingsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPaymentSettingsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutPaymentSettingsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPaymentSettingsInput, Prisma.UserUncheckedCreateWithoutPaymentSettingsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPaymentSettingsInput
+  upsert?: Prisma.UserUpsertWithoutPaymentSettingsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPaymentSettingsInput, Prisma.UserUpdateWithoutPaymentSettingsInput>, Prisma.UserUncheckedUpdateWithoutPaymentSettingsInput>
+}
+
 export type UserCreateWithoutBusinessProfileInput = {
   id?: string
   firstName: string
@@ -759,6 +824,8 @@ export type UserCreateWithoutBusinessProfileInput = {
   verificationTokenExpires?: Date | string | null
   resetToken?: string | null
   resetTokenExpires?: Date | string | null
+  profileImageUrl?: string | null
+  profileImagePublicId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   customers?: Prisma.CustomerCreateNestedManyWithoutUserInput
@@ -766,6 +833,7 @@ export type UserCreateWithoutBusinessProfileInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsCreateNestedOneWithoutUserInput
   invoiceSettings?: Prisma.InvoiceSettingsCreateNestedOneWithoutUserInput
   invoiceReminders?: Prisma.InvoiceReminderCreateNestedManyWithoutUserInput
+  paymentSettings?: Prisma.PaymentSettingsCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutBusinessProfileInput = {
@@ -785,6 +853,8 @@ export type UserUncheckedCreateWithoutBusinessProfileInput = {
   verificationTokenExpires?: Date | string | null
   resetToken?: string | null
   resetTokenExpires?: Date | string | null
+  profileImageUrl?: string | null
+  profileImagePublicId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutUserInput
@@ -792,6 +862,7 @@ export type UserUncheckedCreateWithoutBusinessProfileInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUncheckedCreateNestedOneWithoutUserInput
   invoiceSettings?: Prisma.InvoiceSettingsUncheckedCreateNestedOneWithoutUserInput
   invoiceReminders?: Prisma.InvoiceReminderUncheckedCreateNestedManyWithoutUserInput
+  paymentSettings?: Prisma.PaymentSettingsUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutBusinessProfileInput = {
@@ -827,6 +898,8 @@ export type UserUpdateWithoutBusinessProfileInput = {
   verificationTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   customers?: Prisma.CustomerUpdateManyWithoutUserNestedInput
@@ -834,6 +907,7 @@ export type UserUpdateWithoutBusinessProfileInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUpdateOneWithoutUserNestedInput
   invoiceSettings?: Prisma.InvoiceSettingsUpdateOneWithoutUserNestedInput
   invoiceReminders?: Prisma.InvoiceReminderUpdateManyWithoutUserNestedInput
+  paymentSettings?: Prisma.PaymentSettingsUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBusinessProfileInput = {
@@ -853,6 +927,8 @@ export type UserUncheckedUpdateWithoutBusinessProfileInput = {
   verificationTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutUserNestedInput
@@ -860,6 +936,7 @@ export type UserUncheckedUpdateWithoutBusinessProfileInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUncheckedUpdateOneWithoutUserNestedInput
   invoiceSettings?: Prisma.InvoiceSettingsUncheckedUpdateOneWithoutUserNestedInput
   invoiceReminders?: Prisma.InvoiceReminderUncheckedUpdateManyWithoutUserNestedInput
+  paymentSettings?: Prisma.PaymentSettingsUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCustomersInput = {
@@ -879,6 +956,8 @@ export type UserCreateWithoutCustomersInput = {
   verificationTokenExpires?: Date | string | null
   resetToken?: string | null
   resetTokenExpires?: Date | string | null
+  profileImageUrl?: string | null
+  profileImagePublicId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   businessProfile?: Prisma.BusinessProfileCreateNestedOneWithoutUserInput
@@ -886,6 +965,7 @@ export type UserCreateWithoutCustomersInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsCreateNestedOneWithoutUserInput
   invoiceSettings?: Prisma.InvoiceSettingsCreateNestedOneWithoutUserInput
   invoiceReminders?: Prisma.InvoiceReminderCreateNestedManyWithoutUserInput
+  paymentSettings?: Prisma.PaymentSettingsCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCustomersInput = {
@@ -905,6 +985,8 @@ export type UserUncheckedCreateWithoutCustomersInput = {
   verificationTokenExpires?: Date | string | null
   resetToken?: string | null
   resetTokenExpires?: Date | string | null
+  profileImageUrl?: string | null
+  profileImagePublicId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   businessProfile?: Prisma.BusinessProfileUncheckedCreateNestedOneWithoutUserInput
@@ -912,6 +994,7 @@ export type UserUncheckedCreateWithoutCustomersInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUncheckedCreateNestedOneWithoutUserInput
   invoiceSettings?: Prisma.InvoiceSettingsUncheckedCreateNestedOneWithoutUserInput
   invoiceReminders?: Prisma.InvoiceReminderUncheckedCreateNestedManyWithoutUserInput
+  paymentSettings?: Prisma.PaymentSettingsUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCustomersInput = {
@@ -947,6 +1030,8 @@ export type UserUpdateWithoutCustomersInput = {
   verificationTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   businessProfile?: Prisma.BusinessProfileUpdateOneWithoutUserNestedInput
@@ -954,6 +1039,7 @@ export type UserUpdateWithoutCustomersInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUpdateOneWithoutUserNestedInput
   invoiceSettings?: Prisma.InvoiceSettingsUpdateOneWithoutUserNestedInput
   invoiceReminders?: Prisma.InvoiceReminderUpdateManyWithoutUserNestedInput
+  paymentSettings?: Prisma.PaymentSettingsUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCustomersInput = {
@@ -973,6 +1059,8 @@ export type UserUncheckedUpdateWithoutCustomersInput = {
   verificationTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   businessProfile?: Prisma.BusinessProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -980,6 +1068,7 @@ export type UserUncheckedUpdateWithoutCustomersInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUncheckedUpdateOneWithoutUserNestedInput
   invoiceSettings?: Prisma.InvoiceSettingsUncheckedUpdateOneWithoutUserNestedInput
   invoiceReminders?: Prisma.InvoiceReminderUncheckedUpdateManyWithoutUserNestedInput
+  paymentSettings?: Prisma.PaymentSettingsUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutInvoicesInput = {
@@ -999,6 +1088,8 @@ export type UserCreateWithoutInvoicesInput = {
   verificationTokenExpires?: Date | string | null
   resetToken?: string | null
   resetTokenExpires?: Date | string | null
+  profileImageUrl?: string | null
+  profileImagePublicId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   businessProfile?: Prisma.BusinessProfileCreateNestedOneWithoutUserInput
@@ -1006,6 +1097,7 @@ export type UserCreateWithoutInvoicesInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsCreateNestedOneWithoutUserInput
   invoiceSettings?: Prisma.InvoiceSettingsCreateNestedOneWithoutUserInput
   invoiceReminders?: Prisma.InvoiceReminderCreateNestedManyWithoutUserInput
+  paymentSettings?: Prisma.PaymentSettingsCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutInvoicesInput = {
@@ -1025,6 +1117,8 @@ export type UserUncheckedCreateWithoutInvoicesInput = {
   verificationTokenExpires?: Date | string | null
   resetToken?: string | null
   resetTokenExpires?: Date | string | null
+  profileImageUrl?: string | null
+  profileImagePublicId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   businessProfile?: Prisma.BusinessProfileUncheckedCreateNestedOneWithoutUserInput
@@ -1032,6 +1126,7 @@ export type UserUncheckedCreateWithoutInvoicesInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUncheckedCreateNestedOneWithoutUserInput
   invoiceSettings?: Prisma.InvoiceSettingsUncheckedCreateNestedOneWithoutUserInput
   invoiceReminders?: Prisma.InvoiceReminderUncheckedCreateNestedManyWithoutUserInput
+  paymentSettings?: Prisma.PaymentSettingsUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutInvoicesInput = {
@@ -1067,6 +1162,8 @@ export type UserUpdateWithoutInvoicesInput = {
   verificationTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   businessProfile?: Prisma.BusinessProfileUpdateOneWithoutUserNestedInput
@@ -1074,6 +1171,7 @@ export type UserUpdateWithoutInvoicesInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUpdateOneWithoutUserNestedInput
   invoiceSettings?: Prisma.InvoiceSettingsUpdateOneWithoutUserNestedInput
   invoiceReminders?: Prisma.InvoiceReminderUpdateManyWithoutUserNestedInput
+  paymentSettings?: Prisma.PaymentSettingsUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInvoicesInput = {
@@ -1093,6 +1191,8 @@ export type UserUncheckedUpdateWithoutInvoicesInput = {
   verificationTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   businessProfile?: Prisma.BusinessProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -1100,6 +1200,7 @@ export type UserUncheckedUpdateWithoutInvoicesInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUncheckedUpdateOneWithoutUserNestedInput
   invoiceSettings?: Prisma.InvoiceSettingsUncheckedUpdateOneWithoutUserNestedInput
   invoiceReminders?: Prisma.InvoiceReminderUncheckedUpdateManyWithoutUserNestedInput
+  paymentSettings?: Prisma.PaymentSettingsUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutInvoiceSettingsInput = {
@@ -1119,6 +1220,8 @@ export type UserCreateWithoutInvoiceSettingsInput = {
   verificationTokenExpires?: Date | string | null
   resetToken?: string | null
   resetTokenExpires?: Date | string | null
+  profileImageUrl?: string | null
+  profileImagePublicId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   businessProfile?: Prisma.BusinessProfileCreateNestedOneWithoutUserInput
@@ -1126,6 +1229,7 @@ export type UserCreateWithoutInvoiceSettingsInput = {
   invoices?: Prisma.InvoiceCreateNestedManyWithoutUserInput
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsCreateNestedOneWithoutUserInput
   invoiceReminders?: Prisma.InvoiceReminderCreateNestedManyWithoutUserInput
+  paymentSettings?: Prisma.PaymentSettingsCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutInvoiceSettingsInput = {
@@ -1145,6 +1249,8 @@ export type UserUncheckedCreateWithoutInvoiceSettingsInput = {
   verificationTokenExpires?: Date | string | null
   resetToken?: string | null
   resetTokenExpires?: Date | string | null
+  profileImageUrl?: string | null
+  profileImagePublicId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   businessProfile?: Prisma.BusinessProfileUncheckedCreateNestedOneWithoutUserInput
@@ -1152,6 +1258,7 @@ export type UserUncheckedCreateWithoutInvoiceSettingsInput = {
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutUserInput
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUncheckedCreateNestedOneWithoutUserInput
   invoiceReminders?: Prisma.InvoiceReminderUncheckedCreateNestedManyWithoutUserInput
+  paymentSettings?: Prisma.PaymentSettingsUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutInvoiceSettingsInput = {
@@ -1187,6 +1294,8 @@ export type UserUpdateWithoutInvoiceSettingsInput = {
   verificationTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   businessProfile?: Prisma.BusinessProfileUpdateOneWithoutUserNestedInput
@@ -1194,6 +1303,7 @@ export type UserUpdateWithoutInvoiceSettingsInput = {
   invoices?: Prisma.InvoiceUpdateManyWithoutUserNestedInput
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUpdateOneWithoutUserNestedInput
   invoiceReminders?: Prisma.InvoiceReminderUpdateManyWithoutUserNestedInput
+  paymentSettings?: Prisma.PaymentSettingsUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInvoiceSettingsInput = {
@@ -1213,6 +1323,8 @@ export type UserUncheckedUpdateWithoutInvoiceSettingsInput = {
   verificationTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   businessProfile?: Prisma.BusinessProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -1220,6 +1332,7 @@ export type UserUncheckedUpdateWithoutInvoiceSettingsInput = {
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutUserNestedInput
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUncheckedUpdateOneWithoutUserNestedInput
   invoiceReminders?: Prisma.InvoiceReminderUncheckedUpdateManyWithoutUserNestedInput
+  paymentSettings?: Prisma.PaymentSettingsUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutInvoiceReminderSettingsInput = {
@@ -1239,6 +1352,8 @@ export type UserCreateWithoutInvoiceReminderSettingsInput = {
   verificationTokenExpires?: Date | string | null
   resetToken?: string | null
   resetTokenExpires?: Date | string | null
+  profileImageUrl?: string | null
+  profileImagePublicId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   businessProfile?: Prisma.BusinessProfileCreateNestedOneWithoutUserInput
@@ -1246,6 +1361,7 @@ export type UserCreateWithoutInvoiceReminderSettingsInput = {
   invoices?: Prisma.InvoiceCreateNestedManyWithoutUserInput
   invoiceSettings?: Prisma.InvoiceSettingsCreateNestedOneWithoutUserInput
   invoiceReminders?: Prisma.InvoiceReminderCreateNestedManyWithoutUserInput
+  paymentSettings?: Prisma.PaymentSettingsCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutInvoiceReminderSettingsInput = {
@@ -1265,6 +1381,8 @@ export type UserUncheckedCreateWithoutInvoiceReminderSettingsInput = {
   verificationTokenExpires?: Date | string | null
   resetToken?: string | null
   resetTokenExpires?: Date | string | null
+  profileImageUrl?: string | null
+  profileImagePublicId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   businessProfile?: Prisma.BusinessProfileUncheckedCreateNestedOneWithoutUserInput
@@ -1272,6 +1390,7 @@ export type UserUncheckedCreateWithoutInvoiceReminderSettingsInput = {
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutUserInput
   invoiceSettings?: Prisma.InvoiceSettingsUncheckedCreateNestedOneWithoutUserInput
   invoiceReminders?: Prisma.InvoiceReminderUncheckedCreateNestedManyWithoutUserInput
+  paymentSettings?: Prisma.PaymentSettingsUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutInvoiceReminderSettingsInput = {
@@ -1307,6 +1426,8 @@ export type UserUpdateWithoutInvoiceReminderSettingsInput = {
   verificationTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   businessProfile?: Prisma.BusinessProfileUpdateOneWithoutUserNestedInput
@@ -1314,6 +1435,7 @@ export type UserUpdateWithoutInvoiceReminderSettingsInput = {
   invoices?: Prisma.InvoiceUpdateManyWithoutUserNestedInput
   invoiceSettings?: Prisma.InvoiceSettingsUpdateOneWithoutUserNestedInput
   invoiceReminders?: Prisma.InvoiceReminderUpdateManyWithoutUserNestedInput
+  paymentSettings?: Prisma.PaymentSettingsUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInvoiceReminderSettingsInput = {
@@ -1333,6 +1455,8 @@ export type UserUncheckedUpdateWithoutInvoiceReminderSettingsInput = {
   verificationTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   businessProfile?: Prisma.BusinessProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -1340,6 +1464,7 @@ export type UserUncheckedUpdateWithoutInvoiceReminderSettingsInput = {
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutUserNestedInput
   invoiceSettings?: Prisma.InvoiceSettingsUncheckedUpdateOneWithoutUserNestedInput
   invoiceReminders?: Prisma.InvoiceReminderUncheckedUpdateManyWithoutUserNestedInput
+  paymentSettings?: Prisma.PaymentSettingsUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutInvoiceRemindersInput = {
@@ -1359,6 +1484,8 @@ export type UserCreateWithoutInvoiceRemindersInput = {
   verificationTokenExpires?: Date | string | null
   resetToken?: string | null
   resetTokenExpires?: Date | string | null
+  profileImageUrl?: string | null
+  profileImagePublicId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   businessProfile?: Prisma.BusinessProfileCreateNestedOneWithoutUserInput
@@ -1366,6 +1493,7 @@ export type UserCreateWithoutInvoiceRemindersInput = {
   invoices?: Prisma.InvoiceCreateNestedManyWithoutUserInput
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsCreateNestedOneWithoutUserInput
   invoiceSettings?: Prisma.InvoiceSettingsCreateNestedOneWithoutUserInput
+  paymentSettings?: Prisma.PaymentSettingsCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutInvoiceRemindersInput = {
@@ -1385,6 +1513,8 @@ export type UserUncheckedCreateWithoutInvoiceRemindersInput = {
   verificationTokenExpires?: Date | string | null
   resetToken?: string | null
   resetTokenExpires?: Date | string | null
+  profileImageUrl?: string | null
+  profileImagePublicId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   businessProfile?: Prisma.BusinessProfileUncheckedCreateNestedOneWithoutUserInput
@@ -1392,6 +1522,7 @@ export type UserUncheckedCreateWithoutInvoiceRemindersInput = {
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutUserInput
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUncheckedCreateNestedOneWithoutUserInput
   invoiceSettings?: Prisma.InvoiceSettingsUncheckedCreateNestedOneWithoutUserInput
+  paymentSettings?: Prisma.PaymentSettingsUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutInvoiceRemindersInput = {
@@ -1427,6 +1558,8 @@ export type UserUpdateWithoutInvoiceRemindersInput = {
   verificationTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   businessProfile?: Prisma.BusinessProfileUpdateOneWithoutUserNestedInput
@@ -1434,6 +1567,7 @@ export type UserUpdateWithoutInvoiceRemindersInput = {
   invoices?: Prisma.InvoiceUpdateManyWithoutUserNestedInput
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUpdateOneWithoutUserNestedInput
   invoiceSettings?: Prisma.InvoiceSettingsUpdateOneWithoutUserNestedInput
+  paymentSettings?: Prisma.PaymentSettingsUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInvoiceRemindersInput = {
@@ -1453,6 +1587,8 @@ export type UserUncheckedUpdateWithoutInvoiceRemindersInput = {
   verificationTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   businessProfile?: Prisma.BusinessProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -1460,6 +1596,139 @@ export type UserUncheckedUpdateWithoutInvoiceRemindersInput = {
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutUserNestedInput
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUncheckedUpdateOneWithoutUserNestedInput
   invoiceSettings?: Prisma.InvoiceSettingsUncheckedUpdateOneWithoutUserNestedInput
+  paymentSettings?: Prisma.PaymentSettingsUncheckedUpdateOneWithoutUserNestedInput
+}
+
+export type UserCreateWithoutPaymentSettingsInput = {
+  id?: string
+  firstName: string
+  middleName?: string | null
+  lastName: string
+  class?: string | null
+  email: string
+  phoneNumber?: string | null
+  password?: string | null
+  googleId?: string | null
+  role?: string | null
+  terms?: boolean
+  isVerified?: boolean
+  verificationToken?: string | null
+  verificationTokenExpires?: Date | string | null
+  resetToken?: string | null
+  resetTokenExpires?: Date | string | null
+  profileImageUrl?: string | null
+  profileImagePublicId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  businessProfile?: Prisma.BusinessProfileCreateNestedOneWithoutUserInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutUserInput
+  invoices?: Prisma.InvoiceCreateNestedManyWithoutUserInput
+  invoiceReminderSettings?: Prisma.InvoiceReminderSettingsCreateNestedOneWithoutUserInput
+  invoiceSettings?: Prisma.InvoiceSettingsCreateNestedOneWithoutUserInput
+  invoiceReminders?: Prisma.InvoiceReminderCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutPaymentSettingsInput = {
+  id?: string
+  firstName: string
+  middleName?: string | null
+  lastName: string
+  class?: string | null
+  email: string
+  phoneNumber?: string | null
+  password?: string | null
+  googleId?: string | null
+  role?: string | null
+  terms?: boolean
+  isVerified?: boolean
+  verificationToken?: string | null
+  verificationTokenExpires?: Date | string | null
+  resetToken?: string | null
+  resetTokenExpires?: Date | string | null
+  profileImageUrl?: string | null
+  profileImagePublicId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  businessProfile?: Prisma.BusinessProfileUncheckedCreateNestedOneWithoutUserInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutUserInput
+  invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutUserInput
+  invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUncheckedCreateNestedOneWithoutUserInput
+  invoiceSettings?: Prisma.InvoiceSettingsUncheckedCreateNestedOneWithoutUserInput
+  invoiceReminders?: Prisma.InvoiceReminderUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutPaymentSettingsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPaymentSettingsInput, Prisma.UserUncheckedCreateWithoutPaymentSettingsInput>
+}
+
+export type UserUpsertWithoutPaymentSettingsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPaymentSettingsInput, Prisma.UserUncheckedUpdateWithoutPaymentSettingsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPaymentSettingsInput, Prisma.UserUncheckedCreateWithoutPaymentSettingsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutPaymentSettingsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPaymentSettingsInput, Prisma.UserUncheckedUpdateWithoutPaymentSettingsInput>
+}
+
+export type UserUpdateWithoutPaymentSettingsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  middleName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  class?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  terms?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  verificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verificationTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  businessProfile?: Prisma.BusinessProfileUpdateOneWithoutUserNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutUserNestedInput
+  invoices?: Prisma.InvoiceUpdateManyWithoutUserNestedInput
+  invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUpdateOneWithoutUserNestedInput
+  invoiceSettings?: Prisma.InvoiceSettingsUpdateOneWithoutUserNestedInput
+  invoiceReminders?: Prisma.InvoiceReminderUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPaymentSettingsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  middleName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  class?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  terms?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  verificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verificationTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  businessProfile?: Prisma.BusinessProfileUncheckedUpdateOneWithoutUserNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutUserNestedInput
+  invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutUserNestedInput
+  invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUncheckedUpdateOneWithoutUserNestedInput
+  invoiceSettings?: Prisma.InvoiceSettingsUncheckedUpdateOneWithoutUserNestedInput
+  invoiceReminders?: Prisma.InvoiceReminderUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -1528,6 +1797,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   verificationTokenExpires?: boolean
   resetToken?: boolean
   resetTokenExpires?: boolean
+  profileImageUrl?: boolean
+  profileImagePublicId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   businessProfile?: boolean | Prisma.User$businessProfileArgs<ExtArgs>
@@ -1536,6 +1807,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   invoiceReminderSettings?: boolean | Prisma.User$invoiceReminderSettingsArgs<ExtArgs>
   invoiceSettings?: boolean | Prisma.User$invoiceSettingsArgs<ExtArgs>
   invoiceReminders?: boolean | Prisma.User$invoiceRemindersArgs<ExtArgs>
+  paymentSettings?: boolean | Prisma.User$paymentSettingsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1556,6 +1828,8 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   verificationTokenExpires?: boolean
   resetToken?: boolean
   resetTokenExpires?: boolean
+  profileImageUrl?: boolean
+  profileImagePublicId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
@@ -1577,6 +1851,8 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   verificationTokenExpires?: boolean
   resetToken?: boolean
   resetTokenExpires?: boolean
+  profileImageUrl?: boolean
+  profileImagePublicId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
@@ -1598,11 +1874,13 @@ export type UserSelectScalar = {
   verificationTokenExpires?: boolean
   resetToken?: boolean
   resetTokenExpires?: boolean
+  profileImageUrl?: boolean
+  profileImagePublicId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "firstName" | "middleName" | "lastName" | "class" | "email" | "phoneNumber" | "password" | "googleId" | "role" | "terms" | "isVerified" | "verificationToken" | "verificationTokenExpires" | "resetToken" | "resetTokenExpires" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "firstName" | "middleName" | "lastName" | "class" | "email" | "phoneNumber" | "password" | "googleId" | "role" | "terms" | "isVerified" | "verificationToken" | "verificationTokenExpires" | "resetToken" | "resetTokenExpires" | "profileImageUrl" | "profileImagePublicId" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   businessProfile?: boolean | Prisma.User$businessProfileArgs<ExtArgs>
   customers?: boolean | Prisma.User$customersArgs<ExtArgs>
@@ -1610,6 +1888,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   invoiceReminderSettings?: boolean | Prisma.User$invoiceReminderSettingsArgs<ExtArgs>
   invoiceSettings?: boolean | Prisma.User$invoiceSettingsArgs<ExtArgs>
   invoiceReminders?: boolean | Prisma.User$invoiceRemindersArgs<ExtArgs>
+  paymentSettings?: boolean | Prisma.User$paymentSettingsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1624,6 +1903,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     invoiceReminderSettings: Prisma.$InvoiceReminderSettingsPayload<ExtArgs> | null
     invoiceSettings: Prisma.$InvoiceSettingsPayload<ExtArgs> | null
     invoiceReminders: Prisma.$InvoiceReminderPayload<ExtArgs>[]
+    paymentSettings: Prisma.$PaymentSettingsPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1642,6 +1922,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     verificationTokenExpires: Date | null
     resetToken: string | null
     resetTokenExpires: Date | null
+    profileImageUrl: string | null
+    profileImagePublicId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["user"]>
@@ -2044,6 +2326,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   invoiceReminderSettings<T extends Prisma.User$invoiceReminderSettingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$invoiceReminderSettingsArgs<ExtArgs>>): Prisma.Prisma__InvoiceReminderSettingsClient<runtime.Types.Result.GetResult<Prisma.$InvoiceReminderSettingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   invoiceSettings<T extends Prisma.User$invoiceSettingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$invoiceSettingsArgs<ExtArgs>>): Prisma.Prisma__InvoiceSettingsClient<runtime.Types.Result.GetResult<Prisma.$InvoiceSettingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   invoiceReminders<T extends Prisma.User$invoiceRemindersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$invoiceRemindersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InvoiceReminderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  paymentSettings<T extends Prisma.User$paymentSettingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$paymentSettingsArgs<ExtArgs>>): Prisma.Prisma__PaymentSettingsClient<runtime.Types.Result.GetResult<Prisma.$PaymentSettingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2089,6 +2372,8 @@ export interface UserFieldRefs {
   readonly verificationTokenExpires: Prisma.FieldRef<"User", 'DateTime'>
   readonly resetToken: Prisma.FieldRef<"User", 'String'>
   readonly resetTokenExpires: Prisma.FieldRef<"User", 'DateTime'>
+  readonly profileImageUrl: Prisma.FieldRef<"User", 'String'>
+  readonly profileImagePublicId: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
 }
@@ -2610,6 +2895,25 @@ export type User$invoiceRemindersArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.InvoiceReminderScalarFieldEnum | Prisma.InvoiceReminderScalarFieldEnum[]
+}
+
+/**
+ * User.paymentSettings
+ */
+export type User$paymentSettingsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PaymentSettings
+   */
+  select?: Prisma.PaymentSettingsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PaymentSettings
+   */
+  omit?: Prisma.PaymentSettingsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentSettingsInclude<ExtArgs> | null
+  where?: Prisma.PaymentSettingsWhereInput
 }
 
 /**

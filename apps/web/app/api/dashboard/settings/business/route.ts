@@ -113,6 +113,7 @@ export async function PATCH(req: NextRequest) {
         postalCode: true,
         taxId: true,
         logoUrl: true,
+        logoPublicId: true,
         createdAt: true,
         updatedAt: true,
       },

@@ -5,18 +5,15 @@ import { createColumnHelper } from "@tanstack/react-table"
 
 import { Checkbox } from "@workspace/ui/components/checkbox"
 
-import { InvoiceStatusBadge } from "./invoice-status-badge"
-import { invoiceTableFeatures } from "../common/table-config"
-
-import { InvoiceTableActions } from "./invoice-table-actions"
 import { formatCurrency } from "@/lib/currency"
-import {
-  formatActivityDate,
-  getEffectiveInvoiceStatus,
-} from "@/lib/invoices/invoice"
-import { Invoice } from "@/hooks/use-invoice"
+import { formatActivityDate } from "@/lib/invoices/invoice"
 
-const columnHelper = createColumnHelper<typeof invoiceTableFeatures, Invoice>()
+import { paymentTableFeatures } from "../common/table-config"
+import { PaymentTableActions } from "./payment-table-actions"
+import { PaymentStatusBadge } from "./payment-status-badge"
+import { PaymentListItem, PaymentStatus } from "@/hooks/use-payment"
+
+const columnHelper = createColumnHelper<typeof paymentTableFeatures, PaymentListItem>()
 
 export const columns = columnHelper.columns([
   columnHelper.display({
@@ -27,7 +24,6 @@ export const columns = columnHelper.columns([
 
     header: ({ table }) => {
       const selectedRows = table.getSelectedRowModel().rows
-
       const visibleRows = table.getRowModel().rows
 
       const selectedCount = selectedRows.length
@@ -58,7 +54,7 @@ export const columns = columnHelper.columns([
               row.toggleSelected(true)
             })
           }}
-          aria-label="Select all invoices"
+          aria-label="Select all payments"
         />
       )
     },
@@ -70,91 +66,106 @@ export const columns = columnHelper.columns([
         onCheckedChange={(checked) => {
           row.toggleSelected(checked === true)
         }}
-        aria-label={`Select ${row.original.id}`}
+        aria-label={`Select payment ${row.original.id}`}
       />
     ),
   }),
 
-  columnHelper.accessor("invoiceNumber", {
-    header: "Invoice",
+  columnHelper.display({
+    id: "payment",
+    header: "Payment",
 
     cell: ({ row }) => {
-      const invoice = row.original
-
-      return (
-        <Link
-          href={`/dashboard/invoices/${invoice.invoiceNumber}`}
-          className="font-medium transition-colors hover:text-[#2EAFB4]"
-        >
-          {invoice.invoiceNumber}
-        </Link>
-      )
-    },
-  }),
-
-  columnHelper.accessor("customerId", {
-    header: "Customer",
-
-    cell: ({ row }) => {
-      const invoice = row.original
+      const payment = row.original
 
       return (
         <div className="min-w-0">
-          {/* <p className="truncate font-medium">{invoice.customerId}</p> */}
+          <p className="font-medium">
+            {payment.providerReference ??
+              payment.providerTransactionId ??
+              `#${payment.id.slice(0, 8)}`}
+          </p>
 
           <p className="truncate text-xs text-muted-foreground">
-            {invoice.customer?.email}
+            {payment.provider}
           </p>
         </div>
       )
     },
   }),
 
-  columnHelper.accessor("issueDate", {
-    header: "Issue date",
+  columnHelper.display({
+    id: "invoice",
+    header: "Invoice",
+
+    cell: ({ row }) => {
+      const payment = row.original
+
+      return (
+        <Link
+          href={`/dashboard/invoices/${payment.invoice.invoiceNumber}`}
+          className="font-medium transition-colors hover:text-[#2EAFB4]"
+        >
+          {payment.invoice.invoiceNumber}
+        </Link>
+      )
+    },
+  }),
+
+  columnHelper.display({
+    id: "customer",
+    header: "Customer",
+
+    cell: ({ row }) => {
+      const customer = row.original.invoice.customer
+
+      return (
+        <div className="min-w-0">
+          <p className="truncate font-medium">{customer.name}</p>
+
+          <p className="truncate text-xs text-muted-foreground">
+            {customer.email}
+          </p>
+        </div>
+      )
+    },
+  }),
+
+  columnHelper.accessor("createdAt", {
+    header: "Date",
 
     cell: ({ getValue }) => (
       <span className="text-sm text-muted-foreground">
-        {formatActivityDate(getValue())}
+        {formatActivityDate(getValue()?.toString())}
       </span>
     ),
   }),
 
-  columnHelper.accessor("dueDate", {
-    header: "Due date",
+  columnHelper.accessor("amount", {
+    header: "Amount",
 
-    cell: ({ getValue }) => (
-      <span className="text-sm text-muted-foreground">
-        {formatActivityDate(getValue())}
+    cell: ({ getValue, row }) => (
+      <span className="font-medium">
+        {formatCurrency(Number(getValue()), row.original.currency)}
       </span>
     ),
   }),
 
-  columnHelper.accessor(
-    (row) =>
-      row.lineItems.reduce(
-        (total, item) => total + item.quantity * item.rate,
-        0
-      ),
-    {
-      id: "amount",
-      header: "Amount",
+  columnHelper.accessor("provider", {
+    header: "Provider",
 
-      cell: ({ getValue, row }) => (
-        <span className="font-medium">
-          {formatCurrency(getValue(), row.original.currency)}
-        </span>
-      ),
-    }
-  ),
+    cell: ({ getValue }) => (
+      <span className="text-sm capitalize">{getValue().toLowerCase()}</span>
+    ),
+  }),
 
   columnHelper.accessor("status", {
     header: "Status",
 
     filterFn: "status",
 
-    cell: ({ row }) => (
-      <InvoiceStatusBadge status={getEffectiveInvoiceStatus(row.original)} />
+    cell: ({ getValue }) => (
+      <PaymentStatusBadge status={getValue() as PaymentStatus} />
     ),
   }),
 
@@ -164,10 +175,6 @@ export const columns = columnHelper.columns([
     enableSorting: false,
     enableHiding: false,
 
-    cell: ({ row }) => {
-      // const invoice = row.original
-
-      return <InvoiceTableActions invoice={row.original} />
-    },
+    cell: ({ row }) => <PaymentTableActions payment={row.original} />,
   }),
 ])
