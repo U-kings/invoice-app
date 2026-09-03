@@ -38,6 +38,11 @@ export type Customer = Prisma.CustomerModel
  */
 export type Invoice = Prisma.InvoiceModel
 /**
+ * Model Product
+ * 
+ */
+export type Product = Prisma.ProductModel
+/**
  * Model LineItem
  * 
  */
@@ -62,6 +67,11 @@ export type InvoiceReminder = Prisma.InvoiceReminderModel
  * 
  */
 export type PaymentSettings = Prisma.PaymentSettingsModel
+/**
+ * Model PaymentProviderConnection
+ * 
+ */
+export type PaymentProviderConnection = Prisma.PaymentProviderConnectionModel
 /**
  * Model Payment
  * 

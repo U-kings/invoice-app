@@ -1,5 +1,6 @@
 import { prisma } from "@repo/db"
 import { paymentRouter } from "@workspace/payment-adapters"
+import { decryptSecret } from "../security/encryption"
 
 export async function createCheckout(
   invoiceId: string,
@@ -44,6 +45,29 @@ export async function createCheckout(
   // 2. Call your polymorphic interface strategy to get checkout url
   let result: any
   try {
+    const connection = await prisma.paymentProviderConnection.findUnique({
+      where: {
+        userId_provider: {
+          userId: invoice.userId,
+          provider: "PAYSTACK",
+        },
+      },
+      select: {
+        status: true,
+        encryptedSecretKey: true,
+      },
+    })
+
+    if (
+      !connection ||
+      connection.status !== "CONNECTED" ||
+      !connection.encryptedSecretKey
+    ) {
+      throw new Error("Paystack is not connected for this account.")
+    }
+
+    const paystackSecret = decryptSecret(connection.encryptedSecretKey)
+
     result = await provider.createCheckout({
       invoiceId: invoice.id,
       amount: total,
@@ -54,6 +78,7 @@ export async function createCheckout(
       },
       successUrl: `${process.env.NEXT_PUBLIC_APP_URL}/pay/${invoice.publicToken}/success`,
       cancelUrl: `${process.env.NEXT_PUBLIC_APP_URL}/pay/${invoice.publicToken}`,
+      paystackSecret,
     })
     console.log("✅ Gateway initialized checkout successfully:", result)
   } catch (gatewayError: any) {
@@ -69,43 +94,43 @@ export async function createCheckout(
   // 3. PERSISTENCE STEP: Save initial PENDING payment link record.
   // DO NOT change the Invoice status to PAID here.
   try {
-    const { payment } = await prisma.$transaction(
-      async (tx) => {
-        // Defensive check for an already settled payment
-        const existingSuccessfulPayment = await tx.payment.findFirst({
-          where: {
-            invoiceId: invoice.id,
-            status: "SUCCESS",
-          },
-        })
+    const { payment } = await prisma.$transaction(async (tx) => {
+      // Defensive check for an already settled payment
+      const existingSuccessfulPayment = await tx.payment.findFirst({
+        where: {
+          invoiceId: invoice.id,
+          status: "SUCCESS",
+        },
+      })
 
-        if (existingSuccessfulPayment) {
-          console.log(
-            `⚠️ Prevented double-write: Invoice ${invoice.id} has already been settled.`
-          )
-          return { payment: existingSuccessfulPayment }
-        }
-
-        // Log the newly generated checkout attempt as PENDING
-        const newPayment = await tx.payment.create({
-          data: {
-            invoiceId: invoice.id,
-            provider: result.provider?.toUpperCase() as any,
-            providerReference: result.reference,
-            amount: total,
-            currency: invoice.currency || "NGN",
-            checkoutUrl: result.checkoutUrl || result.url,
-            status: "PENDING", // Correctly captures initial link generated state
-          },
-        })
-
-        // REMOVED: Invoice status remains "SENT" while waiting for user interaction
-
-        return { payment: newPayment }
+      if (existingSuccessfulPayment) {
+        console.log(
+          `⚠️ Prevented double-write: Invoice ${invoice.id} has already been settled.`
+        )
+        return { payment: existingSuccessfulPayment }
       }
-    )
 
-    console.log(`✅ PENDING payment link record tracked for Invoice ${invoice.id}`)
+      // Log the newly generated checkout attempt as PENDING
+      const newPayment = await tx.payment.create({
+        data: {
+          invoiceId: invoice.id,
+          provider: result.provider?.toUpperCase() as any,
+          providerReference: result.reference,
+          amount: total,
+          currency: invoice.currency || "NGN",
+          checkoutUrl: result.checkoutUrl || result.url,
+          status: "PENDING", // Correctly captures initial link generated state
+        },
+      })
+
+      // REMOVED: Invoice status remains "SENT" while waiting for user interaction
+
+      return { payment: newPayment }
+    })
+
+    console.log(
+      `✅ PENDING payment link record tracked for Invoice ${invoice.id}`
+    )
   } catch (prismaError: any) {
     console.error("💥 FAILURE CAUGHT INSIDE DATABASE PERSISTENCE PASS!")
     console.error(prismaError)

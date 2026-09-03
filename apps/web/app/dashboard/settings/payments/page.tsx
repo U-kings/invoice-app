@@ -18,13 +18,21 @@ import { Label } from "@workspace/ui/components/label"
 import { Switch } from "@workspace/ui/components/switch"
 import { Textarea } from "@workspace/ui/components/textarea"
 import { cn } from "@workspace/ui/lib/utils"
+import { PaystackConnectDialog } from "@/components/settings/paystack-connect-dialog"
+
+import {
+  useConnectStripe,
+  useDisconnectPaystack,
+  useDisconnectStripe,
+  usePaymentProviderConnections,
+} from "@/hooks/use-payment-provider-connections"
 
 import {
   usePaymentSettings,
   useUpdatePaymentSettings,
 } from "@/hooks/use-payment-settings"
 
-type PaymentProvider = "paystack" | "stripe" | "paypal"
+type PaymentProvider = "paystack" | "stripe" | "flutterwave"
 
 interface Provider {
   id: PaymentProvider
@@ -41,23 +49,31 @@ const providers: Provider[] = [
       "Accept cards, bank transfers and other local payment methods.",
     initials: "P",
   },
-  {
-    id: "stripe",
-    name: "Stripe",
-    description: "Accept cards and international payments from your customers.",
-    initials: "S",
-  },
-  {
-    id: "paypal",
-    name: "PayPal",
-    description: "Let customers pay using their PayPal account.",
-    initials: "PP",
-  },
+  // {
+  //   id: "stripe",
+  //   name: "Stripe",
+  //   description: "Accept cards and international payments from your customers.",
+  //   initials: "S",
+  // },
+  // {
+  //   id: "flutterwave",
+  //   name: "Flutterwave",
+  //   description: "Let customers pay using their Flutterwave account.",
+  //   initials: "FW",
+  // },
 ]
 
 export default function PaymentSettingsPage() {
   const { data, isLoading } = usePaymentSettings()
   const updatePaymentSettings = useUpdatePaymentSettings()
+
+  const { data: providerConnections = [] } = usePaymentProviderConnections()
+
+  const disconnectPaystack = useDisconnectPaystack()
+  const connectStripe = useConnectStripe()
+  const disconnectStripe = useDisconnectStripe()
+
+  const [paystackDialogOpen, setPaystackDialogOpen] = useState(false)
 
   const [enabledProviders, setEnabledProviders] = useState<PaymentProvider[]>(
     []
@@ -83,6 +99,39 @@ export default function PaymentSettingsPage() {
     additionalInformation: "",
   })
 
+  function isProviderConnected(providerId: PaymentProvider) {
+    const providerName = providerId.toUpperCase()
+
+    return providerConnections.some(
+      (connection) =>
+        connection.provider === providerName &&
+        connection.status === "CONNECTED"
+    )
+  }
+
+  function handleProviderAction(providerId: PaymentProvider) {
+    const connected = isProviderConnected(providerId)
+
+    if (providerId === "paystack") {
+      if (connected) {
+        disconnectPaystack.mutate()
+      } else {
+        setPaystackDialogOpen(true)
+      }
+
+      return
+    }
+
+    if (providerId === "stripe") {
+      if (connected) {
+        disconnectStripe.mutate()
+      } else {
+        connectStripe.mutate()
+      }
+      return
+    }
+  }
+
   /*
    * Populate the editable page state from the API.
    *
@@ -97,7 +146,7 @@ export default function PaymentSettingsPage() {
       [
         data.paystackEnabled ? "paystack" : null,
         data.stripeEnabled ? "stripe" : null,
-        data.paypalEnabled ? "paypal" : null,
+        data.flutterwaveEnabled ? "flutterwave" : null,
       ].filter((provider): provider is PaymentProvider => provider !== null)
     )
 
@@ -121,14 +170,6 @@ export default function PaymentSettingsPage() {
       additionalInformation: data.additionalInformation ?? "",
     })
   }, [data])
-
-  function toggleProvider(provider: PaymentProvider) {
-    setEnabledProviders((current) =>
-      current.includes(provider)
-        ? current.filter((item) => item !== provider)
-        : [...current, provider]
-    )
-  }
 
   function updatePaymentMethod(
     method: keyof typeof paymentMethods,
@@ -154,7 +195,7 @@ export default function PaymentSettingsPage() {
     updatePaymentSettings.mutate({
       paystackEnabled: enabledProviders.includes("paystack"),
       stripeEnabled: enabledProviders.includes("stripe"),
-      paypalEnabled: enabledProviders.includes("paypal"),
+      flutterwaveEnabled: enabledProviders.includes("flutterwave"),
 
       cardPayments: paymentMethods.card,
       bankTransfer: paymentMethods.bankTransfer,
@@ -226,7 +267,16 @@ export default function PaymentSettingsPage() {
 
           <div className="divide-y">
             {providers.map((provider) => {
-              const connected = enabledProviders.includes(provider.id)
+              const connected = isProviderConnected(provider.id)
+
+              const connecting =
+                provider.id === "stripe" && connectStripe.isPending
+
+              const disconnecting =
+                (provider.id === "paystack" && disconnectPaystack.isPending) ||
+                (provider.id === "stripe" && disconnectStripe.isPending)
+
+              const processing = connecting || disconnecting
 
               return (
                 <div
@@ -267,15 +317,35 @@ export default function PaymentSettingsPage() {
                     type="button"
                     variant={connected ? "outline" : "default"}
                     className="shrink-0"
-                    onClick={() => toggleProvider(provider.id)}
+                    disabled={
+                      processing ||
+                      provider.id === "stripe" ||
+                      provider.id === "flutterwave"
+                    }
+                    onClick={() => handleProviderAction(provider.id)}
                   >
-                    {connected ? "Disconnect" : "Connect"}
+                    {processing && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+
+                    {connecting
+                      ? "Connecting..."
+                      : disconnecting
+                        ? "Disconnecting..."
+                        : connected
+                          ? "Disconnect"
+                          : "Connect"}
                   </Button>
                 </div>
               )
             })}
           </div>
         </section>
+
+        <PaystackConnectDialog
+          open={paystackDialogOpen}
+          onOpenChange={setPaystackDialogOpen}
+        />
 
         {/* Payment methods */}
         <section className="rounded-2xl border bg-background">

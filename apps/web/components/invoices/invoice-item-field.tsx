@@ -9,14 +9,16 @@ import {
   FieldLabel,
 } from "@workspace/ui/components/field"
 import { InvoiceItem } from "./invoice-schema"
+import { Product } from "@/hooks/use-products"
 
 
 interface InvoiceItemFieldProps {
   id: string
   value?: string
-  items: InvoiceItem[]
+  items: Product[]
+  // items: InvoiceItem[]
   onChange: (value: string) => void
-  onSelect: (item: InvoiceItem) => void
+  onSelect: (item: Product) => void
 }
 
 export function InvoiceItemField({
@@ -37,8 +39,8 @@ export function InvoiceItemField({
 
     return items.filter(
       (item) =>
-        item.name.toLowerCase().includes(search) ||
-        item.description.toLowerCase().includes(search)
+        item.name?.toLowerCase().includes(search) ||
+        item.description?.toLowerCase().includes(search)
     )
   }, [items, value])
 

@@ -38,6 +38,7 @@ import { useRouter } from "next/navigation"
 import { formatDateForInput } from "@/lib/dateFormatter"
 import { Invoice } from "@/hooks/use-invoice"
 import { useCustomers } from "@/hooks/use-customers"
+import { useProducts } from "@/hooks/use-products"
 
 const paymentTerms = [
   {
@@ -91,6 +92,9 @@ interface InvoiceFormProps {
 
 export function InvoiceFormEdit({ invoice }: InvoiceFormProps) {
   const router = useRouter()
+  const { data, isLoading } = useProducts()
+
+  const products = data?.products ?? []
   const [saveToCatalog, setSaveToCatalog] = useState<Record<string, boolean>>(
     {}
   )
@@ -725,7 +729,8 @@ export function InvoiceFormEdit({ invoice }: InvoiceFormProps) {
                         <InvoiceItemField
                           id={`invoice-item-${index}`}
                           value={field.value ?? ""}
-                          items={catalogItems}
+                          // items={catalogItems}
+                          items={products}
                           onChange={field.onChange}
                           onSelect={(selectedItem) => {
                             form.setValue(
@@ -750,7 +755,7 @@ export function InvoiceFormEdit({ invoice }: InvoiceFormProps) {
 
                             form.setValue(
                               `items.${index}.description`,
-                              selectedItem.description,
+                              selectedItem.description as string,
                               {
                                 shouldDirty: true,
                                 shouldTouch: true,
@@ -760,7 +765,7 @@ export function InvoiceFormEdit({ invoice }: InvoiceFormProps) {
 
                             form.setValue(
                               `items.${index}.rate`,
-                              selectedItem.rate,
+                              Number(selectedItem.rate) as number,
                               {
                                 shouldDirty: true,
                                 shouldTouch: true,

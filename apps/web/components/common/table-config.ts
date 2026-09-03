@@ -59,3 +59,21 @@ export const paymentTableFeatures = tableFeatures({
     status: statusFilter,
   },
 });
+
+export const productTableFeatures = tableFeatures({
+  columnFilteringFeature,
+  columnVisibilityFeature,
+  globalFilteringFeature,
+  rowPaginationFeature,
+  rowSelectionFeature,
+  rowSortingFeature,
+
+  filteredRowModel: createFilteredRowModel(),
+  paginatedRowModel: createPaginatedRowModel(),
+  sortedRowModel: createSortedRowModel(),
+
+  filterFns: {
+    includesString: filterFn_includesString,
+    status: statusFilter,
+  },
+});

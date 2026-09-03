@@ -26,24 +26,24 @@ const columnHelper = createColumnHelper<
 >()
 
 export const columns = columnHelper.columns([
-  columnHelper.accessor((row) => row.invoice.customer.name, {
-    id: "customer",
-    header: "Customer",
+  // columnHelper.accessor((row) => row.invoice.customer.name, {
+  //   id: "customer",
+  //   header: "Customer",
 
-    cell: ({ row }) => {
-      const customer = row.original.invoice.customer
+  //   cell: ({ row }) => {
+  //     const customer = row.original.invoice.customer
 
-      return (
-        <div className="min-w-0">
-          <p className="truncate font-medium">{customer.name}</p>
+  //     return (
+  //       <div className="min-w-0">
+  //         <p className="truncate font-medium">{customer.name}</p>
 
-          <p className="truncate text-xs text-muted-foreground">
-            {customer.email}
-          </p>
-        </div>
-      )
-    },
-  }),
+  //         <p className="truncate text-xs text-muted-foreground">
+  //           {customer.email}
+  //         </p>
+  //       </div>
+  //     )
+  //   },
+  // }),
 
   columnHelper.accessor("invoice.customer.name", {
     id: "customer",

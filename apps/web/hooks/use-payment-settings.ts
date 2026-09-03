@@ -10,7 +10,7 @@ export interface PaymentSettings {
 
   paystackEnabled: boolean
   stripeEnabled: boolean
-  paypalEnabled: boolean
+  flutterwaveEnabled: boolean
 
   cardPayments: boolean
   bankTransfer: boolean

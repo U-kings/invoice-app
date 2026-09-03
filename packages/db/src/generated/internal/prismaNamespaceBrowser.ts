@@ -55,11 +55,13 @@ export const ModelName = {
   BusinessProfile: 'BusinessProfile',
   Customer: 'Customer',
   Invoice: 'Invoice',
+  Product: 'Product',
   LineItem: 'LineItem',
   InvoiceSettings: 'InvoiceSettings',
   InvoiceReminderSettings: 'InvoiceReminderSettings',
   InvoiceReminder: 'InvoiceReminder',
   PaymentSettings: 'PaymentSettings',
+  PaymentProviderConnection: 'PaymentProviderConnection',
   Payment: 'Payment',
   PaymentProviderConfig: 'PaymentProviderConfig'
 } as const
@@ -168,6 +170,19 @@ export const InvoiceScalarFieldEnum = {
 export type InvoiceScalarFieldEnum = (typeof InvoiceScalarFieldEnum)[keyof typeof InvoiceScalarFieldEnum]
 
 
+export const ProductScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  name: 'name',
+  description: 'description',
+  rate: 'rate',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
+
+
 export const LineItemScalarFieldEnum = {
   id: 'id',
   invoiceId: 'invoiceId',
@@ -258,6 +273,25 @@ export const PaymentSettingsScalarFieldEnum = {
 export type PaymentSettingsScalarFieldEnum = (typeof PaymentSettingsScalarFieldEnum)[keyof typeof PaymentSettingsScalarFieldEnum]
 
 
+export const PaymentProviderConnectionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  provider: 'provider',
+  status: 'status',
+  providerAccountId: 'providerAccountId',
+  providerMerchantId: 'providerMerchantId',
+  accessToken: 'accessToken',
+  refreshToken: 'refreshToken',
+  tokenExpiresAt: 'tokenExpiresAt',
+  encryptedSecretKey: 'encryptedSecretKey',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PaymentProviderConnectionScalarFieldEnum = (typeof PaymentProviderConnectionScalarFieldEnum)[keyof typeof PaymentProviderConnectionScalarFieldEnum]
+
+
 export const PaymentScalarFieldEnum = {
   id: 'id',
   invoiceId: 'invoiceId',
@@ -297,6 +331,14 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
 export const QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -311,4 +353,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

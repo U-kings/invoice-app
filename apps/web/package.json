@@ -42,6 +42,7 @@
     "react-international-phone": "^4.8.0",
     "recharts": "^3.10.1",
     "resend": "^6.18.1",
+    "stripe": "^22.6.0",
     "zod": "^4.4.3",
     "zustand": "^5.0.14"
   },

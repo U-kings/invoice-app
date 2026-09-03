@@ -286,7 +286,7 @@ export default function InvoiceReminderPage() {
                         Last delivery error
                       </p>
 
-                      <p className="mt-1 text-sm break-words text-muted-foreground">
+                      <p className="mt-1 text-sm wrap-break-word text-muted-foreground">
                         {reminder.lastError}
                       </p>
                     </div>

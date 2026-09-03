@@ -18,6 +18,16 @@ export const InvoiceReminderType = {
 export type InvoiceReminderType = (typeof InvoiceReminderType)[keyof typeof InvoiceReminderType]
 
 
+export const PaymentConnectionStatus = {
+  PENDING: 'PENDING',
+  CONNECTED: 'CONNECTED',
+  DISCONNECTED: 'DISCONNECTED',
+  ERROR: 'ERROR'
+} as const
+
+export type PaymentConnectionStatus = (typeof PaymentConnectionStatus)[keyof typeof PaymentConnectionStatus]
+
+
 export const PaymentProvider = {
   PAYSTACK: 'PAYSTACK',
   STRIPE: 'STRIPE',

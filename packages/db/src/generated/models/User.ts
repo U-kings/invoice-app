@@ -309,6 +309,8 @@ export type UserWhereInput = {
   invoiceSettings?: Prisma.XOR<Prisma.InvoiceSettingsNullableScalarRelationFilter, Prisma.InvoiceSettingsWhereInput> | null
   invoiceReminders?: Prisma.InvoiceReminderListRelationFilter
   paymentSettings?: Prisma.XOR<Prisma.PaymentSettingsNullableScalarRelationFilter, Prisma.PaymentSettingsWhereInput> | null
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionListRelationFilter
+  products?: Prisma.ProductListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -339,6 +341,8 @@ export type UserOrderByWithRelationInput = {
   invoiceSettings?: Prisma.InvoiceSettingsOrderByWithRelationInput
   invoiceReminders?: Prisma.InvoiceReminderOrderByRelationAggregateInput
   paymentSettings?: Prisma.PaymentSettingsOrderByWithRelationInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionOrderByRelationAggregateInput
+  products?: Prisma.ProductOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -372,6 +376,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   invoiceSettings?: Prisma.XOR<Prisma.InvoiceSettingsNullableScalarRelationFilter, Prisma.InvoiceSettingsWhereInput> | null
   invoiceReminders?: Prisma.InvoiceReminderListRelationFilter
   paymentSettings?: Prisma.XOR<Prisma.PaymentSettingsNullableScalarRelationFilter, Prisma.PaymentSettingsWhereInput> | null
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionListRelationFilter
+  products?: Prisma.ProductListRelationFilter
 }, "id" | "email" | "googleId" | "resetToken">
 
 export type UserOrderByWithAggregationInput = {
@@ -454,6 +460,8 @@ export type UserCreateInput = {
   invoiceSettings?: Prisma.InvoiceSettingsCreateNestedOneWithoutUserInput
   invoiceReminders?: Prisma.InvoiceReminderCreateNestedManyWithoutUserInput
   paymentSettings?: Prisma.PaymentSettingsCreateNestedOneWithoutUserInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionCreateNestedManyWithoutUserInput
+  products?: Prisma.ProductCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -484,6 +492,8 @@ export type UserUncheckedCreateInput = {
   invoiceSettings?: Prisma.InvoiceSettingsUncheckedCreateNestedOneWithoutUserInput
   invoiceReminders?: Prisma.InvoiceReminderUncheckedCreateNestedManyWithoutUserInput
   paymentSettings?: Prisma.PaymentSettingsUncheckedCreateNestedOneWithoutUserInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUncheckedCreateNestedManyWithoutUserInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -514,6 +524,8 @@ export type UserUpdateInput = {
   invoiceSettings?: Prisma.InvoiceSettingsUpdateOneWithoutUserNestedInput
   invoiceReminders?: Prisma.InvoiceReminderUpdateManyWithoutUserNestedInput
   paymentSettings?: Prisma.PaymentSettingsUpdateOneWithoutUserNestedInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUpdateManyWithoutUserNestedInput
+  products?: Prisma.ProductUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -544,6 +556,8 @@ export type UserUncheckedUpdateInput = {
   invoiceSettings?: Prisma.InvoiceSettingsUncheckedUpdateOneWithoutUserNestedInput
   invoiceReminders?: Prisma.InvoiceReminderUncheckedUpdateManyWithoutUserNestedInput
   paymentSettings?: Prisma.PaymentSettingsUncheckedUpdateOneWithoutUserNestedInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUncheckedUpdateManyWithoutUserNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -751,6 +765,20 @@ export type UserUpdateOneRequiredWithoutInvoicesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutInvoicesInput, Prisma.UserUpdateWithoutInvoicesInput>, Prisma.UserUncheckedUpdateWithoutInvoicesInput>
 }
 
+export type UserCreateNestedOneWithoutProductsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutProductsInput, Prisma.UserUncheckedCreateWithoutProductsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutProductsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutProductsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutProductsInput, Prisma.UserUncheckedCreateWithoutProductsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutProductsInput
+  upsert?: Prisma.UserUpsertWithoutProductsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutProductsInput, Prisma.UserUpdateWithoutProductsInput>, Prisma.UserUncheckedUpdateWithoutProductsInput>
+}
+
 export type UserCreateNestedOneWithoutInvoiceSettingsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutInvoiceSettingsInput, Prisma.UserUncheckedCreateWithoutInvoiceSettingsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutInvoiceSettingsInput
@@ -807,6 +835,20 @@ export type UserUpdateOneRequiredWithoutPaymentSettingsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPaymentSettingsInput, Prisma.UserUpdateWithoutPaymentSettingsInput>, Prisma.UserUncheckedUpdateWithoutPaymentSettingsInput>
 }
 
+export type UserCreateNestedOneWithoutPaymentProviderConnectionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPaymentProviderConnectionsInput, Prisma.UserUncheckedCreateWithoutPaymentProviderConnectionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPaymentProviderConnectionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutPaymentProviderConnectionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPaymentProviderConnectionsInput, Prisma.UserUncheckedCreateWithoutPaymentProviderConnectionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPaymentProviderConnectionsInput
+  upsert?: Prisma.UserUpsertWithoutPaymentProviderConnectionsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPaymentProviderConnectionsInput, Prisma.UserUpdateWithoutPaymentProviderConnectionsInput>, Prisma.UserUncheckedUpdateWithoutPaymentProviderConnectionsInput>
+}
+
 export type UserCreateWithoutBusinessProfileInput = {
   id?: string
   firstName: string
@@ -834,6 +876,8 @@ export type UserCreateWithoutBusinessProfileInput = {
   invoiceSettings?: Prisma.InvoiceSettingsCreateNestedOneWithoutUserInput
   invoiceReminders?: Prisma.InvoiceReminderCreateNestedManyWithoutUserInput
   paymentSettings?: Prisma.PaymentSettingsCreateNestedOneWithoutUserInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionCreateNestedManyWithoutUserInput
+  products?: Prisma.ProductCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutBusinessProfileInput = {
@@ -863,6 +907,8 @@ export type UserUncheckedCreateWithoutBusinessProfileInput = {
   invoiceSettings?: Prisma.InvoiceSettingsUncheckedCreateNestedOneWithoutUserInput
   invoiceReminders?: Prisma.InvoiceReminderUncheckedCreateNestedManyWithoutUserInput
   paymentSettings?: Prisma.PaymentSettingsUncheckedCreateNestedOneWithoutUserInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUncheckedCreateNestedManyWithoutUserInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutBusinessProfileInput = {
@@ -908,6 +954,8 @@ export type UserUpdateWithoutBusinessProfileInput = {
   invoiceSettings?: Prisma.InvoiceSettingsUpdateOneWithoutUserNestedInput
   invoiceReminders?: Prisma.InvoiceReminderUpdateManyWithoutUserNestedInput
   paymentSettings?: Prisma.PaymentSettingsUpdateOneWithoutUserNestedInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUpdateManyWithoutUserNestedInput
+  products?: Prisma.ProductUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBusinessProfileInput = {
@@ -937,6 +985,8 @@ export type UserUncheckedUpdateWithoutBusinessProfileInput = {
   invoiceSettings?: Prisma.InvoiceSettingsUncheckedUpdateOneWithoutUserNestedInput
   invoiceReminders?: Prisma.InvoiceReminderUncheckedUpdateManyWithoutUserNestedInput
   paymentSettings?: Prisma.PaymentSettingsUncheckedUpdateOneWithoutUserNestedInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUncheckedUpdateManyWithoutUserNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCustomersInput = {
@@ -966,6 +1016,8 @@ export type UserCreateWithoutCustomersInput = {
   invoiceSettings?: Prisma.InvoiceSettingsCreateNestedOneWithoutUserInput
   invoiceReminders?: Prisma.InvoiceReminderCreateNestedManyWithoutUserInput
   paymentSettings?: Prisma.PaymentSettingsCreateNestedOneWithoutUserInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionCreateNestedManyWithoutUserInput
+  products?: Prisma.ProductCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCustomersInput = {
@@ -995,6 +1047,8 @@ export type UserUncheckedCreateWithoutCustomersInput = {
   invoiceSettings?: Prisma.InvoiceSettingsUncheckedCreateNestedOneWithoutUserInput
   invoiceReminders?: Prisma.InvoiceReminderUncheckedCreateNestedManyWithoutUserInput
   paymentSettings?: Prisma.PaymentSettingsUncheckedCreateNestedOneWithoutUserInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUncheckedCreateNestedManyWithoutUserInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCustomersInput = {
@@ -1040,6 +1094,8 @@ export type UserUpdateWithoutCustomersInput = {
   invoiceSettings?: Prisma.InvoiceSettingsUpdateOneWithoutUserNestedInput
   invoiceReminders?: Prisma.InvoiceReminderUpdateManyWithoutUserNestedInput
   paymentSettings?: Prisma.PaymentSettingsUpdateOneWithoutUserNestedInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUpdateManyWithoutUserNestedInput
+  products?: Prisma.ProductUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCustomersInput = {
@@ -1069,6 +1125,8 @@ export type UserUncheckedUpdateWithoutCustomersInput = {
   invoiceSettings?: Prisma.InvoiceSettingsUncheckedUpdateOneWithoutUserNestedInput
   invoiceReminders?: Prisma.InvoiceReminderUncheckedUpdateManyWithoutUserNestedInput
   paymentSettings?: Prisma.PaymentSettingsUncheckedUpdateOneWithoutUserNestedInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUncheckedUpdateManyWithoutUserNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutInvoicesInput = {
@@ -1098,6 +1156,8 @@ export type UserCreateWithoutInvoicesInput = {
   invoiceSettings?: Prisma.InvoiceSettingsCreateNestedOneWithoutUserInput
   invoiceReminders?: Prisma.InvoiceReminderCreateNestedManyWithoutUserInput
   paymentSettings?: Prisma.PaymentSettingsCreateNestedOneWithoutUserInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionCreateNestedManyWithoutUserInput
+  products?: Prisma.ProductCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutInvoicesInput = {
@@ -1127,6 +1187,8 @@ export type UserUncheckedCreateWithoutInvoicesInput = {
   invoiceSettings?: Prisma.InvoiceSettingsUncheckedCreateNestedOneWithoutUserInput
   invoiceReminders?: Prisma.InvoiceReminderUncheckedCreateNestedManyWithoutUserInput
   paymentSettings?: Prisma.PaymentSettingsUncheckedCreateNestedOneWithoutUserInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUncheckedCreateNestedManyWithoutUserInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutInvoicesInput = {
@@ -1172,6 +1234,8 @@ export type UserUpdateWithoutInvoicesInput = {
   invoiceSettings?: Prisma.InvoiceSettingsUpdateOneWithoutUserNestedInput
   invoiceReminders?: Prisma.InvoiceReminderUpdateManyWithoutUserNestedInput
   paymentSettings?: Prisma.PaymentSettingsUpdateOneWithoutUserNestedInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUpdateManyWithoutUserNestedInput
+  products?: Prisma.ProductUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInvoicesInput = {
@@ -1201,6 +1265,148 @@ export type UserUncheckedUpdateWithoutInvoicesInput = {
   invoiceSettings?: Prisma.InvoiceSettingsUncheckedUpdateOneWithoutUserNestedInput
   invoiceReminders?: Prisma.InvoiceReminderUncheckedUpdateManyWithoutUserNestedInput
   paymentSettings?: Prisma.PaymentSettingsUncheckedUpdateOneWithoutUserNestedInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUncheckedUpdateManyWithoutUserNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutProductsInput = {
+  id?: string
+  firstName: string
+  middleName?: string | null
+  lastName: string
+  class?: string | null
+  email: string
+  phoneNumber?: string | null
+  password?: string | null
+  googleId?: string | null
+  role?: string | null
+  terms?: boolean
+  isVerified?: boolean
+  verificationToken?: string | null
+  verificationTokenExpires?: Date | string | null
+  resetToken?: string | null
+  resetTokenExpires?: Date | string | null
+  profileImageUrl?: string | null
+  profileImagePublicId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  businessProfile?: Prisma.BusinessProfileCreateNestedOneWithoutUserInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutUserInput
+  invoices?: Prisma.InvoiceCreateNestedManyWithoutUserInput
+  invoiceReminderSettings?: Prisma.InvoiceReminderSettingsCreateNestedOneWithoutUserInput
+  invoiceSettings?: Prisma.InvoiceSettingsCreateNestedOneWithoutUserInput
+  invoiceReminders?: Prisma.InvoiceReminderCreateNestedManyWithoutUserInput
+  paymentSettings?: Prisma.PaymentSettingsCreateNestedOneWithoutUserInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutProductsInput = {
+  id?: string
+  firstName: string
+  middleName?: string | null
+  lastName: string
+  class?: string | null
+  email: string
+  phoneNumber?: string | null
+  password?: string | null
+  googleId?: string | null
+  role?: string | null
+  terms?: boolean
+  isVerified?: boolean
+  verificationToken?: string | null
+  verificationTokenExpires?: Date | string | null
+  resetToken?: string | null
+  resetTokenExpires?: Date | string | null
+  profileImageUrl?: string | null
+  profileImagePublicId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  businessProfile?: Prisma.BusinessProfileUncheckedCreateNestedOneWithoutUserInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutUserInput
+  invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutUserInput
+  invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUncheckedCreateNestedOneWithoutUserInput
+  invoiceSettings?: Prisma.InvoiceSettingsUncheckedCreateNestedOneWithoutUserInput
+  invoiceReminders?: Prisma.InvoiceReminderUncheckedCreateNestedManyWithoutUserInput
+  paymentSettings?: Prisma.PaymentSettingsUncheckedCreateNestedOneWithoutUserInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutProductsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutProductsInput, Prisma.UserUncheckedCreateWithoutProductsInput>
+}
+
+export type UserUpsertWithoutProductsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutProductsInput, Prisma.UserUncheckedUpdateWithoutProductsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutProductsInput, Prisma.UserUncheckedCreateWithoutProductsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutProductsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutProductsInput, Prisma.UserUncheckedUpdateWithoutProductsInput>
+}
+
+export type UserUpdateWithoutProductsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  middleName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  class?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  terms?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  verificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verificationTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  businessProfile?: Prisma.BusinessProfileUpdateOneWithoutUserNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutUserNestedInput
+  invoices?: Prisma.InvoiceUpdateManyWithoutUserNestedInput
+  invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUpdateOneWithoutUserNestedInput
+  invoiceSettings?: Prisma.InvoiceSettingsUpdateOneWithoutUserNestedInput
+  invoiceReminders?: Prisma.InvoiceReminderUpdateManyWithoutUserNestedInput
+  paymentSettings?: Prisma.PaymentSettingsUpdateOneWithoutUserNestedInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutProductsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  middleName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  class?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  terms?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  verificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verificationTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  businessProfile?: Prisma.BusinessProfileUncheckedUpdateOneWithoutUserNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutUserNestedInput
+  invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutUserNestedInput
+  invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUncheckedUpdateOneWithoutUserNestedInput
+  invoiceSettings?: Prisma.InvoiceSettingsUncheckedUpdateOneWithoutUserNestedInput
+  invoiceReminders?: Prisma.InvoiceReminderUncheckedUpdateManyWithoutUserNestedInput
+  paymentSettings?: Prisma.PaymentSettingsUncheckedUpdateOneWithoutUserNestedInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutInvoiceSettingsInput = {
@@ -1230,6 +1436,8 @@ export type UserCreateWithoutInvoiceSettingsInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsCreateNestedOneWithoutUserInput
   invoiceReminders?: Prisma.InvoiceReminderCreateNestedManyWithoutUserInput
   paymentSettings?: Prisma.PaymentSettingsCreateNestedOneWithoutUserInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionCreateNestedManyWithoutUserInput
+  products?: Prisma.ProductCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutInvoiceSettingsInput = {
@@ -1259,6 +1467,8 @@ export type UserUncheckedCreateWithoutInvoiceSettingsInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUncheckedCreateNestedOneWithoutUserInput
   invoiceReminders?: Prisma.InvoiceReminderUncheckedCreateNestedManyWithoutUserInput
   paymentSettings?: Prisma.PaymentSettingsUncheckedCreateNestedOneWithoutUserInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUncheckedCreateNestedManyWithoutUserInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutInvoiceSettingsInput = {
@@ -1304,6 +1514,8 @@ export type UserUpdateWithoutInvoiceSettingsInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUpdateOneWithoutUserNestedInput
   invoiceReminders?: Prisma.InvoiceReminderUpdateManyWithoutUserNestedInput
   paymentSettings?: Prisma.PaymentSettingsUpdateOneWithoutUserNestedInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUpdateManyWithoutUserNestedInput
+  products?: Prisma.ProductUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInvoiceSettingsInput = {
@@ -1333,6 +1545,8 @@ export type UserUncheckedUpdateWithoutInvoiceSettingsInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUncheckedUpdateOneWithoutUserNestedInput
   invoiceReminders?: Prisma.InvoiceReminderUncheckedUpdateManyWithoutUserNestedInput
   paymentSettings?: Prisma.PaymentSettingsUncheckedUpdateOneWithoutUserNestedInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUncheckedUpdateManyWithoutUserNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutInvoiceReminderSettingsInput = {
@@ -1362,6 +1576,8 @@ export type UserCreateWithoutInvoiceReminderSettingsInput = {
   invoiceSettings?: Prisma.InvoiceSettingsCreateNestedOneWithoutUserInput
   invoiceReminders?: Prisma.InvoiceReminderCreateNestedManyWithoutUserInput
   paymentSettings?: Prisma.PaymentSettingsCreateNestedOneWithoutUserInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionCreateNestedManyWithoutUserInput
+  products?: Prisma.ProductCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutInvoiceReminderSettingsInput = {
@@ -1391,6 +1607,8 @@ export type UserUncheckedCreateWithoutInvoiceReminderSettingsInput = {
   invoiceSettings?: Prisma.InvoiceSettingsUncheckedCreateNestedOneWithoutUserInput
   invoiceReminders?: Prisma.InvoiceReminderUncheckedCreateNestedManyWithoutUserInput
   paymentSettings?: Prisma.PaymentSettingsUncheckedCreateNestedOneWithoutUserInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUncheckedCreateNestedManyWithoutUserInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutInvoiceReminderSettingsInput = {
@@ -1436,6 +1654,8 @@ export type UserUpdateWithoutInvoiceReminderSettingsInput = {
   invoiceSettings?: Prisma.InvoiceSettingsUpdateOneWithoutUserNestedInput
   invoiceReminders?: Prisma.InvoiceReminderUpdateManyWithoutUserNestedInput
   paymentSettings?: Prisma.PaymentSettingsUpdateOneWithoutUserNestedInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUpdateManyWithoutUserNestedInput
+  products?: Prisma.ProductUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInvoiceReminderSettingsInput = {
@@ -1465,6 +1685,8 @@ export type UserUncheckedUpdateWithoutInvoiceReminderSettingsInput = {
   invoiceSettings?: Prisma.InvoiceSettingsUncheckedUpdateOneWithoutUserNestedInput
   invoiceReminders?: Prisma.InvoiceReminderUncheckedUpdateManyWithoutUserNestedInput
   paymentSettings?: Prisma.PaymentSettingsUncheckedUpdateOneWithoutUserNestedInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUncheckedUpdateManyWithoutUserNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutInvoiceRemindersInput = {
@@ -1494,6 +1716,8 @@ export type UserCreateWithoutInvoiceRemindersInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsCreateNestedOneWithoutUserInput
   invoiceSettings?: Prisma.InvoiceSettingsCreateNestedOneWithoutUserInput
   paymentSettings?: Prisma.PaymentSettingsCreateNestedOneWithoutUserInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionCreateNestedManyWithoutUserInput
+  products?: Prisma.ProductCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutInvoiceRemindersInput = {
@@ -1523,6 +1747,8 @@ export type UserUncheckedCreateWithoutInvoiceRemindersInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUncheckedCreateNestedOneWithoutUserInput
   invoiceSettings?: Prisma.InvoiceSettingsUncheckedCreateNestedOneWithoutUserInput
   paymentSettings?: Prisma.PaymentSettingsUncheckedCreateNestedOneWithoutUserInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUncheckedCreateNestedManyWithoutUserInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutInvoiceRemindersInput = {
@@ -1568,6 +1794,8 @@ export type UserUpdateWithoutInvoiceRemindersInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUpdateOneWithoutUserNestedInput
   invoiceSettings?: Prisma.InvoiceSettingsUpdateOneWithoutUserNestedInput
   paymentSettings?: Prisma.PaymentSettingsUpdateOneWithoutUserNestedInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUpdateManyWithoutUserNestedInput
+  products?: Prisma.ProductUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInvoiceRemindersInput = {
@@ -1597,6 +1825,8 @@ export type UserUncheckedUpdateWithoutInvoiceRemindersInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUncheckedUpdateOneWithoutUserNestedInput
   invoiceSettings?: Prisma.InvoiceSettingsUncheckedUpdateOneWithoutUserNestedInput
   paymentSettings?: Prisma.PaymentSettingsUncheckedUpdateOneWithoutUserNestedInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUncheckedUpdateManyWithoutUserNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPaymentSettingsInput = {
@@ -1626,6 +1856,8 @@ export type UserCreateWithoutPaymentSettingsInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsCreateNestedOneWithoutUserInput
   invoiceSettings?: Prisma.InvoiceSettingsCreateNestedOneWithoutUserInput
   invoiceReminders?: Prisma.InvoiceReminderCreateNestedManyWithoutUserInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionCreateNestedManyWithoutUserInput
+  products?: Prisma.ProductCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPaymentSettingsInput = {
@@ -1655,6 +1887,8 @@ export type UserUncheckedCreateWithoutPaymentSettingsInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUncheckedCreateNestedOneWithoutUserInput
   invoiceSettings?: Prisma.InvoiceSettingsUncheckedCreateNestedOneWithoutUserInput
   invoiceReminders?: Prisma.InvoiceReminderUncheckedCreateNestedManyWithoutUserInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUncheckedCreateNestedManyWithoutUserInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPaymentSettingsInput = {
@@ -1700,6 +1934,8 @@ export type UserUpdateWithoutPaymentSettingsInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUpdateOneWithoutUserNestedInput
   invoiceSettings?: Prisma.InvoiceSettingsUpdateOneWithoutUserNestedInput
   invoiceReminders?: Prisma.InvoiceReminderUpdateManyWithoutUserNestedInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUpdateManyWithoutUserNestedInput
+  products?: Prisma.ProductUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPaymentSettingsInput = {
@@ -1729,6 +1965,148 @@ export type UserUncheckedUpdateWithoutPaymentSettingsInput = {
   invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUncheckedUpdateOneWithoutUserNestedInput
   invoiceSettings?: Prisma.InvoiceSettingsUncheckedUpdateOneWithoutUserNestedInput
   invoiceReminders?: Prisma.InvoiceReminderUncheckedUpdateManyWithoutUserNestedInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUncheckedUpdateManyWithoutUserNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutPaymentProviderConnectionsInput = {
+  id?: string
+  firstName: string
+  middleName?: string | null
+  lastName: string
+  class?: string | null
+  email: string
+  phoneNumber?: string | null
+  password?: string | null
+  googleId?: string | null
+  role?: string | null
+  terms?: boolean
+  isVerified?: boolean
+  verificationToken?: string | null
+  verificationTokenExpires?: Date | string | null
+  resetToken?: string | null
+  resetTokenExpires?: Date | string | null
+  profileImageUrl?: string | null
+  profileImagePublicId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  businessProfile?: Prisma.BusinessProfileCreateNestedOneWithoutUserInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutUserInput
+  invoices?: Prisma.InvoiceCreateNestedManyWithoutUserInput
+  invoiceReminderSettings?: Prisma.InvoiceReminderSettingsCreateNestedOneWithoutUserInput
+  invoiceSettings?: Prisma.InvoiceSettingsCreateNestedOneWithoutUserInput
+  invoiceReminders?: Prisma.InvoiceReminderCreateNestedManyWithoutUserInput
+  paymentSettings?: Prisma.PaymentSettingsCreateNestedOneWithoutUserInput
+  products?: Prisma.ProductCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutPaymentProviderConnectionsInput = {
+  id?: string
+  firstName: string
+  middleName?: string | null
+  lastName: string
+  class?: string | null
+  email: string
+  phoneNumber?: string | null
+  password?: string | null
+  googleId?: string | null
+  role?: string | null
+  terms?: boolean
+  isVerified?: boolean
+  verificationToken?: string | null
+  verificationTokenExpires?: Date | string | null
+  resetToken?: string | null
+  resetTokenExpires?: Date | string | null
+  profileImageUrl?: string | null
+  profileImagePublicId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  businessProfile?: Prisma.BusinessProfileUncheckedCreateNestedOneWithoutUserInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutUserInput
+  invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutUserInput
+  invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUncheckedCreateNestedOneWithoutUserInput
+  invoiceSettings?: Prisma.InvoiceSettingsUncheckedCreateNestedOneWithoutUserInput
+  invoiceReminders?: Prisma.InvoiceReminderUncheckedCreateNestedManyWithoutUserInput
+  paymentSettings?: Prisma.PaymentSettingsUncheckedCreateNestedOneWithoutUserInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutPaymentProviderConnectionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPaymentProviderConnectionsInput, Prisma.UserUncheckedCreateWithoutPaymentProviderConnectionsInput>
+}
+
+export type UserUpsertWithoutPaymentProviderConnectionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPaymentProviderConnectionsInput, Prisma.UserUncheckedUpdateWithoutPaymentProviderConnectionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPaymentProviderConnectionsInput, Prisma.UserUncheckedCreateWithoutPaymentProviderConnectionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutPaymentProviderConnectionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPaymentProviderConnectionsInput, Prisma.UserUncheckedUpdateWithoutPaymentProviderConnectionsInput>
+}
+
+export type UserUpdateWithoutPaymentProviderConnectionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  middleName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  class?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  terms?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  verificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verificationTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  businessProfile?: Prisma.BusinessProfileUpdateOneWithoutUserNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutUserNestedInput
+  invoices?: Prisma.InvoiceUpdateManyWithoutUserNestedInput
+  invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUpdateOneWithoutUserNestedInput
+  invoiceSettings?: Prisma.InvoiceSettingsUpdateOneWithoutUserNestedInput
+  invoiceReminders?: Prisma.InvoiceReminderUpdateManyWithoutUserNestedInput
+  paymentSettings?: Prisma.PaymentSettingsUpdateOneWithoutUserNestedInput
+  products?: Prisma.ProductUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPaymentProviderConnectionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  middleName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  class?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  terms?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  verificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verificationTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  businessProfile?: Prisma.BusinessProfileUncheckedUpdateOneWithoutUserNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutUserNestedInput
+  invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutUserNestedInput
+  invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUncheckedUpdateOneWithoutUserNestedInput
+  invoiceSettings?: Prisma.InvoiceSettingsUncheckedUpdateOneWithoutUserNestedInput
+  invoiceReminders?: Prisma.InvoiceReminderUncheckedUpdateManyWithoutUserNestedInput
+  paymentSettings?: Prisma.PaymentSettingsUncheckedUpdateOneWithoutUserNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -1740,12 +2118,16 @@ export type UserCountOutputType = {
   customers: number
   invoices: number
   invoiceReminders: number
+  paymentProviderConnections: number
+  products: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   customers?: boolean | UserCountOutputTypeCountCustomersArgs
   invoices?: boolean | UserCountOutputTypeCountInvoicesArgs
   invoiceReminders?: boolean | UserCountOutputTypeCountInvoiceRemindersArgs
+  paymentProviderConnections?: boolean | UserCountOutputTypeCountPaymentProviderConnectionsArgs
+  products?: boolean | UserCountOutputTypeCountProductsArgs
 }
 
 /**
@@ -1779,6 +2161,20 @@ export type UserCountOutputTypeCountInvoiceRemindersArgs<ExtArgs extends runtime
   where?: Prisma.InvoiceReminderWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountPaymentProviderConnectionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PaymentProviderConnectionWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountProductsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ProductWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1808,6 +2204,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   invoiceSettings?: boolean | Prisma.User$invoiceSettingsArgs<ExtArgs>
   invoiceReminders?: boolean | Prisma.User$invoiceRemindersArgs<ExtArgs>
   paymentSettings?: boolean | Prisma.User$paymentSettingsArgs<ExtArgs>
+  paymentProviderConnections?: boolean | Prisma.User$paymentProviderConnectionsArgs<ExtArgs>
+  products?: boolean | Prisma.User$productsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1889,6 +2287,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   invoiceSettings?: boolean | Prisma.User$invoiceSettingsArgs<ExtArgs>
   invoiceReminders?: boolean | Prisma.User$invoiceRemindersArgs<ExtArgs>
   paymentSettings?: boolean | Prisma.User$paymentSettingsArgs<ExtArgs>
+  paymentProviderConnections?: boolean | Prisma.User$paymentProviderConnectionsArgs<ExtArgs>
+  products?: boolean | Prisma.User$productsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1904,6 +2304,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     invoiceSettings: Prisma.$InvoiceSettingsPayload<ExtArgs> | null
     invoiceReminders: Prisma.$InvoiceReminderPayload<ExtArgs>[]
     paymentSettings: Prisma.$PaymentSettingsPayload<ExtArgs> | null
+    paymentProviderConnections: Prisma.$PaymentProviderConnectionPayload<ExtArgs>[]
+    products: Prisma.$ProductPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2327,6 +2729,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   invoiceSettings<T extends Prisma.User$invoiceSettingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$invoiceSettingsArgs<ExtArgs>>): Prisma.Prisma__InvoiceSettingsClient<runtime.Types.Result.GetResult<Prisma.$InvoiceSettingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   invoiceReminders<T extends Prisma.User$invoiceRemindersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$invoiceRemindersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InvoiceReminderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   paymentSettings<T extends Prisma.User$paymentSettingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$paymentSettingsArgs<ExtArgs>>): Prisma.Prisma__PaymentSettingsClient<runtime.Types.Result.GetResult<Prisma.$PaymentSettingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  paymentProviderConnections<T extends Prisma.User$paymentProviderConnectionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$paymentProviderConnectionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentProviderConnectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  products<T extends Prisma.User$productsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$productsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2914,6 +3318,54 @@ export type User$paymentSettingsArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   include?: Prisma.PaymentSettingsInclude<ExtArgs> | null
   where?: Prisma.PaymentSettingsWhereInput
+}
+
+/**
+ * User.paymentProviderConnections
+ */
+export type User$paymentProviderConnectionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PaymentProviderConnection
+   */
+  select?: Prisma.PaymentProviderConnectionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PaymentProviderConnection
+   */
+  omit?: Prisma.PaymentProviderConnectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentProviderConnectionInclude<ExtArgs> | null
+  where?: Prisma.PaymentProviderConnectionWhereInput
+  orderBy?: Prisma.PaymentProviderConnectionOrderByWithRelationInput | Prisma.PaymentProviderConnectionOrderByWithRelationInput[]
+  cursor?: Prisma.PaymentProviderConnectionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PaymentProviderConnectionScalarFieldEnum | Prisma.PaymentProviderConnectionScalarFieldEnum[]
+}
+
+/**
+ * User.products
+ */
+export type User$productsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Product
+   */
+  select?: Prisma.ProductSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Product
+   */
+  omit?: Prisma.ProductOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProductInclude<ExtArgs> | null
+  where?: Prisma.ProductWhereInput
+  orderBy?: Prisma.ProductOrderByWithRelationInput | Prisma.ProductOrderByWithRelationInput[]
+  cursor?: Prisma.ProductWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ProductScalarFieldEnum | Prisma.ProductScalarFieldEnum[]
 }
 
 /**

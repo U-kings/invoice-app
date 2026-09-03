@@ -199,7 +199,7 @@ export function CustomerDataTable({
               <DropdownMenuGroup>
                 {table
                   .getAllLeafColumns()
-                  .filter((column) => column.id !== "select")
+                  .filter((column) => column.id !== "select" && column.id !== "actions")
                   .map((column) => {
                     const header = column.columnDef.header
                     const label =

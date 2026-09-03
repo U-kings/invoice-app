@@ -27,7 +27,6 @@ export function AuthHydrationProvider({
   // 2. Hydration effect runs unconditionally
   useEffect(() => {
     if (data?.user && data?.access_token && !isLoggingOut) {
-      console.log(user?.id, data.user.id)
       if (user?.id !== data.user.id || token !== data.access_token) {
         setAuth(data.user, data.access_token)
       }

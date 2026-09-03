@@ -10,6 +10,7 @@ export interface CreateCheckoutInput {
   }
   successUrl: string
   cancelUrl: string
+  paystackSecret?: string
 }
 
 export interface CheckoutResult {

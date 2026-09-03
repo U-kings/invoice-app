@@ -37,6 +37,7 @@ import { useCreateInvoice } from "@/hooks/use-create-invoice"
 import { useCustomers } from "@/hooks/use-customers"
 import { toast } from "@workspace/ui/components/toast"
 import { useInvoiceSettings } from "@/hooks/use-invoice-settings"
+import { useProducts } from "@/hooks/use-products"
 
 const paymentTerms = [
   {
@@ -118,9 +119,13 @@ function calculateDueDate(issueDate: string, paymentTerm: string) {
 
 export function InvoiceForm() {
   const router = useRouter()
+  const { data, isLoading } = useProducts()
+
+  const products = data?.products ?? []
   const [saveToCatalog, setSaveToCatalog] = useState<Record<string, boolean>>(
     {}
   )
+
   const [catalogItems, setCatalogItems] = useState<InvoiceItem[]>(() => {
     const storedItems = getCatalogItems()
 
@@ -846,7 +851,8 @@ export function InvoiceForm() {
                         <InvoiceItemField
                           id={`invoice-item-${index}`}
                           value={field.value}
-                          items={catalogItems}
+                          items={products}
+                          // items={catalogItems}
                           onChange={field.onChange}
                           onSelect={(selectedItem) => {
                             form.setValue(
@@ -871,7 +877,7 @@ export function InvoiceForm() {
 
                             form.setValue(
                               `items.${index}.description`,
-                              selectedItem.description,
+                              selectedItem.description as string,
                               {
                                 shouldDirty: true,
                                 shouldTouch: true,
@@ -881,7 +887,7 @@ export function InvoiceForm() {
 
                             form.setValue(
                               `items.${index}.rate`,
-                              selectedItem.rate,
+                              Number(selectedItem.rate) as number,
                               {
                                 shouldDirty: true,
                                 shouldTouch: true,
@@ -1225,7 +1231,7 @@ export function InvoiceForm() {
       </section>
       <div className="flex flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">
         <Button
-        nativeButton={false}
+          nativeButton={false}
           type="button"
           className="h-10"
           variant="ghost"
