@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 
 import { Camera, Trash2, Upload } from "lucide-react"
@@ -26,6 +26,7 @@ import {
 
 import { toast } from "@workspace/ui/components/toast"
 import Image from "next/image"
+import { useMutation } from "@tanstack/react-query"
 
 interface ProfileFormValues {
   firstName: string
@@ -50,6 +51,12 @@ export function ProfileSettings() {
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const [showEmailChange, setShowEmailChange] = useState(false)
+
+  const [newEmail, setNewEmail] = useState("")
+
+  const [currentPassword, setCurrentPassword] = useState("")
+
   const form = useForm<ProfileFormValues>({
     defaultValues: {
       firstName: "",
@@ -73,6 +80,52 @@ export function ProfileSettings() {
       phoneNumber: profileQuery.data.phoneNumber ?? "",
     })
   }, [profileQuery.data, form])
+
+    const requestEmailChangeMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch("/api/dashboard/settings/profile/email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: newEmail,
+          currentPassword,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to request email change")
+      }
+
+      return result
+    },
+
+    onSuccess: (result) => {
+      setShowEmailChange(false)
+      setNewEmail("")
+      setCurrentPassword("")
+
+      toast.add({
+        title: "Confirmation email sent",
+        description:
+          result.message ||
+          "Check your new email address to confirm the change.",
+        type: "success",
+      })
+    },
+
+    onError: (error) => {
+      toast.add({
+        title: "Failed to change email",
+        description:
+          error instanceof Error ? error.message : "Something went wrong.",
+        type: "error",
+      })
+    },
+  })
 
   function onSubmit(values: ProfileFormValues) {
     updateProfileMutation.mutate(
@@ -204,6 +257,8 @@ export function ProfileSettings() {
   const isImageRemoving = removeProfileImageMutation.isPending
 
   const isImageBusy = isImageUploading || isImageRemoving
+
+
 
   return (
     <form
@@ -357,13 +412,112 @@ export function ProfileSettings() {
         <Field className="md:col-span-2">
           <FieldLabel htmlFor="email">Email</FieldLabel>
 
-          <Input id="email" type="email" readOnly {...form.register("email")} />
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Input
+              id="email"
+              type="email"
+              readOnly
+              {...form.register("email")}
+              className="flex-1"
+            />
+
+            <Button
+              type="button"
+              variant="outline"
+              className="h-12"
+              onClick={() => {
+                setNewEmail(profileQuery.data?.email ?? "")
+                setShowEmailChange(true)
+              }}
+            >
+              Change email
+            </Button>
+          </div>
 
           <FieldDescription>
-            Your email address cannot be changed from this page.
+            Changing your email requires confirmation at the new address.
           </FieldDescription>
         </Field>
       </FieldGroup>
+
+      {showEmailChange && (
+        <div className="mt-6 rounded-xl border bg-muted/30 p-5">
+          <div className="mb-5">
+            <h3 className="font-medium">Change email address</h3>
+
+            <p className="mt-1 text-sm text-muted-foreground">
+              Enter your new email address and your current password. We'll send
+              a confirmation link to the new address.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <Field>
+              <FieldLabel htmlFor="new-email">New email address</FieldLabel>
+
+              <Input
+                id="new-email"
+                type="email"
+                autoComplete="email"
+                placeholder="you@example.com"
+                value={newEmail}
+                onChange={(event) => {
+                  setNewEmail(event.target.value)
+                }}
+              />
+            </Field>
+
+            <Field>
+              <FieldLabel htmlFor="email-current-password">
+                Current password
+              </FieldLabel>
+
+              <Input
+                id="email-current-password"
+                type="password"
+                autoComplete="current-password"
+                placeholder="Enter your current password"
+                value={currentPassword}
+                onChange={(event) => {
+                  setCurrentPassword(event.target.value)
+                }}
+              />
+            </Field>
+
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setShowEmailChange(false)
+                  setNewEmail("")
+                  setCurrentPassword("")
+                }}
+                disabled={requestEmailChangeMutation.isPending}
+              >
+                Cancel
+              </Button>
+
+              <Button
+                type="button"
+                onClick={() => {
+                  requestEmailChangeMutation.mutate()
+                }}
+                disabled={
+                  !newEmail.trim() ||
+                  !currentPassword ||
+                  requestEmailChangeMutation.isPending
+                }
+                className="bg-[#2EAFB4] text-white hover:bg-[#269ba0]"
+              >
+                {requestEmailChangeMutation.isPending
+                  ? "Sending..."
+                  : "Send confirmation"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Save */}
 

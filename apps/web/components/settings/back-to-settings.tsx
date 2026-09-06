@@ -15,7 +15,7 @@ export default function BackToSettings() {
           <Link
             {...props}
             href="/dashboard/settings"
-            className="mb-3 flex items-center gap-2 leading-0"
+            className="w-fit mb-3 flex items-center gap-2 leading-0"
           />
         )}
       >

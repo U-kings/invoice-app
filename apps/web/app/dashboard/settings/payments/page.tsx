@@ -31,6 +31,7 @@ import {
   usePaymentSettings,
   useUpdatePaymentSettings,
 } from "@/hooks/use-payment-settings"
+import BackToSettings from "@/components/settings/back-to-settings"
 
 type PaymentProvider = "paystack" | "stripe" | "flutterwave"
 
@@ -235,7 +236,8 @@ export default function PaymentSettingsPage() {
     <div className="w-full space-y-8">
       {/* Header */}
       <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">
+        <BackToSettings/>
+        <h1 className="text-2xl font-bold tracking-tight">
           Payment settings
         </h1>
 

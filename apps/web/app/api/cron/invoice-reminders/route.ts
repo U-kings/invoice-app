@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { processInvoiceReminders } from "@/lib/invoice-reminders/process-invoice-reminders"
 
-export async function POST(req: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
     const authorization =
       req.headers.get("authorization")

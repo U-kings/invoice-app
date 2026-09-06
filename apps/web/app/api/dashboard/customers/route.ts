@@ -8,6 +8,7 @@ interface AuthPayload {
 }
 
 import { CustomerStatus as PrismaCustomerStatus } from "@repo/db"
+import { getAuthenticatedSession } from "@/lib/auth/session"
 
 const statusMap: Record<string, PrismaCustomerStatus> = {
   Active: "ACTIVE",
@@ -15,49 +16,21 @@ const statusMap: Record<string, PrismaCustomerStatus> = {
   Blocked: "BLOCKED",
 }
 
-export async function GET(req: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    // ---------------------------------------------
-    // 1. Authenticate user
-    // ---------------------------------------------
+const auth = await getAuthenticatedSession(request)
 
-    const token = req.cookies.get("token")?.value
-
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const jwtSecret = process.env.JWT_SECRET
-
-    if (!jwtSecret) {
-      throw new Error("JWT_SECRET environment variable is missing")
-    }
-
-    let decoded: AuthPayload
-
-    try {
-      decoded = jwt.verify(token, jwtSecret) as AuthPayload
-    } catch {
+    if (!auth) {
       return NextResponse.json(
-        {
-          error: "Invalid or expired authentication token",
-        },
-        { status: 401 }
+        { error: "Unauthorized" },
+        { status: 401 },
       )
     }
-
-    if (!decoded.userId) {
-      return NextResponse.json(
-        { error: "Invalid authentication token" },
-        { status: 401 }
-      )
-    }
-
     // ---------------------------------------------
     // 2. Read query parameters
     // ---------------------------------------------
 
-    const searchParams = req.nextUrl.searchParams
+    const searchParams = request.nextUrl.searchParams
 
     const search = searchParams.get("search")?.trim() ?? ""
 
@@ -99,7 +72,7 @@ export async function GET(req: NextRequest) {
     // ---------------------------------------------
 
     const where = {
-      userId: decoded.userId,
+      userId: auth.userId,
 
       ...(search
         ? {
@@ -252,13 +225,13 @@ interface CreateCustomerBody {
   email: string
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     // ---------------------------------------------
     // 1. Authenticate user
     // ---------------------------------------------
 
-    const token = req.cookies.get("token")?.value
+    const token = request.cookies.get("token")?.value
 
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -294,7 +267,7 @@ export async function POST(req: NextRequest) {
     // 2. Parse body
     // ---------------------------------------------
 
-    const body = (await req.json()) as CreateCustomerBody
+    const body = (await request.json()) as CreateCustomerBody
 
     const name = body.name?.trim()
     const email = body.email?.trim().toLowerCase()

@@ -40,13 +40,13 @@ export default function CustomersPage() {
   }, [isEditing])
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-6">
+    <div className="w-full space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Customers</h1>
 
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-1 text-sm text-muted-foreground sm:text-base">
             Manage your customers and keep track of their invoices.
           </p>
         </div>

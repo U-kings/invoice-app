@@ -23,7 +23,9 @@ export default async function DashboardLayout({
 
   return (
     <AuthHydrationProvider>
-      <DashboardShell>{children}</DashboardShell>
+      <DashboardShell>
+        {children}
+      </DashboardShell>
     </AuthHydrationProvider>
   )
 }

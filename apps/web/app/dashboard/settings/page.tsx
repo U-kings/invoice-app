@@ -79,7 +79,7 @@ export default function SettingsPage() {
           Settings
         </h1>
 
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-1 text-sm text-muted-foreground sm:text-base">
           Manage your account, business, invoicing, and payment settings.
         </p>
       </div>

@@ -1,42 +1,40 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@repo/db";
-import jwt from "jsonwebtoken";
+import { NextRequest, NextResponse } from "next/server"
 
-export async function GET(req: NextRequest) {
+import { prisma } from "@repo/db"
+import { getAuthenticatedSession } from "@/lib/auth/session"
+
+export async function GET(request: NextRequest) {
   try {
-    // 1. Extract the secure authentication cookie token
-    const token = req.cookies.get("token")?.value;
+    const auth = await getAuthenticatedSession(request)
 
-    if (!token) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    if (!auth) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
-    const jwtSecret = process.env.JWT_SECRET;
-    if (!jwtSecret) throw new Error("JWT_SECRET is missing.");
-
-    // 2. Decode the token payload
-    const decoded = jwt.verify(token, jwtSecret) as { userId: string };
-
-    // 3. Query the user record context matching your PostgreSQL id
     const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-    });
+      where: {
+        id: auth.userId,
+      },
+    })
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 401 });
+      return NextResponse.json({ error: "User not found" }, { status: 401 })
     }
 
-    // Strip password safely before sending profile downstream
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...publicUser } = user;
+    const { password, ...publicUser } = user
 
-    return NextResponse.json({ 
-      user: publicUser, 
-      access_token: token 
-    }, { status: 200 });
+    return NextResponse.json(
+      {
+        user: publicUser,
 
+        // Keep this for your existing Zustand hydration.
+        access_token: request.cookies.get("token")?.value ?? null,
+      },
+      { status: 200 }
+    )
   } catch (error) {
-    console.error("Session verification route failure:", error);
-    return NextResponse.json({ error: "Invalid session token" }, { status: 401 });
+    console.error("Session verification route failure:", error)
+
+    return NextResponse.json({ error: "Invalid session" }, { status: 401 })
   }
 }

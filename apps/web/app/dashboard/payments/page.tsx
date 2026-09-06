@@ -15,7 +15,7 @@ export default function PaymentsPage() {
 
   return (
     <>
-      <div className="mx-auto max-w-7xl overflow-clip">
+      <div className="w-full overflow-clip">
         {isError ? (
           <div className="p-6 text-sm text-destructive">
             {error.message?.toString()?.includes("Can't reach database server")

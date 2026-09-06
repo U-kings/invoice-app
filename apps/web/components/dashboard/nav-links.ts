@@ -31,11 +31,11 @@ export const navLinks = [
     href: "/dashboard/payments",
     icon: CreditCard,
   },
-  {
-    title: "Estimates",
-    href: "/dashboard/estimates",
-    icon: Receipt,
-  },
+  // {
+  //   title: "Estimates",
+  //   href: "/dashboard/estimates",
+  //   icon: Receipt,
+  // },
   {
     title: "Products",
     href: "/dashboard/products",

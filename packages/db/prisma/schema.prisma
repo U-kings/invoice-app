@@ -17,6 +17,9 @@ model User {
   lastName                   String
   class                      String?
   email                      String                      @unique
+  pendingEmail               String?                     @unique
+  emailChangeToken           String?                     @unique
+  emailChangeTokenExpires    DateTime?
   phoneNumber                String?
   password                   String?
   googleId                   String?                     @unique
@@ -40,6 +43,38 @@ model User {
   paymentSettings            PaymentSettings?
   paymentProviderConnections PaymentProviderConnection[]
   products                   Product[]
+  userTwoFactor              UserTwoFactor?
+  sessions                   Session[]
+}
+
+model UserTwoFactor {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  secret        String?
+  enabled       Boolean  @default(false)
+  recoveryCodes String[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Session {
+  id           String    @id @default(uuid())
+  userId       String
+  tokenId      String    @unique
+  userAgent    String?
+  ipAddress    String?
+  createdAt    DateTime  @default(now())
+  lastActiveAt DateTime  @default(now())
+  expiresAt    DateTime
+  revokedAt    DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, revokedAt])
+  @@index([expiresAt])
 }
 
 model BusinessProfile {

@@ -4,7 +4,7 @@ import { Skeleton } from "@workspace/ui/components/skeleton"
 
 export function CustomerSkeleton() {
   return (
-    <div className="w-full space-y-4 max-w-300 mx-auto animate-pulse">
+    <div className="w-full space-y-4 animate-pulse">
       {/* 1. Toolbar Row (Search Input & Filter Buttons) */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {/* Search customers... input block */}

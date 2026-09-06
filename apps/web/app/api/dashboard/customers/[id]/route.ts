@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import jwt from "jsonwebtoken"
 
 import { prisma } from "@repo/db"
+import { getAuthenticatedSession } from "@/lib/auth/session"
 
 interface AuthPayload {
   userId: string
@@ -20,42 +21,16 @@ interface RouteContext {
   }>
 }
 
-export async function PATCH(req: NextRequest, { params }: RouteContext) {
+export async function PATCH(request: NextRequest, { params }: RouteContext) {
   try {
     // ---------------------------------------------
     // 1. Authenticate
     // ---------------------------------------------
 
-    const token = req.cookies.get("token")?.value
+    const auth = await getAuthenticatedSession(request)
 
-    if (!token) {
+    if (!auth) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const jwtSecret = process.env.JWT_SECRET
-
-    if (!jwtSecret) {
-      throw new Error("JWT_SECRET environment variable is missing")
-    }
-
-    let decoded: AuthPayload
-
-    try {
-      decoded = jwt.verify(token, jwtSecret) as AuthPayload
-    } catch {
-      return NextResponse.json(
-        {
-          error: "Invalid or expired authentication token",
-        },
-        { status: 401 }
-      )
-    }
-
-    if (!decoded.userId) {
-      return NextResponse.json(
-        { error: "Invalid authentication token" },
-        { status: 401 }
-      )
     }
 
     // ---------------------------------------------
@@ -75,7 +50,7 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
     // 3. Parse body
     // ---------------------------------------------
 
-    const body = (await req.json()) as UpdateCustomerBody
+    const body = (await request.json()) as UpdateCustomerBody
 
     const name = body.name?.trim()
     const email = body.email?.trim().toLowerCase()
@@ -98,7 +73,7 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
     const customer = await prisma.customer.findFirst({
       where: {
         id,
-        userId: decoded.userId,
+        userId: auth.userId,
       },
     })
 
@@ -124,7 +99,7 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
 
       const duplicate = await prisma.customer.findFirst({
         where: {
-          userId: decoded.userId,
+          userId: auth.userId,
           email,
           NOT: {
             id,
@@ -175,12 +150,12 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: RouteContext) {
+export async function DELETE(request: NextRequest, { params }: RouteContext) {
   try {
     // ---------------------------------------------
     // 1. Authenticate (Keep your existing token verification here)
     // ---------------------------------------------
-    const token = req.cookies.get("token")?.value
+    const token = request.cookies.get("token")?.value
     if (!token)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     const jwtSecret = process.env.JWT_SECRET

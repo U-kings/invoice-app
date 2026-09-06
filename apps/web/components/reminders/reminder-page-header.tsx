@@ -11,7 +11,7 @@ export function ReminderPageHeader() {
       <div className="space-y-1">
         <h1 className="text-3xl font-bold tracking-tight">Invoice reminders</h1>
 
-        <p className="text-sm text-muted-foreground">
+        <p className="mt-1 text-sm text-muted-foreground sm:text-base">
           Manage scheduled reminders and track their delivery status.
         </p>
       </div>

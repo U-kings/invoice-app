@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import jwt from "jsonwebtoken"
 import { prisma } from "@repo/db"
+import { getAuthenticatedSession } from "@/lib/auth/session"
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -10,39 +11,15 @@ interface AuthPayload {
   userId: string
 }
 
-export async function PATCH(req: NextRequest, { params }: RouteContext) {
+export async function PATCH(request: NextRequest, { params }: RouteContext) {
   try {
     // ---------------------------------------------
     // 1. Authenticate user
     // ---------------------------------------------
-    const token = req.cookies.get("token")?.value
+    const auth = await getAuthenticatedSession(request)
 
-    if (!token) {
+    if (!auth) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const jwtSecret = process.env.JWT_SECRET
-
-    if (!jwtSecret) {
-      throw new Error("JWT_SECRET environment variable is missing")
-    }
-
-    let decoded: AuthPayload
-
-    try {
-      decoded = jwt.verify(token, jwtSecret) as AuthPayload
-    } catch {
-      return NextResponse.json(
-        { error: "Invalid or expired authentication token" },
-        { status: 401 }
-      )
-    }
-
-    if (!decoded.userId) {
-      return NextResponse.json(
-        { error: "Invalid authentication token" },
-        { status: 401 }
-      )
     }
 
     // ---------------------------------------------
@@ -63,7 +40,7 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
     const customer = await prisma.customer.findFirst({
       where: {
         id,
-        userId: decoded.userId,
+        userId: auth.userId,
       },
       select: {
         id: true,

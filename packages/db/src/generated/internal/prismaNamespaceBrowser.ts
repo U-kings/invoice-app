@@ -52,6 +52,8 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   User: 'User',
+  UserTwoFactor: 'UserTwoFactor',
+  Session: 'Session',
   BusinessProfile: 'BusinessProfile',
   Customer: 'Customer',
   Invoice: 'Invoice',
@@ -89,6 +91,9 @@ export const UserScalarFieldEnum = {
   lastName: 'lastName',
   class: 'class',
   email: 'email',
+  pendingEmail: 'pendingEmail',
+  emailChangeToken: 'emailChangeToken',
+  emailChangeTokenExpires: 'emailChangeTokenExpires',
   phoneNumber: 'phoneNumber',
   password: 'password',
   googleId: 'googleId',
@@ -106,6 +111,34 @@ export const UserScalarFieldEnum = {
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const UserTwoFactorScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  secret: 'secret',
+  enabled: 'enabled',
+  recoveryCodes: 'recoveryCodes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserTwoFactorScalarFieldEnum = (typeof UserTwoFactorScalarFieldEnum)[keyof typeof UserTwoFactorScalarFieldEnum]
+
+
+export const SessionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  tokenId: 'tokenId',
+  userAgent: 'userAgent',
+  ipAddress: 'ipAddress',
+  createdAt: 'createdAt',
+  lastActiveAt: 'lastActiveAt',
+  expiresAt: 'expiresAt',
+  revokedAt: 'revokedAt'
+} as const
+
+export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
 
 
 export const BusinessProfileScalarFieldEnum = {

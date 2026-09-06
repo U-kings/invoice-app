@@ -14,7 +14,7 @@ const currencySymbols: Record<string, string> = {
   KES: "KSh",
 }
 
-function getCurrencySymbol(currency: string) {
+export function getCurrencySymbol(currency: string) {
   return currencySymbols[currency.toUpperCase()] ?? currency
 }
 

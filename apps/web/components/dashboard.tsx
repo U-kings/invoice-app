@@ -44,7 +44,7 @@ export function Dashboard() {
         height={800}
         alt="Dashboard hero image"
         loading="eager"
-        className="hidden dark:block overflow-hidden rounded-[32px] border border-white/15 bg-background/65 shadow-2xl backdrop-blur-[40px]"
+        className="hidden dark:block overflow-hidden rounded-[32px] border border-white/15 bg-background/65 shadow-2xl backdrop-blur-2xl"
       />
       <Image
         src="/dashboard-hero-light.png"
@@ -52,10 +52,10 @@ export function Dashboard() {
         height={800}
         alt="Dashboard hero image"
         loading="eager"
-        className="block dark:hidden overflow-hidden rounded-[32px] border border-white/15 bg-background/65 shadow-2xl backdrop-blur-[40px]"
+        className="block dark:hidden overflow-hidden rounded-[32px] border border-white/15 bg-background/65 shadow-2xl backdrop-blur-2xl"
       />
 
-      <div className="hidden scale-70 overflow-hidden rounded-[32px] border border-white/15 bg-background/65 shadow-2xl backdrop-blur-[40px]">
+      <div className="hidden scale-70 overflow-hidden rounded-[32px] border border-white/15 bg-background/65 shadow-2xl backdrop-blur-2xl">
         <div className="flex">
           <DashboardSidebar />
 

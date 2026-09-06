@@ -4,7 +4,7 @@ import { Skeleton } from "@workspace/ui/components/skeleton"
 
 export function PaymentSkeleton() {
   return (
-    <div className="animate-fade-in mx-auto w-full max-w-300 space-y-6">
+    <div className="animate-fade-in w-full space-y-6">
       {/* 2. Top Stats Grid (4 Cards Row) */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 3 }).map((_, index) => (

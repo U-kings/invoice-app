@@ -19,7 +19,7 @@ const path = points
 
 export function RevenueChart() {
   return (
-    <div className="relative h-[320px] w-full overflow-hidden rounded-2xl">
+    <div className="relative h-80 w-full overflow-hidden rounded-2xl">
       {/* background grid */}
 
       <svg
