@@ -27,6 +27,7 @@ import {
 import { useAuthStore } from "@/app/store/useAuthStore"
 import { LogoutButton } from "./logout-button"
 import { useProfile } from "@/hooks/use-profile"
+import Link from "next/link"
 
 export function UserMenu() {
   // const userData = useAuthStore((state) => state.user)
@@ -53,7 +54,11 @@ export function UserMenu() {
         </div>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-72">
+      <DropdownMenuContent
+        align="end"
+        className="w-full max-w-65 rounded-lg border bg-popover p-1 text-popover-foreground shadow-md"
+      >
+        {/* <DropdownMenuContent align="end" className="w-72"> */}
         {/* <DropdownMenuLabel> */}
         {/* <div className="space-y-1"> */}
         <div className="px-3 py-2">
@@ -68,27 +73,27 @@ export function UserMenu() {
         <DropdownMenuSeparator />
 
         <DropdownMenuGroup>
-          <DropdownMenuItem>
+          <DropdownMenuItem render={<Link href="/dashboard/settings/profile" />}>
             <User className="mr-2 h-4 w-4" />
             Profile
           </DropdownMenuItem>
 
-          <DropdownMenuItem>
+          <DropdownMenuItem render={<Link href="/dashboard/billing" />}>
             <CreditCard className="mr-2 h-4 w-4" />
             Billing
           </DropdownMenuItem>
 
-          <DropdownMenuItem>
+          {/* <DropdownMenuItem render={<Link href="/dashboard/team" />}>
             <Users className="mr-2 h-4 w-4" />
             Team
-          </DropdownMenuItem>
+          </DropdownMenuItem> */}
 
-          <DropdownMenuItem>
+          <DropdownMenuItem render={<Link href="/dashboard/settings" />}>
             <Settings className="mr-2 h-4 w-4" />
             Settings
           </DropdownMenuItem>
 
-          <DropdownMenuItem>
+          <DropdownMenuItem render={<Link href="/dashboard/help" />}>
             <HelpCircle className="mr-2 h-4 w-4" />
             Help
           </DropdownMenuItem>

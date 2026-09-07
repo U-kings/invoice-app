@@ -337,6 +337,7 @@ export type UserWhereInput = {
   products?: Prisma.ProductListRelationFilter
   userTwoFactor?: Prisma.XOR<Prisma.UserTwoFactorNullableScalarRelationFilter, Prisma.UserTwoFactorWhereInput> | null
   sessions?: Prisma.SessionListRelationFilter
+  subscription?: Prisma.XOR<Prisma.SubscriptionNullableScalarRelationFilter, Prisma.SubscriptionWhereInput> | null
 }
 
 export type UserOrderByWithRelationInput = {
@@ -374,6 +375,7 @@ export type UserOrderByWithRelationInput = {
   products?: Prisma.ProductOrderByRelationAggregateInput
   userTwoFactor?: Prisma.UserTwoFactorOrderByWithRelationInput
   sessions?: Prisma.SessionOrderByRelationAggregateInput
+  subscription?: Prisma.SubscriptionOrderByWithRelationInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -414,6 +416,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   products?: Prisma.ProductListRelationFilter
   userTwoFactor?: Prisma.XOR<Prisma.UserTwoFactorNullableScalarRelationFilter, Prisma.UserTwoFactorWhereInput> | null
   sessions?: Prisma.SessionListRelationFilter
+  subscription?: Prisma.XOR<Prisma.SubscriptionNullableScalarRelationFilter, Prisma.SubscriptionWhereInput> | null
 }, "id" | "email" | "pendingEmail" | "emailChangeToken" | "googleId" | "resetToken">
 
 export type UserOrderByWithAggregationInput = {
@@ -509,6 +512,7 @@ export type UserCreateInput = {
   products?: Prisma.ProductCreateNestedManyWithoutUserInput
   userTwoFactor?: Prisma.UserTwoFactorCreateNestedOneWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -546,6 +550,7 @@ export type UserUncheckedCreateInput = {
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutUserInput
   userTwoFactor?: Prisma.UserTwoFactorUncheckedCreateNestedOneWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -583,6 +588,7 @@ export type UserUpdateInput = {
   products?: Prisma.ProductUpdateManyWithoutUserNestedInput
   userTwoFactor?: Prisma.UserTwoFactorUpdateOneWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -620,6 +626,7 @@ export type UserUncheckedUpdateInput = {
   products?: Prisma.ProductUncheckedUpdateManyWithoutUserNestedInput
   userTwoFactor?: Prisma.UserTwoFactorUncheckedUpdateOneWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -831,6 +838,20 @@ export type UserUpdateOneRequiredWithoutSessionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSessionsInput, Prisma.UserUpdateWithoutSessionsInput>, Prisma.UserUncheckedUpdateWithoutSessionsInput>
 }
 
+export type UserCreateNestedOneWithoutSubscriptionInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSubscriptionInput, Prisma.UserUncheckedCreateWithoutSubscriptionInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSubscriptionInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutSubscriptionNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSubscriptionInput, Prisma.UserUncheckedCreateWithoutSubscriptionInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSubscriptionInput
+  upsert?: Prisma.UserUpsertWithoutSubscriptionInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSubscriptionInput, Prisma.UserUpdateWithoutSubscriptionInput>, Prisma.UserUncheckedUpdateWithoutSubscriptionInput>
+}
+
 export type UserCreateNestedOneWithoutBusinessProfileInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutBusinessProfileInput, Prisma.UserUncheckedCreateWithoutBusinessProfileInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutBusinessProfileInput
@@ -991,6 +1012,7 @@ export type UserCreateWithoutUserTwoFactorInput = {
   paymentProviderConnections?: Prisma.PaymentProviderConnectionCreateNestedManyWithoutUserInput
   products?: Prisma.ProductCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutUserTwoFactorInput = {
@@ -1027,6 +1049,7 @@ export type UserUncheckedCreateWithoutUserTwoFactorInput = {
   paymentProviderConnections?: Prisma.PaymentProviderConnectionUncheckedCreateNestedManyWithoutUserInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutUserTwoFactorInput = {
@@ -1079,6 +1102,7 @@ export type UserUpdateWithoutUserTwoFactorInput = {
   paymentProviderConnections?: Prisma.PaymentProviderConnectionUpdateManyWithoutUserNestedInput
   products?: Prisma.ProductUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUserTwoFactorInput = {
@@ -1115,6 +1139,7 @@ export type UserUncheckedUpdateWithoutUserTwoFactorInput = {
   paymentProviderConnections?: Prisma.PaymentProviderConnectionUncheckedUpdateManyWithoutUserNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSessionsInput = {
@@ -1151,6 +1176,7 @@ export type UserCreateWithoutSessionsInput = {
   paymentProviderConnections?: Prisma.PaymentProviderConnectionCreateNestedManyWithoutUserInput
   products?: Prisma.ProductCreateNestedManyWithoutUserInput
   userTwoFactor?: Prisma.UserTwoFactorCreateNestedOneWithoutUserInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -1187,6 +1213,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   paymentProviderConnections?: Prisma.PaymentProviderConnectionUncheckedCreateNestedManyWithoutUserInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutUserInput
   userTwoFactor?: Prisma.UserTwoFactorUncheckedCreateNestedOneWithoutUserInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -1239,6 +1266,7 @@ export type UserUpdateWithoutSessionsInput = {
   paymentProviderConnections?: Prisma.PaymentProviderConnectionUpdateManyWithoutUserNestedInput
   products?: Prisma.ProductUpdateManyWithoutUserNestedInput
   userTwoFactor?: Prisma.UserTwoFactorUpdateOneWithoutUserNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -1275,6 +1303,171 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   paymentProviderConnections?: Prisma.PaymentProviderConnectionUncheckedUpdateManyWithoutUserNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutUserNestedInput
   userTwoFactor?: Prisma.UserTwoFactorUncheckedUpdateOneWithoutUserNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutUserNestedInput
+}
+
+export type UserCreateWithoutSubscriptionInput = {
+  id?: string
+  firstName: string
+  middleName?: string | null
+  lastName: string
+  class?: string | null
+  email: string
+  pendingEmail?: string | null
+  emailChangeToken?: string | null
+  emailChangeTokenExpires?: Date | string | null
+  phoneNumber?: string | null
+  password?: string | null
+  googleId?: string | null
+  role?: string | null
+  terms?: boolean
+  isVerified?: boolean
+  verificationToken?: string | null
+  verificationTokenExpires?: Date | string | null
+  resetToken?: string | null
+  resetTokenExpires?: Date | string | null
+  profileImageUrl?: string | null
+  profileImagePublicId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  businessProfile?: Prisma.BusinessProfileCreateNestedOneWithoutUserInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutUserInput
+  invoices?: Prisma.InvoiceCreateNestedManyWithoutUserInput
+  invoiceReminderSettings?: Prisma.InvoiceReminderSettingsCreateNestedOneWithoutUserInput
+  invoiceSettings?: Prisma.InvoiceSettingsCreateNestedOneWithoutUserInput
+  invoiceReminders?: Prisma.InvoiceReminderCreateNestedManyWithoutUserInput
+  paymentSettings?: Prisma.PaymentSettingsCreateNestedOneWithoutUserInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionCreateNestedManyWithoutUserInput
+  products?: Prisma.ProductCreateNestedManyWithoutUserInput
+  userTwoFactor?: Prisma.UserTwoFactorCreateNestedOneWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutSubscriptionInput = {
+  id?: string
+  firstName: string
+  middleName?: string | null
+  lastName: string
+  class?: string | null
+  email: string
+  pendingEmail?: string | null
+  emailChangeToken?: string | null
+  emailChangeTokenExpires?: Date | string | null
+  phoneNumber?: string | null
+  password?: string | null
+  googleId?: string | null
+  role?: string | null
+  terms?: boolean
+  isVerified?: boolean
+  verificationToken?: string | null
+  verificationTokenExpires?: Date | string | null
+  resetToken?: string | null
+  resetTokenExpires?: Date | string | null
+  profileImageUrl?: string | null
+  profileImagePublicId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  businessProfile?: Prisma.BusinessProfileUncheckedCreateNestedOneWithoutUserInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutUserInput
+  invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutUserInput
+  invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUncheckedCreateNestedOneWithoutUserInput
+  invoiceSettings?: Prisma.InvoiceSettingsUncheckedCreateNestedOneWithoutUserInput
+  invoiceReminders?: Prisma.InvoiceReminderUncheckedCreateNestedManyWithoutUserInput
+  paymentSettings?: Prisma.PaymentSettingsUncheckedCreateNestedOneWithoutUserInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUncheckedCreateNestedManyWithoutUserInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutUserInput
+  userTwoFactor?: Prisma.UserTwoFactorUncheckedCreateNestedOneWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutSubscriptionInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSubscriptionInput, Prisma.UserUncheckedCreateWithoutSubscriptionInput>
+}
+
+export type UserUpsertWithoutSubscriptionInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSubscriptionInput, Prisma.UserUncheckedUpdateWithoutSubscriptionInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSubscriptionInput, Prisma.UserUncheckedCreateWithoutSubscriptionInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSubscriptionInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSubscriptionInput, Prisma.UserUncheckedUpdateWithoutSubscriptionInput>
+}
+
+export type UserUpdateWithoutSubscriptionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  middleName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  class?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  pendingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailChangeToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailChangeTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  terms?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  verificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verificationTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  businessProfile?: Prisma.BusinessProfileUpdateOneWithoutUserNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutUserNestedInput
+  invoices?: Prisma.InvoiceUpdateManyWithoutUserNestedInput
+  invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUpdateOneWithoutUserNestedInput
+  invoiceSettings?: Prisma.InvoiceSettingsUpdateOneWithoutUserNestedInput
+  invoiceReminders?: Prisma.InvoiceReminderUpdateManyWithoutUserNestedInput
+  paymentSettings?: Prisma.PaymentSettingsUpdateOneWithoutUserNestedInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUpdateManyWithoutUserNestedInput
+  products?: Prisma.ProductUpdateManyWithoutUserNestedInput
+  userTwoFactor?: Prisma.UserTwoFactorUpdateOneWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSubscriptionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  middleName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  class?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  pendingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailChangeToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailChangeTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  terms?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  verificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verificationTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resetTokenExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  profileImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  businessProfile?: Prisma.BusinessProfileUncheckedUpdateOneWithoutUserNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutUserNestedInput
+  invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutUserNestedInput
+  invoiceReminderSettings?: Prisma.InvoiceReminderSettingsUncheckedUpdateOneWithoutUserNestedInput
+  invoiceSettings?: Prisma.InvoiceSettingsUncheckedUpdateOneWithoutUserNestedInput
+  invoiceReminders?: Prisma.InvoiceReminderUncheckedUpdateManyWithoutUserNestedInput
+  paymentSettings?: Prisma.PaymentSettingsUncheckedUpdateOneWithoutUserNestedInput
+  paymentProviderConnections?: Prisma.PaymentProviderConnectionUncheckedUpdateManyWithoutUserNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutUserNestedInput
+  userTwoFactor?: Prisma.UserTwoFactorUncheckedUpdateOneWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutBusinessProfileInput = {
@@ -1311,6 +1504,7 @@ export type UserCreateWithoutBusinessProfileInput = {
   products?: Prisma.ProductCreateNestedManyWithoutUserInput
   userTwoFactor?: Prisma.UserTwoFactorCreateNestedOneWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutBusinessProfileInput = {
@@ -1347,6 +1541,7 @@ export type UserUncheckedCreateWithoutBusinessProfileInput = {
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutUserInput
   userTwoFactor?: Prisma.UserTwoFactorUncheckedCreateNestedOneWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutBusinessProfileInput = {
@@ -1399,6 +1594,7 @@ export type UserUpdateWithoutBusinessProfileInput = {
   products?: Prisma.ProductUpdateManyWithoutUserNestedInput
   userTwoFactor?: Prisma.UserTwoFactorUpdateOneWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBusinessProfileInput = {
@@ -1435,6 +1631,7 @@ export type UserUncheckedUpdateWithoutBusinessProfileInput = {
   products?: Prisma.ProductUncheckedUpdateManyWithoutUserNestedInput
   userTwoFactor?: Prisma.UserTwoFactorUncheckedUpdateOneWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCustomersInput = {
@@ -1471,6 +1668,7 @@ export type UserCreateWithoutCustomersInput = {
   products?: Prisma.ProductCreateNestedManyWithoutUserInput
   userTwoFactor?: Prisma.UserTwoFactorCreateNestedOneWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCustomersInput = {
@@ -1507,6 +1705,7 @@ export type UserUncheckedCreateWithoutCustomersInput = {
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutUserInput
   userTwoFactor?: Prisma.UserTwoFactorUncheckedCreateNestedOneWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCustomersInput = {
@@ -1559,6 +1758,7 @@ export type UserUpdateWithoutCustomersInput = {
   products?: Prisma.ProductUpdateManyWithoutUserNestedInput
   userTwoFactor?: Prisma.UserTwoFactorUpdateOneWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCustomersInput = {
@@ -1595,6 +1795,7 @@ export type UserUncheckedUpdateWithoutCustomersInput = {
   products?: Prisma.ProductUncheckedUpdateManyWithoutUserNestedInput
   userTwoFactor?: Prisma.UserTwoFactorUncheckedUpdateOneWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutInvoicesInput = {
@@ -1631,6 +1832,7 @@ export type UserCreateWithoutInvoicesInput = {
   products?: Prisma.ProductCreateNestedManyWithoutUserInput
   userTwoFactor?: Prisma.UserTwoFactorCreateNestedOneWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutInvoicesInput = {
@@ -1667,6 +1869,7 @@ export type UserUncheckedCreateWithoutInvoicesInput = {
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutUserInput
   userTwoFactor?: Prisma.UserTwoFactorUncheckedCreateNestedOneWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutInvoicesInput = {
@@ -1719,6 +1922,7 @@ export type UserUpdateWithoutInvoicesInput = {
   products?: Prisma.ProductUpdateManyWithoutUserNestedInput
   userTwoFactor?: Prisma.UserTwoFactorUpdateOneWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInvoicesInput = {
@@ -1755,6 +1959,7 @@ export type UserUncheckedUpdateWithoutInvoicesInput = {
   products?: Prisma.ProductUncheckedUpdateManyWithoutUserNestedInput
   userTwoFactor?: Prisma.UserTwoFactorUncheckedUpdateOneWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutProductsInput = {
@@ -1791,6 +1996,7 @@ export type UserCreateWithoutProductsInput = {
   paymentProviderConnections?: Prisma.PaymentProviderConnectionCreateNestedManyWithoutUserInput
   userTwoFactor?: Prisma.UserTwoFactorCreateNestedOneWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutProductsInput = {
@@ -1827,6 +2033,7 @@ export type UserUncheckedCreateWithoutProductsInput = {
   paymentProviderConnections?: Prisma.PaymentProviderConnectionUncheckedCreateNestedManyWithoutUserInput
   userTwoFactor?: Prisma.UserTwoFactorUncheckedCreateNestedOneWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutProductsInput = {
@@ -1879,6 +2086,7 @@ export type UserUpdateWithoutProductsInput = {
   paymentProviderConnections?: Prisma.PaymentProviderConnectionUpdateManyWithoutUserNestedInput
   userTwoFactor?: Prisma.UserTwoFactorUpdateOneWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutProductsInput = {
@@ -1915,6 +2123,7 @@ export type UserUncheckedUpdateWithoutProductsInput = {
   paymentProviderConnections?: Prisma.PaymentProviderConnectionUncheckedUpdateManyWithoutUserNestedInput
   userTwoFactor?: Prisma.UserTwoFactorUncheckedUpdateOneWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutInvoiceSettingsInput = {
@@ -1951,6 +2160,7 @@ export type UserCreateWithoutInvoiceSettingsInput = {
   products?: Prisma.ProductCreateNestedManyWithoutUserInput
   userTwoFactor?: Prisma.UserTwoFactorCreateNestedOneWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutInvoiceSettingsInput = {
@@ -1987,6 +2197,7 @@ export type UserUncheckedCreateWithoutInvoiceSettingsInput = {
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutUserInput
   userTwoFactor?: Prisma.UserTwoFactorUncheckedCreateNestedOneWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutInvoiceSettingsInput = {
@@ -2039,6 +2250,7 @@ export type UserUpdateWithoutInvoiceSettingsInput = {
   products?: Prisma.ProductUpdateManyWithoutUserNestedInput
   userTwoFactor?: Prisma.UserTwoFactorUpdateOneWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInvoiceSettingsInput = {
@@ -2075,6 +2287,7 @@ export type UserUncheckedUpdateWithoutInvoiceSettingsInput = {
   products?: Prisma.ProductUncheckedUpdateManyWithoutUserNestedInput
   userTwoFactor?: Prisma.UserTwoFactorUncheckedUpdateOneWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutInvoiceReminderSettingsInput = {
@@ -2111,6 +2324,7 @@ export type UserCreateWithoutInvoiceReminderSettingsInput = {
   products?: Prisma.ProductCreateNestedManyWithoutUserInput
   userTwoFactor?: Prisma.UserTwoFactorCreateNestedOneWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutInvoiceReminderSettingsInput = {
@@ -2147,6 +2361,7 @@ export type UserUncheckedCreateWithoutInvoiceReminderSettingsInput = {
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutUserInput
   userTwoFactor?: Prisma.UserTwoFactorUncheckedCreateNestedOneWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutInvoiceReminderSettingsInput = {
@@ -2199,6 +2414,7 @@ export type UserUpdateWithoutInvoiceReminderSettingsInput = {
   products?: Prisma.ProductUpdateManyWithoutUserNestedInput
   userTwoFactor?: Prisma.UserTwoFactorUpdateOneWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInvoiceReminderSettingsInput = {
@@ -2235,6 +2451,7 @@ export type UserUncheckedUpdateWithoutInvoiceReminderSettingsInput = {
   products?: Prisma.ProductUncheckedUpdateManyWithoutUserNestedInput
   userTwoFactor?: Prisma.UserTwoFactorUncheckedUpdateOneWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutInvoiceRemindersInput = {
@@ -2271,6 +2488,7 @@ export type UserCreateWithoutInvoiceRemindersInput = {
   products?: Prisma.ProductCreateNestedManyWithoutUserInput
   userTwoFactor?: Prisma.UserTwoFactorCreateNestedOneWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutInvoiceRemindersInput = {
@@ -2307,6 +2525,7 @@ export type UserUncheckedCreateWithoutInvoiceRemindersInput = {
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutUserInput
   userTwoFactor?: Prisma.UserTwoFactorUncheckedCreateNestedOneWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutInvoiceRemindersInput = {
@@ -2359,6 +2578,7 @@ export type UserUpdateWithoutInvoiceRemindersInput = {
   products?: Prisma.ProductUpdateManyWithoutUserNestedInput
   userTwoFactor?: Prisma.UserTwoFactorUpdateOneWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInvoiceRemindersInput = {
@@ -2395,6 +2615,7 @@ export type UserUncheckedUpdateWithoutInvoiceRemindersInput = {
   products?: Prisma.ProductUncheckedUpdateManyWithoutUserNestedInput
   userTwoFactor?: Prisma.UserTwoFactorUncheckedUpdateOneWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPaymentSettingsInput = {
@@ -2431,6 +2652,7 @@ export type UserCreateWithoutPaymentSettingsInput = {
   products?: Prisma.ProductCreateNestedManyWithoutUserInput
   userTwoFactor?: Prisma.UserTwoFactorCreateNestedOneWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPaymentSettingsInput = {
@@ -2467,6 +2689,7 @@ export type UserUncheckedCreateWithoutPaymentSettingsInput = {
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutUserInput
   userTwoFactor?: Prisma.UserTwoFactorUncheckedCreateNestedOneWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPaymentSettingsInput = {
@@ -2519,6 +2742,7 @@ export type UserUpdateWithoutPaymentSettingsInput = {
   products?: Prisma.ProductUpdateManyWithoutUserNestedInput
   userTwoFactor?: Prisma.UserTwoFactorUpdateOneWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPaymentSettingsInput = {
@@ -2555,6 +2779,7 @@ export type UserUncheckedUpdateWithoutPaymentSettingsInput = {
   products?: Prisma.ProductUncheckedUpdateManyWithoutUserNestedInput
   userTwoFactor?: Prisma.UserTwoFactorUncheckedUpdateOneWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPaymentProviderConnectionsInput = {
@@ -2591,6 +2816,7 @@ export type UserCreateWithoutPaymentProviderConnectionsInput = {
   products?: Prisma.ProductCreateNestedManyWithoutUserInput
   userTwoFactor?: Prisma.UserTwoFactorCreateNestedOneWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPaymentProviderConnectionsInput = {
@@ -2627,6 +2853,7 @@ export type UserUncheckedCreateWithoutPaymentProviderConnectionsInput = {
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutUserInput
   userTwoFactor?: Prisma.UserTwoFactorUncheckedCreateNestedOneWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPaymentProviderConnectionsInput = {
@@ -2679,6 +2906,7 @@ export type UserUpdateWithoutPaymentProviderConnectionsInput = {
   products?: Prisma.ProductUpdateManyWithoutUserNestedInput
   userTwoFactor?: Prisma.UserTwoFactorUpdateOneWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPaymentProviderConnectionsInput = {
@@ -2715,6 +2943,7 @@ export type UserUncheckedUpdateWithoutPaymentProviderConnectionsInput = {
   products?: Prisma.ProductUncheckedUpdateManyWithoutUserNestedInput
   userTwoFactor?: Prisma.UserTwoFactorUncheckedUpdateOneWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutUserNestedInput
 }
 
 
@@ -2828,6 +3057,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   products?: boolean | Prisma.User$productsArgs<ExtArgs>
   userTwoFactor?: boolean | Prisma.User$userTwoFactorArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
+  subscription?: boolean | Prisma.User$subscriptionArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -2922,6 +3152,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   products?: boolean | Prisma.User$productsArgs<ExtArgs>
   userTwoFactor?: boolean | Prisma.User$userTwoFactorArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
+  subscription?: boolean | Prisma.User$subscriptionArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -2941,6 +3172,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     products: Prisma.$ProductPayload<ExtArgs>[]
     userTwoFactor: Prisma.$UserTwoFactorPayload<ExtArgs> | null
     sessions: Prisma.$SessionPayload<ExtArgs>[]
+    subscription: Prisma.$SubscriptionPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3371,6 +3603,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   products<T extends Prisma.User$productsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$productsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   userTwoFactor<T extends Prisma.User$userTwoFactorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$userTwoFactorArgs<ExtArgs>>): Prisma.Prisma__UserTwoFactorClient<runtime.Types.Result.GetResult<Prisma.$UserTwoFactorPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  subscription<T extends Prisma.User$subscriptionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$subscriptionArgs<ExtArgs>>): Prisma.Prisma__SubscriptionClient<runtime.Types.Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4052,6 +4285,25 @@ export type User$sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.SessionScalarFieldEnum | Prisma.SessionScalarFieldEnum[]
+}
+
+/**
+ * User.subscription
+ */
+export type User$subscriptionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Subscription
+   */
+  select?: Prisma.SubscriptionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Subscription
+   */
+  omit?: Prisma.SubscriptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SubscriptionInclude<ExtArgs> | null
+  where?: Prisma.SubscriptionWhereInput
 }
 
 /**

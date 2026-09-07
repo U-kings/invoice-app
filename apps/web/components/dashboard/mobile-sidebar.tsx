@@ -110,7 +110,11 @@ export function MobileSidebar() {
               Unlock premium reports and automation.
             </p>
 
-            <Button className="mt-4 w-full bg-[#2EAFB4] hover:bg-[#26969a]">
+            <Button
+              nativeButton={false}
+              render={<Link href="/dashboard/billing" />}
+              className="mt-4 w-full bg-[#2EAFB4] hover:bg-[#26969a]"
+            >
               Upgrade
             </Button>
           </div>

@@ -8,6 +8,7 @@ import { QuickActions } from "@/components/dashboard/quick-actions"
 import { ActivityFeed } from "@/components/dashboard/activity-feed"
 import { CreateInvoiceBanner } from "@/components/dashboard/create-invoice-banner"
 
+
 export default function DashboardPage() {
   return (
     <div className="space-y-8">

@@ -20,14 +20,34 @@ export interface CheckoutResult {
   url?: string
 }
 
+export interface CreateSubscriptionInput {
+  userId: string
+  email: string
+  plan: "PRO"
+  currency: string
+  countryCode: string
+  successUrl: string
+  cancelUrl: string
+}
+
+export interface SubscriptionCheckoutResult {
+  provider: PaymentProviderName
+  checkoutUrl: string
+  providerCustomerId: string
+  providerSubscriptionId: string
+}
+
 export interface PaymentProvider {
   readonly name: PaymentProviderName
 
   supports(input: {
     currency: string
     businessCountry: string
-    customerCountry: string
+    customerCountry?: string
   }): boolean
 
   createCheckout(input: CreateCheckoutInput): Promise<CheckoutResult>
+  createSubscriptionCheckout(
+    input: CreateSubscriptionInput
+  ): Promise<SubscriptionCheckoutResult>
 }

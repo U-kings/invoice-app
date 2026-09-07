@@ -1,43 +1,63 @@
+// proxy.ts
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import { verifyAuthToken } from "./lib/auth"
 
 export async function proxy(request: NextRequest): Promise<NextResponse> {
   const token = request.cookies.get("token")?.value
-  const tempToken = request.cookies.get("temp_token")?.value // 🌟 1. Check for the temporary 2FA token
+  const tempToken = request.cookies.get("temp_token")?.value
 
   const verifiedToken = await verifyAuthToken(token)
   const { pathname } = request.nextUrl
 
-  // Define routes that should NOT be accessible to fully logged-in users
   const isAuthPage = pathname === "/login" || pathname === "/api/auth/login"
 
   if (isAuthPage) {
-    // 🌟 2. If they have a temporary token, they are completing 2FA. Let them stay on the login page!
-    if (tempToken && !verifiedToken) {
-      return NextResponse.next()
-    }
-
-    // If they are fully logged in and trying to access login page -> Send to dashboard
-    if (verifiedToken) {
+    if (tempToken && !verifiedToken) return NextResponse.next()
+    if (verifiedToken)
       return NextResponse.redirect(new URL("/dashboard", request.url))
-    }
-
-    // If they are not logged in at all, let them access the login page
     return NextResponse.next()
   }
 
-  // Guarding Dashboard Routes: If no valid full token, boot them to login
+  // Guarding Dashboard Routes: If no valid token, boot to login
   if (!verifiedToken) {
     const loginUrl = new URL("/login", request.url)
-    loginUrl.searchParams.set("from", pathname) // Remembers where they wanted to go
+    loginUrl.searchParams.set("from", pathname)
     return NextResponse.redirect(loginUrl)
   }
 
-  // Token is verified and they are trying to access a dashboard route -> Proceed
+  // ---------------------------------------------------------
+  // 📈 SUBSCRIPTION GUARD: PRO / REPORTS CHECK
+  // ---------------------------------------------------------
+
+  // Target your reports route specifically
+  const isPremiumRoute = pathname.startsWith("/dashboard/reports")
+
+  if (isPremiumRoute) {
+    // Extract the status string passed from your login JWT payload
+    const subStatus = verifiedToken.subscriptionStatus
+
+    // Allow access only if they are actively paying or on a free trial
+    const hasProAccess = subStatus === "ACTIVE" || subStatus === "TRIALING"
+
+    if (!hasProAccess) {
+      // Redirect users who are PENDING, PAST_DUE, or EXPIRED to the upgrade page
+      const upgradeUrl = new URL("/dashboard/billing", request.url)
+      // const upgradeUrl = new URL("/dashboard/billing/upgrade", request.url)
+      // upgradeUrl.searchParams.set("reason", "premium_reports_locked")
+      upgradeUrl.searchParams.set("reason", "premium_features_locked")
+      return NextResponse.redirect(upgradeUrl)
+    }
+  }
+
   return NextResponse.next()
 }
 
+// ⚠️ Make sure your matcher includes the reports path pattern
 export const config = {
-  matcher: ["/login", "/api/auth/login", "/dashboard/:path*"],
+  matcher: [
+    "/login",
+    "/api/auth/login",
+    "/dashboard/:path*", // This covers /dashboard/reports and sub-routes natively
+  ],
 }

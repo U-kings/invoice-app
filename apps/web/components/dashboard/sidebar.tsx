@@ -5,8 +5,14 @@ import Link from "next/link"
 import { navLinks } from "./nav-links"
 import { NavItem } from "./nav-item"
 import { Logo } from "../logo"
+import { Button } from "@workspace/ui/components/button"
+import { useBilling } from "@/hooks/use-billing"
 
 export function Sidebar() {
+  const { data } = useBilling()
+
+  const isPro =
+    data?.subscription.plan === "PRO" && data.subscription.status === "ACTIVE"
   return (
     <aside className="fixed top-0 left-0 hidden h-screen w-72 border-r bg-background/80 backdrop-blur-xl lg:flex lg:flex-col">
       {/* Logo */}
@@ -41,15 +47,25 @@ export function Sidebar() {
       {/* Upgrade Card */}
       <div className="p-5">
         <div className="rounded-3xl border bg-linear-to-br from-[#2EAFB4]/10 to-transparent p-5">
-          <h3 className="font-semibold">Upgrade to Pro</h3>
+          <h3 className="font-semibold">
+            {isPro ? "Manage your plan" : "Upgrade to Pro"}
+          </h3>
 
           <p className="mt-2 text-sm text-muted-foreground">
-            Unlock premium reports, automation, and team collaboration.
+            {isPro
+              ? "View your subscription and billing."
+              : "Unlock more features for your business."}
+            {/* Unlock premium reports, automation, and team collaboration. */}
           </p>
 
-          <button className="mt-5 w-full rounded-xl bg-[#2EAFB4] py-3 font-medium text-white transition hover:opacity-90">
-            Upgrade
-          </button>
+          <Button
+            nativeButton={false}
+            render={<Link href="/dashboard/billing" />}
+            className="mt-5 h-10 w-full rounded-xl bg-[#2EAFB4] py-3 font-medium text-white transition hover:bg-[#26969a] hover:opacity-90"
+          >
+            {isPro ? "Manage plan" : "Upgrade"}
+            {/* Upgrade */}
+          </Button>
         </div>
       </div>
     </aside>

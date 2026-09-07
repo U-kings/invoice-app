@@ -6,7 +6,7 @@ export default function BusinessProfilePage() {
     <div className="space-y-6">
       <div>
         <BackToSettings />
-        <h1 className="text-2xl font-semibold tracking-tight">
+        <h1 className="text-2xl font-bold tracking-tight">
           Business profile
         </h1>
 

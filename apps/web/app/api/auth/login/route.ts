@@ -11,7 +11,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     if (!email || !inputPassword) {
       return NextResponse.json(
         { error: "Email and password are required" },
-        { status: 400 },
+        { status: 400 }
       )
     }
 
@@ -20,12 +20,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       where: {
         email: email.toLowerCase().trim(),
       },
+      include: { subscription: true },
     })
 
     if (!user) {
       return NextResponse.json(
         { error: "Invalid credentials" },
-        { status: 400 },
+        { status: 400 }
       )
     }
 
@@ -36,20 +37,17 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           error:
             "This account uses Google Sign-In. Please click 'Continue with Google'.",
         },
-        { status: 400 },
+        { status: 400 }
       )
     }
 
     // 4. Verify password
-    const isMatch = await bcrypt.compare(
-      inputPassword,
-      user.password,
-    )
+    const isMatch = await bcrypt.compare(inputPassword, user.password)
 
     if (!isMatch) {
       return NextResponse.json(
         { error: "Invalid credentials" },
-        { status: 400 },
+        { status: 400 }
       )
     }
 
@@ -61,7 +59,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             "Your account is not verified yet. Please check your email to verify your account.",
           requiresVerification: true,
         },
-        { status: 403 },
+        { status: 403 }
       )
     }
 
@@ -70,7 +68,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     if (!jwtSecret) {
       throw new Error(
-        "JWT_SECRET environment variable is missing from configuration.",
+        "JWT_SECRET environment variable is missing from configuration."
       )
     }
 
@@ -81,16 +79,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         tokenId: crypto.randomUUID(),
         userAgent: req.headers.get("user-agent"),
         ipAddress:
-          req.headers
-            .get("x-forwarded-for")
-            ?.split(",")[0]
-            ?.trim() ??
+          req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
           req.headers.get("x-real-ip"),
-        expiresAt: new Date(
-          Date.now() + 7 * 24 * 60 * 60 * 1000,
-        ),
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       },
     })
+
+    const subscriptionStatus = user.subscription?.status || "EXPIRED"
 
     // 8. Create JWT containing the session ID
     const token = jwt.sign(
@@ -99,16 +94,21 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         role: user.role,
         class: user.class,
         sessionId: session.id,
+        subscriptionStatus,
       },
       jwtSecret,
       {
         expiresIn: "7d",
-      },
+      }
     )
 
     // 9. Remove password before returning user
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...publicUser } = user
+    const { password, subscription, ...userWithoutPassword } = user
+
+    const publicUser = {
+      ...userWithoutPassword,
+      subscriptionStatus, // ✨ Flattened directly onto the user object
+    }
 
     // 10. Create response
     const response = NextResponse.json({
@@ -131,13 +131,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     console.error("Login Route Error:", err)
 
     const errorMessage =
-      err instanceof Error
-        ? err.message
-        : "An unexpected server error occurred"
+      err instanceof Error ? err.message : "An unexpected server error occurred"
 
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }

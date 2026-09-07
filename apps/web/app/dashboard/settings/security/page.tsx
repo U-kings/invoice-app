@@ -476,7 +476,7 @@ export default function SecuritySettingsPage() {
       {/* Header */}
       <div>
         <BackToSettings />
-        <h1 className="text-2xl font-semibold tracking-tight">Security</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Security</h1>
 
         <p className="mt-1 text-sm text-muted-foreground">
           Manage your password, authentication, and account security.

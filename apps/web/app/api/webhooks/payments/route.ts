@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@repo/db"
 import * as crypto from "crypto"
+import { after } from "next/server" // 🚀 Crucial for Vercel's 10s limit
 
 function safeTimingCheck(computedHash: string, inboundSignature: string): boolean {
   const a = Buffer.from(computedHash, "utf8")
   const b = Buffer.from(inboundSignature, "utf8")
-
   if (a.length !== b.length) return false 
   return crypto.timingSafeEqual(a, b)
 }
@@ -27,7 +27,6 @@ function verifyStripeSignature(
   secret: string | undefined
 ): boolean {
   if (!signature || !secret) return false
-
   const parts = signature.split(",")
   const timestamp = parts.find((p) => p.startsWith("t="))?.split("=")[1]
   const v1Signatures = parts
@@ -39,14 +38,46 @@ function verifyStripeSignature(
 
   const signedPayload = `${timestamp}.${rawBody}`
   const computedHash = crypto.createHmac("sha256", secret).update(signedPayload).digest("hex")
-
   return v1Signatures.some((v1Sig) => safeTimingCheck(computedHash, v1Sig))
+}
+
+// Separate database logic out so it can run asynchronously in the background
+async function processDatabaseTransaction(providerReference: string) {
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      const payment = await tx.payment.findFirst({
+        where: { providerReference: providerReference },
+      })
+
+      if (!payment) {
+        throw new Error(`Payment entry matching reference [${providerReference}] not found in database.`)
+      }
+
+      if (payment.status === "SUCCESS") {
+        console.log(`Idempotent block: Reference [${providerReference}] already finalized.`);
+        return;
+      }
+
+      await tx.payment.update({
+        where: { id: payment.id },
+        data: { status: "SUCCESS" as any },
+      })
+
+      await tx.invoice.update({
+        where: { id: payment.invoiceId },
+        data: { status: "PAID" as any },
+      })
+      
+      console.log(`Successfully processed transaction for reference: ${providerReference}`);
+    })
+  } catch (error: any) {
+    console.error("💥 SYSTEM CRITICAL: Webhook Background Processing Fault:", error)
+  }
 }
 
 export async function POST(req: NextRequest) {
   try {
     const rawBody = await req.text()
-
     let isVerified = false
     let providerReference = ""
     let shouldProcessTransaction = false
@@ -55,49 +86,27 @@ export async function POST(req: NextRequest) {
     const flutterwaveSignature = req.headers.get("verif-hash")
     const stripeSignature = req.headers.get("stripe-signature")
 
-    // ---------------------------------------------------------
     // 1. GATEWAY HANDSHAKE EVALUATION
-    // ---------------------------------------------------------
     if (paystackSignature) {
-      isVerified = await verifyWebhookSignature(
-        rawBody,
-        paystackSignature,
-        process.env.PAYSTACK_SECRET_KEY,
-        "sha512"
-      )
-
+      isVerified = await verifyWebhookSignature(rawBody, paystackSignature, process.env.PAYSTACK_SECRET_KEY, "sha512")
       if (isVerified) {
         const payload = JSON.parse(rawBody)
-        // Guard checking structure
         if (payload.event === "charge.success" && payload.data?.status === "success") {
           providerReference = payload.data.reference
           shouldProcessTransaction = true
         }
       }
     } else if (flutterwaveSignature) {
-      isVerified = safeTimingCheck(
-        process.env.FLUTTERWAVE_SECRET_HASH || "",
-        flutterwaveSignature
-      )
-
+      isVerified = safeTimingCheck(process.env.FLUTTERWAVE_SECRET_HASH || "", flutterwaveSignature)
       if (isVerified) {
         const payload = JSON.parse(rawBody)
-        if (
-          payload.status === "successful" ||
-          payload.event === "charge.completed"
-        ) {
-          // Fallback sequence targeting native references
+        if (payload.status === "successful" || payload.event === "charge.completed") {
           providerReference = payload.data?.tx_ref || payload.data?.reference
           shouldProcessTransaction = true
         }
       }
     } else if (stripeSignature) {
-      isVerified = verifyStripeSignature(
-        rawBody,
-        stripeSignature,
-        process.env.STRIPE_WEBHOOK_SECRET
-      )
-
+      isVerified = verifyStripeSignature(rawBody, stripeSignature, process.env.STRIPE_WEBHOOK_SECRET)
       if (isVerified) {
         const payload = JSON.parse(rawBody)
         if (payload.type === "checkout.session.completed") {
@@ -109,70 +118,26 @@ export async function POST(req: NextRequest) {
 
     // 2. Clear security wall block early
     if (!isVerified) {
-      return NextResponse.json(
-        { error: "Cryptographic signature validation failure" },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: "Cryptographic signature validation failure" }, { status: 401 })
     }
 
     // 3. Early exit for unhandled webhook events
     if (!shouldProcessTransaction || !providerReference) {
-      return NextResponse.json(
-        { message: "Webhook signature verified, but event type skipped" },
-        { status: 200 }
-      )
+      return NextResponse.json({ message: "Webhook signature verified, but event type skipped" }, { status: 200 })
     }
 
-    // ---------------------------------------------------------
-    // 2. ATOMIC TRANSACTIONS PROCESSING
-    // ---------------------------------------------------------
-    const result = await prisma.$transaction(async (tx) => {
-      // 🚀 FIXED: Search purely by the unique reference identifier, NOT status
-      const payment = await tx.payment.findFirst({
-        where: { providerReference: providerReference },
-      })
-
-      if (!payment) {
-        throw new Error(`Payment entry matching reference [${providerReference}] not found in database.`)
-      }
-
-      // 🚀 FIXED: If it's already marked as SUCCESS, exit gracefully with a clear message 
-      if (payment.status === "SUCCESS") {
-        return {
-          message: "Idempotent block: Transaction was already processed and finalized.",
-          updatedPayment: payment,
-          status: "ALREADY_PROCESSED"
-        }
-      }
-
-      // Update the Payment log state cleanly
-      const updatedPayment = await tx.payment.update({
-        where: { id: payment.id },
-        data: { status: "SUCCESS" as any },
-      })
-
-      // Cascade update your parent Invoice state workflow cleanly
-      const updatedInvoice = await tx.invoice.update({
-        where: { id: payment.invoiceId },
-        data: { status: "PAID" as any },
-      })
-
-      return { updatedPayment, updatedInvoice, status: "NEWLY_PROCESSED" }
+    // 🚀 4. THE MAGIC MAGIC MOVE: Schedule the heavy DB work to execute AFTER responding 
+    after(async () => {
+      await processDatabaseTransaction(providerReference)
     })
 
-    return NextResponse.json({ received: true, result }, { status: 200 })
+    // 🚀 5. IMMEDIATELY return 200 OK to the payment gateway (Takes < 50ms total)
+    return NextResponse.json({ received: true, message: "Webhook accepted for processing" }, { status: 200 })
+
   } catch (error: any) {
     console.error("💥 SYSTEM CRITICAL: Webhook Route Fault:", error)
-    
-    // Return a 200 even if the payment record wasn't found in your system 
-    // to prevent payment providers from continuously hammering your server.
-    if (error.message?.includes("not found in database")) {
-      return NextResponse.json({ error: error.message }, { status: 200 })
-    }
-
-    return NextResponse.json(
-      { error: "Webhook Processing Failed" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Webhook Processing Failed" }, { status: 500 })
   }
 }
+
+export const dynamic = 'force-dynamic';

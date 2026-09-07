@@ -33,6 +33,11 @@ export type UserTwoFactor = Prisma.UserTwoFactorModel
  */
 export type Session = Prisma.SessionModel
 /**
+ * Model Subscription
+ * 
+ */
+export type Subscription = Prisma.SubscriptionModel
+/**
  * Model BusinessProfile
  * 
  */

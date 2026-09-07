@@ -9,6 +9,26 @@
 * 🟢 You can import this file directly.
 */
 
+export const SubscriptionPlan = {
+  FREE: 'FREE',
+  PRO: 'PRO'
+} as const
+
+export type SubscriptionPlan = (typeof SubscriptionPlan)[keyof typeof SubscriptionPlan]
+
+
+export const SubscriptionStatus = {
+  ACTIVE: 'ACTIVE',
+  PENDING: 'PENDING',
+  TRIALING: 'TRIALING',
+  PAST_DUE: 'PAST_DUE',
+  CANCELLED: 'CANCELLED',
+  EXPIRED: 'EXPIRED'
+} as const
+
+export type SubscriptionStatus = (typeof SubscriptionStatus)[keyof typeof SubscriptionStatus]
+
+
 export const InvoiceReminderType = {
   BEFORE_DUE: 'BEFORE_DUE',
   DUE_DATE: 'DUE_DATE',

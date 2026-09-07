@@ -28,7 +28,7 @@ import { PasswordInput } from "./password-input"
 import { SocialLogin } from "./social-login"
 import { TrustBadge } from "./trust-badge"
 import { AuthLoader } from "./auth-loader"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { AuthSuccess } from "./auth-success"
 import { useAuthStore } from "@/app/store/useAuthStore"
 import { useRouter } from "next/navigation"
@@ -118,6 +118,12 @@ export function LoginForm() {
     },
   })
 
+  useEffect(() => {
+    if (twoFactorCode.length === 6 && show2FA) {
+      handle2FASubmit()
+    }
+  }, [twoFactorCode, show2FA])
+
   if (isSuccess && !show2FA) {
     return <AuthSuccess />
   }
@@ -131,8 +137,8 @@ export function LoginForm() {
   }
 
   // 💡 4. Form intercept block specifically handling code submissions
-  async function handle2FASubmit(e: React.FormEvent) {
-    e.preventDefault()
+  async function handle2FASubmit(e?: React.FormEvent) {
+    e?.preventDefault()
     if (!twoFactorCode.trim()) {
       return toast.add({
         title: "Code Required",
@@ -178,7 +184,6 @@ export function LoginForm() {
                   Verification Code
                 </FieldLabel>
                 <FieldContent className="flex flex-col items-center justify-center">
-                  {/* 🌟 SHADCN INPUT OTP IMPLEMENTATION 🌟 */}
                   <InputOTP
                     maxLength={12} // Accommodates either 6 digits or standard alphanumeric backup recovery keys
                     value={twoFactorCode}
@@ -226,7 +231,7 @@ export function LoginForm() {
                 setShow2FA(false)
                 setTwoFactorCode("")
               }}
-              className="mt-4 w-full text-center text-sm font-medium text-muted-foreground hover:text-foreground"
+              className="mx-auto mt-4 w-fit text-center text-sm font-medium text-muted-foreground hover:text-foreground"
             >
               ← Back to standard credentials
             </button>
@@ -290,7 +295,7 @@ export function LoginForm() {
             <Button
               type="submit"
               disabled={form.formState.isSubmitting || isPending}
-              className="group relative h-12 w-full overflow-hidden bg-[#2EAFB4] text-primary hover:bg-[#289ca0]"
+              className="group relative h-12 w-full overflow-hidden bg-[#2EAFB4] hover:bg-[#289ca0]"
             >
               <span className="absolute inset-0 -translate-x-full bg-white/20 transition-transform duration-700 group-hover:translate-x-full" />
               {(form.formState.isSubmitting || isPending) && <AuthLoader />}

@@ -1,10 +1,15 @@
 import { jwtVerify, JWTPayload } from 'jose';
 
-// Define the shape of the data stored inside your JWT token
+// Define the your exact database subscription enum type structure
+export type SubscriptionStatusType = 'ACTIVE' | 'TRIALING' | 'PENDING' | 'PAST_DUE' | 'CANCELLED' | 'EXPIRED';
+
+// ✨ Update this interface to reflect what your login route actually signs
 export interface AuthUserPayload extends JWTPayload {
-  id: string;
-  email: string;
-  role?: string; // Optional: If you track roles like 'admin' or 'user'
+  userId: string;          // 🚀 Changed from 'id' to 'userId' to match jwt.sign
+  role?: string; 
+  class?: string;          // Added to match jwt.sign payload
+  sessionId: string;       // Added to match jwt.sign payload
+  subscriptionStatus: SubscriptionStatusType; // ✨ Strictly typed status key for your Edge Middleware
 }
 
 /**

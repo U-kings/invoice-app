@@ -14,14 +14,6 @@ export function StatsGrid() {
 
   const { data, isLoading, isFetching } = useDashboard(selectedCurrency)
 
-  // Let the API establish the initial/default currency.
-  // useEffect(() => {
-  //   if (!selectedCurrency && data?.currency) {
-  //     // eslint-disable-next-line react-hooks/set-state-in-effect
-  //     setSelectedCurrency(data.currency)
-  //   }
-  // }, [data?.currency, selectedCurrency])
-
   const activeCurrency = selectedCurrency ?? data?.currency
 
   if (isLoading || !data) {

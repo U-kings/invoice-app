@@ -8,7 +8,7 @@ const plans = [
     title: "Starter",
     description:
       "Perfect for freelancers and small businesses.",
-    price: "$0",
+    price: "₦0",
     period: "/mo",
     buttonText: "Get Started Free",
     features: [
@@ -22,7 +22,7 @@ const plans = [
     title: "Pro",
     description:
       "For growing businesses that need more.",
-    price: "$19",
+    price: "₦5000",
     period: "/mo",
     buttonText: "Start 14-Day Free Trial",
     popular: true,
