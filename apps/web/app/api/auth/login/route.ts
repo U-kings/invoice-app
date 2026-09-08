@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@repo/db"
 import bcrypt from "bcryptjs"
-import jwt from "jsonwebtoken"
+import { createSessionAndCookie } from "@/lib/auth/auth" // 🚀 Updated to look at the combined utility
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
@@ -63,73 +63,35 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       )
     }
 
-    // 6. Verify JWT secret
-    const jwtSecret = process.env.JWT_SECRET
-
-    if (!jwtSecret) {
-      throw new Error(
-        "JWT_SECRET environment variable is missing from configuration."
-      )
-    }
-
-    // 7. Create persistent session
-    const session = await prisma.session.create({
-      data: {
-        userId: user.id,
-        tokenId: crypto.randomUUID(),
-        userAgent: req.headers.get("user-agent"),
-        ipAddress:
-          req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-          req.headers.get("x-real-ip"),
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      },
-    })
-
     const subscriptionStatus = user.subscription?.status || "EXPIRED"
     const subscriptionPlan = user.subscription?.plan || "FREE"
 
-    // 8. Create JWT containing the session ID
-    const token = jwt.sign(
-      {
-        userId: user.id,
-        role: user.role,
-        class: user.class,
-        sessionId: session.id,
-        subscriptionStatus,
-        subscriptionPlan,
-      },
-      jwtSecret,
-      {
-        expiresIn: "7d",
-      }
-    )
-
-    // 9. Remove password before returning user
+    // 6. Remove password before returning user data profile
     const { password, subscription, ...userWithoutPassword } = user
 
     const publicUser = {
       ...userWithoutPassword,
-      subscriptionStatus, // ✨ Flattened directly onto the user object
+      subscriptionStatus, 
       subscriptionPlan,
     }
 
-    // 10. Create response
+    // 7. Initialize Next.js response target
     const response = NextResponse.json({
       message: "Login successful",
       user: publicUser,
-      access_token: token,
+      // Note: If your frontend reads access_token directly from the JSON body stream, 
+      // we extract it below in Step 8 to attach it cleanly.
     })
 
-    // 11. Store JWT in HTTP-only cookie
-    response.cookies.set("token", token, {
-      httpOnly: true,
-      path: "/",
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 7 * 24 * 60 * 60,
-    })
+    // 8. 🚀 CENTRALIZED CORE: Handle database session tracking & secure HTTP-only cookies
+    const { token } = await createSessionAndCookie(req, response, user)
 
-    return response
+    // Optional: Re-inject token into payload body if your client-side architecture explicitly depends on it
+    const body = await response.json();
+    body.access_token = token;
+    
+    return NextResponse.json(body, { status: 200, headers: response.headers })
+
   } catch (err: unknown) {
     console.error("Login Route Error:", err)
 

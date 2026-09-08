@@ -1,17 +1,9 @@
 import { prisma } from "@repo/db";
 import { OAuth2Client } from "google-auth-library";
 import { NextRequest, NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
+import { createSessionAndCookie } from "@/lib/auth/auth"; // 🚀 Switch to the unified utility
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
-function generateAccessToken(userId: string): string {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    throw new Error("JWT_SECRET environment variable is missing from the server.");
-  }
-  return jwt.sign({ id: userId }, secret, { expiresIn: "7d" });
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -40,6 +32,7 @@ export async function POST(req: NextRequest) {
     // 2. Query matching user account context
     let user = await prisma.user.findUnique({
       where: { email },
+      include: { subscription: true }, 
     });
 
     if (user) {
@@ -47,34 +40,35 @@ export async function POST(req: NextRequest) {
       if (!user.googleId) {
         user = await prisma.user.update({
           where: { email },
-          data: { googleId, isVerified: true }, 
+          data: { googleId, isVerified: true },
+          include: { subscription: true },
         });
       }
       
-      const accessToken = generateAccessToken(user.id);
+      const subscriptionStatus = user.subscription?.status || "EXPIRED";
+      const subscriptionPlan = user.subscription?.plan || "FREE";
       
-      // 🚀 FIX: Return BOTH token names to support all frontend variants
       const response = NextResponse.json({
         message: "Login successful!",
-        token: accessToken,        // 💡 Support generic token property
-        access_token: accessToken, // 💡 Support snake_case access_token
         user: { 
           id: user.id, 
           email: user.email, 
           firstName: user.firstName, 
-          lastName: user.lastName 
+          lastName: user.lastName,
+          subscriptionStatus,
+          subscriptionPlan,
         }
       }, { status: 200 });
 
-      // 🚀 NEXT.JS COOKIE FALLBACK: If your middleware guards /dashboard, it needs this cookie!
-      response.cookies.set("token", accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 60 * 60 * 24 * 7, // 7 days
-        path: "/",
-      });
+      // 🚀 CENTRALIZED CORE: Handle database session tracking & secure HTTP-only cookies
+      const { token } = await createSessionAndCookie(req, response, user);
 
-      return response;
+      // Re-inject token keys into payload body to support client-side architecture requirements
+      const body = await response.json();
+      body.token = token;
+      body.access_token = token;
+
+      return NextResponse.json(body, { status: 200, headers: response.headers });
     }
 
     // SCENARIO B: Brand new registration via Google
@@ -92,31 +86,32 @@ export async function POST(req: NextRequest) {
         terms: true,
         isVerified: true, 
       },
+      include: { subscription: true },
     });
 
-    const accessToken = generateAccessToken(user.id);
+    const subscriptionStatus = user.subscription?.status || "EXPIRED";
+    const subscriptionPlan = user.subscription?.plan || "FREE";
 
     const response = NextResponse.json({
       message: "Registration profile created successfully via Google!",
-      token: accessToken,
-      access_token: accessToken,
       user: { 
         id: user.id, 
         email: user.email, 
         firstName: user.firstName, 
-        lastName: user.lastName 
+        lastName: user.lastName,
+        subscriptionStatus,
+        subscriptionPlan,
       }
     }, { status: 201 });
 
-    // Set cookie for brand new signups as well
-    response.cookies.set("token", accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 24 * 7,
-      path: "/",
-    });
+    // 🚀 CENTRALIZED CORE: Handle database session tracking & secure HTTP-only cookies for sign-up path
+    const { token } = await createSessionAndCookie(req, response, user);
 
-    return response;
+    const body = await response.json();
+    body.token = token;
+    body.access_token = token;
+
+    return NextResponse.json(body, { status: 201, headers: response.headers });
 
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : "Internal Auth Error";

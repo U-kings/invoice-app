@@ -1,24 +1,6 @@
 import { prisma } from "@repo/db"
 import { NextRequest, NextResponse } from "next/server"
-import jwt from "jsonwebtoken"
-
-// 🚀 FIXED: Matches your exact login route payload signing structure!
-function generateAccessToken(user: any): string {
-  const jwtSecret = process.env.JWT_SECRET;
-  if (!jwtSecret) {
-    throw new Error("JWT_SECRET environment variable is missing from configuration.");
-  }
-  
-  return jwt.sign(
-    {
-      userId: user.id, // 💡 Matches your exact PostgreSQL string id property key
-      role: user.role,
-      class: user.class,
-    },
-    jwtSecret,
-    { expiresIn: "7d" }
-  );
-}
+import { createSessionAndCookie } from "@/lib/auth/auth" // 🚀 Switch to the unified utility
 
 export async function GET(req: NextRequest) {
   try {
@@ -34,7 +16,6 @@ export async function GET(req: NextRequest) {
       return NextResponse.redirect(new URL("/login?error=no_code", origin))
     }
 
-    // 🚀 FIXED: Dynamic path token split completely protects the OAuth exchange URL from being stripped
     const tokenEndpointParts = ["https:", "", "oauth2.googleapis.com", "token"]
     const tokenUrl = tokenEndpointParts.join("/")
 
@@ -64,7 +45,6 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    // 🚀 FIXED: Dynamic path token split completely protects the Profile Fetch URL from being stripped
     const profileEndpointParts = [
       "https:",
       "",
@@ -93,15 +73,19 @@ export async function GET(req: NextRequest) {
     const firstName = profile.given_name || "First Name"
     const lastName = profile.family_name || "Last Name"
 
-    // 3. Database Sync with Prisma
+    // 3. Database Sync with Prisma (Including Subscription to map schema context)
     console.log(`🔄 Syncing user in database: ${email}`)
-    let user = await prisma.user.findUnique({ where: { email } })
+    let user = await prisma.user.findUnique({
+      where: { email },
+      include: { subscription: true },
+    })
 
     if (user) {
       if (!user.googleId) {
         user = await prisma.user.update({
           where: { email },
           data: { googleId, isVerified: true },
+          include: { subscription: true },
         })
       }
     } else {
@@ -115,22 +99,20 @@ export async function GET(req: NextRequest) {
           terms: true,
           isVerified: true,
         },
+        include: { subscription: true },
       })
     }
 
-    // 4. Session Token Generation & Cookie Set
+    // 4. Unified Session Lifecycle Execution
     console.log(
-      "🚀 User authenticated successfully! Generating application token..."
+      "🚀 User authenticated successfully! Initializing shared session handling..."
     )
-    const appToken = generateAccessToken(user)
+
+    // Create the standard redirect response target
     const successResponse = NextResponse.redirect(new URL("/dashboard", origin))
 
-    successResponse.cookies.set("token", appToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 24 * 7,
-      path: "/",
-    })
+    // 🚀 CENTRALIZED CORE: Handle database session tracking & secure HTTP-only cookies
+    await createSessionAndCookie(req, successResponse, user)
 
     return successResponse
   } catch (error) {
