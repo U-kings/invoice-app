@@ -33,6 +33,7 @@ import { useDebounce } from "@/hooks/use-debounce"
 import { columns } from "./columns"
 import { customerTableFeatures } from "./table-config"
 import { CustomerStatus, useCustomers } from "@/hooks/use-customers"
+import { DataTablePagination } from "../common/data-table-pagination"
 // import { DataTablePagination } from "./data-table-pagination"
 
 // Replace with your actual customer query hook
@@ -57,7 +58,7 @@ export function CustomerDataTable({
   }, [debouncedSearch, status])
 
   // Mock query call structure matching your pattern
-  const { data, isLoading } = useCustomers({
+  const { data, isLoading, isError } = useCustomers({
     page,
     pageSize,
     search: debouncedSearch,
@@ -199,7 +200,10 @@ export function CustomerDataTable({
               <DropdownMenuGroup>
                 {table
                   .getAllLeafColumns()
-                  .filter((column) => column.id !== "select" && column.id !== "actions")
+                  .filter(
+                    (column) =>
+                      column.id !== "select" && column.id !== "actions"
+                  )
                   .map((column) => {
                     const header = column.columnDef.header
                     const label =
@@ -322,7 +326,11 @@ export function CustomerDataTable({
           </Table>
         </div>
       </div>
-      {/* <DataTablePagination table={table} /> */}
+      {/* Pagination */}
+      {!isLoading &&
+        !isError &&
+        serverPagination &&
+        serverPagination.total > 0 && <DataTablePagination table={table} />}
     </div>
   )
 }

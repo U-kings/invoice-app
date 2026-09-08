@@ -606,6 +606,7 @@ export default function PaymentSettingsPage() {
                   id="account-name"
                   placeholder="Business account name"
                   value={bankDetails.accountName}
+                  disabled
                   onChange={(event) =>
                     setBankDetails((current) => ({
                       ...current,

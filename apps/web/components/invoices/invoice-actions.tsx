@@ -130,7 +130,7 @@ export function InvoiceActions({ invoice }: InvoiceActionsProps) {
 
           <DropdownMenuContent align="end" className="w-52">
             {/* Send invoice */}
-            {(!isCancelled) && (
+            {!isCancelled && (
               <DropdownMenuItem
                 disabled={isCancelled}
                 onClick={() => {
@@ -179,15 +179,17 @@ export function InvoiceActions({ invoice }: InvoiceActionsProps) {
             )}
 
             {/* Delete */}
-            <DropdownMenuItem
-              className="text-destructive focus:text-destructive"
-              onClick={() => {
-                setDeleteOpen(true)
-              }}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete Invoice
-            </DropdownMenuItem>
+            {effectiveStatus === "Draft" && (
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onClick={() => {
+                  setDeleteOpen(true)
+                }}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete invoice
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

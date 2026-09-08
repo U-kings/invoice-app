@@ -294,12 +294,12 @@ export function DataTable() {
         </div>
       </div>
 
-      <InvoiceBulkActions
+      {/* <InvoiceBulkActions
         selectedCount={table.getSelectedRowModel().rows.length}
         onClear={() => {
           table.resetRowSelection()
         }}
-      />
+      /> */}
 
       {/* Table */}
       <div className="overflow-hidden rounded-2xl border bg-background">

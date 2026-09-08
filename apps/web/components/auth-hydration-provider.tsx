@@ -14,11 +14,8 @@ export function AuthHydrationProvider({
   children: React.ReactNode
 }) {
   const router = useRouter()
-
   const { user, token, setAuth, logout, isLoggingOut } = useAuthStore()
-
   const [sessionInvalid, setSessionInvalid] = useState(false)
-
   const isRedirecting = useRef(false)
 
   /*
@@ -26,8 +23,12 @@ export function AuthHydrationProvider({
    */
   const { data } = useQuery({
     queryKey: ["auth-session"],
-
     queryFn: async () => {
+      // ⚠️ Guard 1: Hard block if the browser profile is offline
+      if (typeof window !== "undefined" && !navigator.onLine) {
+        throw new Error("Offline")
+      }
+
       const response = await fetch("/api/auth/me", {
         method: "GET",
         credentials: "include",
@@ -40,11 +41,11 @@ export function AuthHydrationProvider({
 
       return response.json()
     },
-
     enabled: !isLoggingOut && !sessionInvalid && (!user || !token),
-
-    retry: false,
-
+    retry: (failureCount, error: any) => {
+      if (error.message === "Offline") return true; // Keep retrying until online
+      return false;
+    },
     staleTime: 1000 * 60 * 5,
   })
 
@@ -61,31 +62,22 @@ export function AuthHydrationProvider({
 
   /*
    * Monitor the server session.
-   *
-   * IMPORTANT:
-   * This effect does NOT control normal logout.
-   * The logout hook handles logout separately.
    */
-
   useEffect(() => {
     let intervalId: ReturnType<typeof setInterval> | undefined
 
     const checkSession = async () => {
-      /*
-       * Don't run a background check while
-       * the user is intentionally logging out.
-       */
-      if (useAuthStore.getState().isLoggingOut) {
-        return
-      }
+      if (useAuthStore.getState().isLoggingOut) return
+      if (document.visibilityState !== "visible") return
 
-      if (document.visibilityState !== "visible") {
+      // ⚠️ Guard 2: Skip interval checks completely if offline
+      if (typeof window !== "undefined" && !navigator.onLine) {
+        console.log("Device is offline. Skipping authorization check.")
         return
       }
 
       try {
         console.log("Checking authentication session...")
-
         const response = await fetch("/api/auth/me", {
           method: "GET",
           credentials: "include",
@@ -94,24 +86,18 @@ export function AuthHydrationProvider({
 
         console.log("Session response:", response.status)
 
-        /*
-         * Everything is fine.
-         */
         if (response.ok) {
           return
         }
 
         /*
-         * The server says the session is no longer valid.
+         * ⚠️ THE FIX: Only log out if the server explicitly responds with 401 
+         * AND the browser confirms it actually has a valid internet connection.
          */
-        if (response.status === 401) {
-          console.log("Session expired or revoked")
-
+        if (response.status === 401 && navigator.onLine) {
+          console.log("Session verified as expired by remote server.")
           setSessionInvalid(true)
 
-          /*
-           * Clear the HTTP-only cookie.
-           */
           try {
             await fetch("/api/auth/logout", {
               method: "POST",
@@ -122,76 +108,41 @@ export function AuthHydrationProvider({
             console.error("Failed to clear authentication cookie:", error)
           }
 
-          /*
-           * Clear Zustand.
-           */
           logout()
-
-          /*
-           * Redirect.
-           */
-          // router.replace("/login")
+          router.replace("/login") // Pushes the user to login page smoothly
         }
       } catch (error) {
-        /*
-         * Network failures should not log
-         * the user out.
-         */
-        console.error("Session monitor check failed:", error)
+        console.error("Session monitor check failed due to network exception:", error)
       }
     }
 
-    /*
-     * Run immediately.
-     */
     void checkSession()
 
-    /*
-     * Check every 2 minutes.
-     */
     intervalId = setInterval(() => {
       void checkSession()
     }, SESSION_CHECK_INTERVAL)
 
-    /*
-     * Check when the user returns to the tab.
-     */
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
         void checkSession()
       }
     }
 
+    // Safely re-check session only when connection successfully returns
+    const handleOnlineStatus = () => {
+      console.log("Device back online. Re-verifying token status...")
+      void checkSession()
+    }
+
     document.addEventListener("visibilitychange", handleVisibilityChange)
+    window.addEventListener("online", handleOnlineStatus)
 
     return () => {
-      if (intervalId) {
-        clearInterval(intervalId)
-      }
-
+      if (intervalId) clearInterval(intervalId)
       document.removeEventListener("visibilitychange", handleVisibilityChange)
+      window.removeEventListener("online", handleOnlineStatus)
     }
   }, [logout, router])
-
-  /*
-   * Prevent authenticated UI from rendering
-   * while an intentional logout is in progress.
-   */
-  // if (isLoggingOut) {
-  //   return (
-  //     <>
-  //       {children}
-
-  //       <div className="fixed inset-0 z-9999 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-  //         <div className="flex items-center gap-3 rounded-lg border bg-background px-5 py-3 shadow-lg">
-  //           <div className="size-4 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-foreground" />
-
-  //           <span className="text-sm font-medium">Signing you out...</span>
-  //         </div>
-  //       </div>
-  //     </>
-  //   )
-  // }
 
   return <>{children}</>
 }

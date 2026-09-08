@@ -11,12 +11,17 @@ export type Customer = {
   id: string
   name: string
   email: string
+  phone: string
+  address: string
   createdAt: string
   invoiceCount: number
   status: CustomerStatus
 }
 
-const columnHelper = createColumnHelper<typeof customerTableFeatures, Customer>()
+const columnHelper = createColumnHelper<
+  typeof customerTableFeatures,
+  Customer
+>()
 
 export const columns = columnHelper.columns([
   columnHelper.display({
@@ -75,9 +80,7 @@ export const columns = columnHelper.columns([
   columnHelper.accessor("name", {
     header: "Customer",
     cell: ({ row }) => (
-      <div className="font-medium text-foreground">
-        {row.getValue("name")}
-      </div>
+      <div className="font-medium text-foreground">{row.getValue("name")}</div>
     ),
   }),
 
@@ -102,7 +105,7 @@ export const columns = columnHelper.columns([
     cell: ({ row }) => {
       const status = row.getValue("status") as string
       return (
-        <Badge variant="outline" className="capitalize font-normal">
+        <Badge variant="outline" className="font-normal capitalize">
           {status}
         </Badge>
       )

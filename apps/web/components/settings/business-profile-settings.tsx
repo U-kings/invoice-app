@@ -30,6 +30,7 @@ import {
 import { toast } from "@workspace/ui/components/toast"
 import { businessProfileSchema } from "./settings-schema"
 import { zodResolver } from "@hookform/resolvers/zod"
+import Image from "next/image"
 
 type BusinessProfileFormValues = {
   businessName: string
@@ -312,7 +313,9 @@ export function BusinessProfileSettings() {
               <div className="flex items-center gap-4">
                 <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-xl border bg-background">
                   {data?.businessProfile?.logoUrl ? (
-                    <img
+                    <Image
+                      width={50}
+                      height={50}
                       src={data.businessProfile.logoUrl}
                       alt={`${data.businessProfile.businessName || "Business"} logo`}
                       className="size-full object-contain p-2"
@@ -331,7 +334,8 @@ export function BusinessProfileSettings() {
                   </p>
 
                   <p className="mt-2 text-xs text-muted-foreground">
-                    JPG, PNG or WEBP · Maximum 5 MB
+                    JPG or PNG · Maximum 5 MB
+                    {/* JPG, PNG or WEBP · Maximum 5 MB */}
                   </p>
                 </div>
               </div>
@@ -340,7 +344,8 @@ export function BusinessProfileSettings() {
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/jpeg,image/png,image/webp"
+                  accept="image/jpeg,image/png"
+                  // accept="image/jpeg,image/png,image/webp"
                   className="hidden"
                   onChange={(event) => {
                     const file = event.target.files?.[0]

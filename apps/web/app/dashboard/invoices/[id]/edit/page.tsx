@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react"
 import { prisma } from "@repo/db"
 import { Invoice, useInvoices } from "@/hooks/use-invoice"
 import { useParams } from "next/navigation"
+import EditInvoiceSkeleton from "@/components/invoices/edit-invoice-skeleton"
 
 export default function EditInvoicePage() {
   const params = useParams<{ id: string }>()
@@ -31,11 +32,7 @@ export default function EditInvoicePage() {
           Back to invoices
         </Link>
 
-        <h1 className="text-2xl font-semibold">Invoice not found</h1>
-
-        <p className="text-sm text-muted-foreground">
-          The invoice you&apos;re trying to edit could not be found.
-        </p>
+        {isLoading && <EditInvoiceSkeleton />}
       </div>
     )
   }

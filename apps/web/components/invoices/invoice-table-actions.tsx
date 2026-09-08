@@ -1,8 +1,18 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
-import { MoreHorizontal, Trash2 } from "lucide-react"
+
+import {
+  Check,
+  CheckCircle2,
+  CircleX,
+  Copy,
+  Download,
+  Ellipsis,
+  Mail,
+  Pencil,
+  Trash2,
+} from "lucide-react"
 
 import { Button } from "@workspace/ui/components/button"
 
@@ -13,83 +23,194 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu"
-
 import { InvoiceDeleteDialog } from "./invoice-delete-dialog"
-import { Invoice } from "@/hooks/use-invoice"
+import { useState } from "react"
+import { InvoiceSendDialog } from "./invoice-send-dialog"
+import { useRouter } from "next/navigation"
+import { InvoiceCancelDialog } from "./invoice-cancel-dialog"
+import { InvoiceMarkPaidDialog } from "./invoice-mark-paid-dialog"
+import { useDownloadInvoice } from "@/hooks/use-download-invoice"
+import { toast } from "@workspace/ui/components/toast"
 import { getEffectiveInvoiceStatus } from "@/lib/invoices/invoice"
+import { Invoice } from "@/hooks/use-invoice"
 
-interface InvoiceTableActionsProps {
+interface InvoiceActionsProps {
   invoice: Invoice
-  //   onDeleted: () => void
 }
 
-export function InvoiceTableActions({ invoice }: InvoiceTableActionsProps) {
+export function InvoiceTableActions({ invoice }: InvoiceActionsProps) {
+  const router = useRouter()
+  const effectiveStatus = getEffectiveInvoiceStatus(invoice)
+  const canMarkAsPaid =
+    effectiveStatus === "Sent" || effectiveStatus === "Overdue"
+  const canCancel =
+    effectiveStatus === "Draft" ||
+    effectiveStatus === "Sent" ||
+    effectiveStatus === "Overdue"
+  const isPaid = effectiveStatus === "Paid"
+  const isCancelled = effectiveStatus === "Cancelled"
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const [sendOpen, setSendOpen] = useState(false)
+  const [cancelOpen, setCancelOpen] = useState(false)
+  const [markPaidOpen, setMarkPaidOpen] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const downloadInvoice = useDownloadInvoice()
 
-  const isDraft = getEffectiveInvoiceStatus(invoice) === "Draft"
-  const isSent = getEffectiveInvoiceStatus(invoice) === "Sent"
-  const isPaid = getEffectiveInvoiceStatus(invoice) === "Paid"
-  const isCancelled = getEffectiveInvoiceStatus(invoice) === "Cancelled"
-  const isOverdue = getEffectiveInvoiceStatus(invoice) === "Overdue"
+  const handleCopyInvoiceLink = async (publicToken: string) => {
+    try {
+      const url = `${window.location.origin}/invoice/${publicToken}`
+
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      toast.add({
+        title: "Link copied",
+        type: "success",
+        description: "Invoice link copied to clipboard.",
+      })
+      setTimeout(() => {
+        setCopied(false)
+      }, 2000)
+    } catch (error) {
+      console.error("Failed to copy invoice link:", error)
+
+      toast.add({
+        title: "Copy failed",
+        type: "error",
+        description: "Unable to copy the invoice link.",
+      })
+    }
+  }
 
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          render={<Button variant="ghost" size="icon" className="h-8 w-8" />}
-        >
-          <MoreHorizontal className="h-4 w-4" />
-
-          <span className="sr-only">Open actions</span>
-        </DropdownMenuTrigger>
-
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem
+      <div className="flex flex-wrap items-center gap-2">
+        {/* More actions */}
+        <DropdownMenu>
+          <DropdownMenuTrigger
             render={
-              <Link href={`/dashboard/invoices/${invoice?.invoiceNumber}`} />
+              <Button
+                variant="outline"
+                size="icon"
+                aria-label="More invoice actions"
+              />
             }
           >
-            View invoice
-          </DropdownMenuItem>
-          {!isCancelled && !isPaid && (
+            <Ellipsis className="h-4 w-4" />
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent align="end" className="w-auto">
             <DropdownMenuItem
+              disabled={isCancelled}
               render={
-                <Link
-                  href={`/dashboard/invoices/${invoice?.invoiceNumber}/edit`}
-                />
+                <Link href={`/dashboard/invoices/${invoice?.invoiceNumber}`} />
               }
             >
-              Edit invoice
+              View
             </DropdownMenuItem>
-          )}
 
-          <DropdownMenuItem>Download PDF</DropdownMenuItem>
-          {isOverdue && isSent && (
-            <DropdownMenuItem>Resend invoice</DropdownMenuItem>
-          )}
-          {isDraft && <DropdownMenuItem>Send invoice</DropdownMenuItem>}
-          {(isSent || isDraft) && !isCancelled && (
-            <DropdownMenuItem>Mark as paid</DropdownMenuItem>
-          )}
-          {!isCancelled && !isPaid && (
-            <DropdownMenuItem>Cancel invoice</DropdownMenuItem>
-          )}
+            {/* {!isPaid && (
+              <DropdownMenuItem
+                disabled={isCancelled}
+                render={
+                  <Link
+                    href={`/dashboard/invoices/${invoice?.invoiceNumber}/edit`}
+                  />
+                }
+              >
+                Edit
+              </DropdownMenuItem>
+            )} */}
+            {/* Send invoice */}
+            {!isCancelled && (
+              <DropdownMenuItem
+                disabled={isCancelled}
+                onClick={() => {
+                  setSendOpen(true)
+                }}
+              >
+                Send invoice
+              </DropdownMenuItem>
+            )}
+            {/* Mark as paid */}
+            {canMarkAsPaid && (
+              <DropdownMenuItem
+                disabled={isCancelled || isPaid}
+                onClick={() => setMarkPaidOpen(true)}
+              >
+                Mark as paid
+              </DropdownMenuItem>
+            )}
+            {/* Duplicate */}
+            <DropdownMenuItem
+              onClick={() => handleCopyInvoiceLink(invoice?.publicToken ?? "")}
+            >
+              {copied ? "Copied" : "Copy link"}
+            </DropdownMenuItem>
+            {/* Download */}
+            <DropdownMenuItem
+              onClick={() =>
+                downloadInvoice.mutate({
+                  invoiceId: invoice?.id,
+                })
+              }
+            >
+              {downloadInvoice.isPending ? "Downloading..." : "Download PDF"}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            {canCancel && (
+              <DropdownMenuItem
+                className="text-amber-600 focus:text-amber-600"
+                disabled={isPaid || isCancelled}
+                onClick={() => setCancelOpen(true)}
+              >
+                Cancel invoice
+              </DropdownMenuItem>
+            )}
+            {/* Delete */}
+            {effectiveStatus === "Draft" && (
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onClick={() => {
+                  setDeleteOpen(true)
+                }}
+              >
+                Delete invoice
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
 
-          <DropdownMenuSeparator />
+      {/* Send dialog */}
+      <InvoiceSendDialog
+        invoiceId={invoice?.id}
+        invoiceNumber={invoice?.invoiceNumber}
+        email={invoice?.customer?.email}
+        open={sendOpen}
+        onOpenChange={setSendOpen}
+      />
 
-          <DropdownMenuItem
-            className="text-red-500"
-            onClick={() => setDeleteOpen(true)}
-          >
-            Delete invoice
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <InvoiceMarkPaidDialog
+        invoice={invoice}
+        open={markPaidOpen}
+        onOpenChange={setMarkPaidOpen}
+      />
 
+      {/* Delete dialog */}
       <InvoiceDeleteDialog
         invoice={invoice}
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
+        onDeleted={() => {
+          router.push("/dashboard/invoices")
+        }}
+      />
+
+      {/* Cancel dialog */}
+      <InvoiceCancelDialog
+        invoice={invoice}
+        open={cancelOpen}
+        onOpenChange={setCancelOpen}
       />
     </>
   )

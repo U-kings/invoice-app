@@ -15,6 +15,7 @@ import {
   getEffectiveInvoiceStatus,
 } from "@/lib/invoices/invoice"
 import { Invoice, useInvoices } from "@/hooks/use-invoice"
+import SingleInvoiceSkeleton from "@/components/invoices/invoice-skeleton"
 
 export default function InvoiceDetailsPage() {
   const params = useParams<{ id: string }>()
@@ -43,9 +44,7 @@ export default function InvoiceDetailsPage() {
           Back to invoices
         </Link>
 
-        <h1 className="text-sm font-semibold">
-          {isLoading ? "Loading invoice..." : "Invoice not found"}
-        </h1>
+        {isLoading && <SingleInvoiceSkeleton />}
       </div>
     )
   }

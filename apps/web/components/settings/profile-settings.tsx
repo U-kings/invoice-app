@@ -81,7 +81,7 @@ export function ProfileSettings() {
     })
   }, [profileQuery.data, form])
 
-    const requestEmailChangeMutation = useMutation({
+  const requestEmailChangeMutation = useMutation({
     mutationFn: async () => {
       const response = await fetch("/api/dashboard/settings/profile/email", {
         method: "POST",
@@ -258,8 +258,6 @@ export function ProfileSettings() {
 
   const isImageBusy = isImageUploading || isImageRemoving
 
-
-
   return (
     <form
       onSubmit={form.handleSubmit(onSubmit)}
@@ -310,14 +308,16 @@ export function ProfileSettings() {
           </p>
 
           <p className="mt-1 text-xs text-muted-foreground">
-            JPG, PNG or WEBP · Maximum 5 MB
+            JPG or PNG · Maximum 5 MB
+            {/* JPG, PNG or WEBP · Maximum 5 MB */}
           </p>
 
           <div className="mt-4 flex flex-wrap gap-2">
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/jpeg,image/png,image/webp"
+              accept="image/jpeg,image/png"
+              // accept="image/jpeg,image/png,image/webp"
               onChange={handleImageChange}
               className="hidden"
             />
@@ -508,7 +508,7 @@ export function ProfileSettings() {
                   !currentPassword ||
                   requestEmailChangeMutation.isPending
                 }
-                className="bg-[#2EAFB4] text-white h-12 px-5 hover:bg-[#269ba0]"
+                className="h-12 bg-[#2EAFB4] px-5 text-white hover:bg-[#269ba0]"
               >
                 {requestEmailChangeMutation.isPending
                   ? "Sending..."
@@ -525,7 +525,7 @@ export function ProfileSettings() {
         <Button
           type="submit"
           disabled={updateProfileMutation.isPending || !form.formState.isDirty}
-          className="bg-[#2EAFB4] text-white h-12 px-5 hover:bg-[#269ba0]"
+          className="h-12 bg-[#2EAFB4] px-5 text-white hover:bg-[#269ba0]"
         >
           {updateProfileMutation.isPending ? "Saving..." : "Save changes"}
         </Button>

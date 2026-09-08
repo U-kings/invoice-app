@@ -4,19 +4,16 @@ import * as React from "react"
 import { Plus, Search } from "lucide-react"
 
 import { Input } from "@workspace/ui/components/input"
-import {
-  Field,
-  FieldLabel,
-} from "@workspace/ui/components/field"
+import { Field, FieldLabel } from "@workspace/ui/components/field"
 import { InvoiceItem } from "./invoice-schema"
-import { Product } from "@/hooks/use-products"
-
+import { Product, useProducts } from "@/hooks/use-products"
+import { useDebounce } from "@/hooks/use-debounce"
+import { cn } from "@workspace/ui/lib/utils"
 
 interface InvoiceItemFieldProps {
   id: string
   value?: string
   items: Product[]
-  // items: InvoiceItem[]
   onChange: (value: string) => void
   onSelect: (item: Product) => void
 }
@@ -30,18 +27,26 @@ export function InvoiceItemField({
 }: InvoiceItemFieldProps) {
   const [open, setOpen] = React.useState(false)
 
+  const debouncedSearch = useDebounce(value, 400)
+
+  const { data, isLoading, isError } = useProducts({
+    search: debouncedSearch,
+  })
+
   const filteredItems = React.useMemo(() => {
     const search = value?.trim().toLowerCase()
 
     if (!search) {
-      return items
+      return data?.products ? data?.products : items
     }
 
-    return items.filter(
-      (item) =>
-        item.name?.toLowerCase().includes(search) ||
-        item.description?.toLowerCase().includes(search)
-    )
+    return data?.products
+      ? data?.products
+      : items?.filter(
+          (item) =>
+            item.name?.toLowerCase().includes(search) ||
+            item.description?.toLowerCase().includes(search)
+        )
   }, [items, value])
 
   const exactMatch = items.some(
@@ -50,21 +55,21 @@ export function InvoiceItemField({
 
   const containerRef = React.useRef<HTMLDivElement>(null)
 
-React.useEffect(() => {
-  function handlePointerDown(event: PointerEvent) {
-    if (!containerRef.current) return
+  React.useEffect(() => {
+    function handlePointerDown(event: PointerEvent) {
+      if (!containerRef.current) return
 
-    if (!containerRef.current.contains(event.target as Node)) {
-      setOpen(false)
+      if (!containerRef.current.contains(event.target as Node)) {
+        setOpen(false)
+      }
     }
-  }
 
-  document.addEventListener("pointerdown", handlePointerDown)
+    document.addEventListener("pointerdown", handlePointerDown)
 
-  return () => {
-    document.removeEventListener("pointerdown", handlePointerDown)
-  }
-}, [])
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown)
+    }
+  }, [])
 
   return (
     <Field className="min-w-0">
@@ -88,8 +93,12 @@ React.useEffect(() => {
         />
 
         {open && (
-          <div className="absolute top-full right-0 left-0 z-10 mt-1 overflow-hidden rounded-xl border bg-popover p-1 shadow-lg">
-            {filteredItems.map((item) => (
+          <div
+            className={cn(
+              "absolute top-full right-0 left-0 z-10 mt-1 overflow-hidden rounded-xl border bg-popover p-1 shadow-lg"
+            )}
+          >
+            {filteredItems?.map((item) => (
               <button
                 key={item.id}
                 type="button"
@@ -105,9 +114,7 @@ React.useEffect(() => {
                 }}
               >
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">
-                    {item.name}
-                  </p>
+                  <p className="truncate text-sm font-medium">{item.name}</p>
 
                   <p className="truncate text-xs text-muted-foreground">
                     {item.description}
@@ -131,13 +138,11 @@ React.useEffect(() => {
               >
                 <Plus className="h-4 w-4" />
 
-                <span>
-                  Add `{value?.trim()}`
-                </span>
+                <span>Add `{value?.trim()}`</span>
               </button>
             )}
 
-            {filteredItems.length === 0 && !value?.trim() && (
+            {filteredItems?.length === 0 && !value?.trim() && (
               <p className="px-3 py-3 text-sm text-muted-foreground">
                 No items available.
               </p>

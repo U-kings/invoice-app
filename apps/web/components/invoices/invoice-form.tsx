@@ -124,7 +124,7 @@ function calculateDueDate(issueDate: string, paymentTerm: string) {
 
 export function InvoiceForm() {
   const router = useRouter()
-  const { data, isLoading } = useProducts()
+  const { data, isLoading } = useProducts({ page: 1, pageSize: 20 })
   const createInvoiceMutation = useCreateInvoice()
   const checkoutMutation = useCreateCheckout()
   const { data: invoiceUsage, isLoading: isInvoiceUsageLoading } =

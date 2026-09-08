@@ -28,7 +28,11 @@ import { useUpdateCustomer } from "@/hooks/use-update-customer"
 const customerSchema = z.object({
   name: z.string().trim().min(1, "Customer name is required"),
 
-  email: z.string().trim().email("Enter a valid email address"),
+  email: z.email("Enter a valid email address"),
+
+  phone: z.string().trim().optional().or(z.literal("")),
+
+  address: z.string().trim().optional().or(z.literal("")),
 })
 
 type CustomerFormValues = z.infer<typeof customerSchema>
@@ -38,6 +42,8 @@ interface EditCustomerDialogProps {
     id: string
     name: string
     email: string
+    phone: string
+    address: string
   }
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -56,6 +62,8 @@ export function EditCustomerDialog({
     defaultValues: {
       name: "",
       email: "",
+      phone: "",
+      address: "",
     },
   })
 
@@ -78,6 +86,8 @@ export function EditCustomerDialog({
         customerId: customer.id,
         name: values.name,
         email: values.email,
+        phone: values.phone || null,
+        address: values.address || null,
       },
       {
         onSuccess: (updatedCustomer) => {
