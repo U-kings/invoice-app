@@ -24,7 +24,7 @@ export function InvoicePageHeader() {
 
       <Button
         nativeButton={false}
-        className="w-full bg-[#2EAFB4] text-white hover:bg-[#26969a] sm:w-auto"
+        className="w-full  h-10 px-4 bg-[#2EAFB4] text-white hover:bg-[#26969a] sm:w-auto"
         render={<Link href="/dashboard/invoices/new" className="flex" />}
       >
         <Plus className="mr-2 h-4 w-4" />

@@ -1,64 +1,88 @@
 "use client"
 
-import * as React from "react"
 import { Search } from "lucide-react"
 
 import { Input } from "@workspace/ui/components/input"
 import { Field, FieldLabel } from "@workspace/ui/components/field"
-import { Product, useProducts } from "@/hooks/use-products"
 import { useDebounce } from "@/hooks/use-debounce"
 import { cn } from "@workspace/ui/lib/utils"
+import { Customer } from "@/hooks/use-create-customer"
+import { useCustomers } from "@/hooks/use-customers"
+import { useEffect, useMemo, useRef, useState } from "react"
 
-interface InvoiceItemFieldProps {
+interface CustomerListFieldProps {
   id: string
-  value?: string // 🚀 Now represents the actual product name string instead of an ID
+  value?: string // Represents the active Customer ID string (from your form controller)
   field: boolean
   onChange: (value: string) => void
-  onSelect: (item: Product) => void
+  onSelect: (item: Customer) => void
 }
 
-export function InvoiceItemField({
+export function CustomerListField({
   id,
-  value = "",
-  field,
+  value,
   onChange,
+  field,
   onSelect,
-}: InvoiceItemFieldProps) {
-  const [open, setOpen] = React.useState(false)
+}: CustomerListFieldProps) {
+  const [open, setOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
 
-  const debouncedSearch = useDebounce(value, 400)
+  const debouncedSearch = useDebounce(searchQuery, 400)
 
-  // Fetch contextual server results matching the current text query
-  const { data } = useProducts({
+  // 🚀 Self-contained data fetching directly within the field component
+  const { data } = useCustomers({
     page: 1,
     pageSize: 10,
     search: debouncedSearch,
   })
 
-  // Compute drop-down choices directly using the server response pool
-  const filteredItems = React.useMemo(() => {
-    const search = value.trim().toLowerCase()
-    const currentPool = data?.products || []
+  // 🚀 Find currently active customer object solely using the API response data pool
+  const activeCustomer = useMemo(() => {
+    if (!value) return null
+    const pool = Array.isArray(data?.customers) ? data.customers : []
+    return pool.find((c) => c.id === value) || null
+  }, [data?.customers, value])
 
-    if (!search) {
+  // Sync the typed search string parameter when an option is selected or updated
+  useEffect(() => {
+    if (activeCustomer) {
+      setSearchQuery(activeCustomer.name)
+    } else if (!value) {
+      setSearchQuery("")
+    }
+  }, [activeCustomer, value])
+
+  // Compute local filtered items based on what's fetched from the hook
+  const filteredItems = useMemo(() => {
+    const search = searchQuery.trim().toLowerCase()
+    const currentPool = data?.customers || []
+
+    if (
+      !search ||
+      (activeCustomer && activeCustomer.name.toLowerCase() === search)
+    ) {
       return currentPool
     }
 
     return currentPool.filter(
       (item) =>
         item.name?.toLowerCase().includes(search) ||
-        item.description?.toLowerCase().includes(search)
+        item.email?.toLowerCase().includes(search)
     )
-  }, [data?.products, value])
+  }, [data?.customers, searchQuery, activeCustomer])
 
-  const containerRef = React.useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   // Handle outside pointers to drop component focus panels cleanly
-  React.useEffect(() => {
+  useEffect(() => {
     function handlePointerDown(event: PointerEvent) {
       if (!containerRef.current) return
       if (!containerRef.current.contains(event.target as Node)) {
         setOpen(false)
+        if (activeCustomer) {
+          setSearchQuery(activeCustomer.name)
+        }
       }
     }
 
@@ -66,27 +90,27 @@ export function InvoiceItemField({
     return () => {
       document.removeEventListener("pointerdown", handlePointerDown)
     }
-  }, [])
+  }, [activeCustomer])
 
   return (
     <Field className="min-w-0">
-      <FieldLabel htmlFor={id} className="opacity-0">
-        Item
-      </FieldLabel>
+      <FieldLabel htmlFor={id}>Customers</FieldLabel>
 
       <div ref={containerRef} className="relative min-w-0">
         <Search className="pointer-events-none absolute top-1/2 left-3 z-10 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 
         <Input
           id={id}
-          value={value} // 🚀 Directly bind onto form value text stream strings safely
+          value={searchQuery}
           aria-invalid={field}
-          placeholder="Search or enter an item..."
+          placeholder="Search or enter customer..."
           className="h-12 min-w-0 pl-9"
           autoComplete="off"
           onFocus={() => setOpen(true)}
           onChange={(event) => {
-            onChange(event.target.value) // Instantly updates your parent state as they type
+            const nextText = event.target.value
+            setSearchQuery(nextText)
+            onChange(nextText) // Informs parent hooks/validations of active typing events
             setOpen(true)
           }}
         />
@@ -105,10 +129,7 @@ export function InvoiceItemField({
                 onMouseDown={(event) => {
                   event.preventDefault()
 
-                  // 🚀 Inform parent form to save the product name string
-                  onChange(item.name)
-
-                  // Broadcast full product metadata upwards (e.g., to auto-fill rate/price inputs)
+                  setSearchQuery(item.name)
                   onSelect(item)
                   setOpen(false)
                 }}
@@ -116,23 +137,15 @@ export function InvoiceItemField({
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{item.name}</p>
                   <p className="truncate text-xs text-muted-foreground">
-                    {item.description}
+                    {item.email}
                   </p>
                 </div>
-
-                <span className="shrink-0 text-sm font-medium text-muted-foreground">
-                  $
-                  {item.rate.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
-                </span>
               </button>
             ))}
 
             {filteredItems?.length === 0 && (
               <p className="px-3 py-3 text-sm text-muted-foreground">
-                No items available.
+                No customers found.
               </p>
             )}
           </div>

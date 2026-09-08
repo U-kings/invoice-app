@@ -37,11 +37,13 @@ export function CreateInvoiceBanner() {
           </div>
         </div>
 
-        <Button className="group flex w-full shrink-0 bg-[#2EAFB4] text-white hover:bg-[#26969a] sm:w-auto">
-          <Link href="/dashboard/invoices/new" className="flex">
-            <span className="flex items-center leading-0">Create invoice</span>
-            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Link>
+        <Button
+          nativeButton={false}
+          render={<Link href="/dashboard/invoices/new" className="flex"/>}
+          className="group h-10 px-4 flex w-full shrink-0 bg-[#2EAFB4] text-white hover:bg-[#26969a] sm:w-auto"
+        >
+          <span className="flex items-center leading-0">Create invoice</span>
+          <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
         </Button>
       </div>
     </motion.section>

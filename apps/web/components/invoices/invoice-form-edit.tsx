@@ -39,6 +39,7 @@ import { formatDateForInput } from "@/lib/dateFormatter"
 import { Invoice } from "@/hooks/use-invoice"
 import { useCustomers } from "@/hooks/use-customers"
 import { useProducts } from "@/hooks/use-products"
+import { CustomerListField } from "./customer-list-field"
 
 const paymentTerms = [
   {
@@ -372,77 +373,29 @@ export function InvoiceFormEdit({ invoice }: InvoiceFormProps) {
           {/* (customer) => customer.id === invoice?.customerId */}
           <Controller
             name="customerId"
-            control={control}
+            control={form.control}
             render={({ field, fieldState }) => {
-              const selectedCustomer = customers.find(
-                (customer) => customer.id === invoice?.customerId
-              )
-
               return (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="customer">Customer</FieldLabel>
-
-                  <Select
+                  <CustomerListField
+                    id={`customer`}
                     value={field.value}
-                    onValueChange={(value) => {
-                      const customer = customers.find(
-                        (customer) => customer.id === value
-                      )
-
-                      if (!customer) {
-                        return
-                      }
-
-                      field.onChange(customer.id)
-
-                      form.setValue("customerEmail", customer.email, {
-                        shouldValidate: true,
+                    field={fieldState.invalid}
+                    // items={catalogItems}
+                    onChange={field.onChange}
+                    onSelect={(selectedItem) => {
+                      form.setValue(`customerId`, selectedItem.id, {
                         shouldDirty: true,
+                        shouldTouch: true,
+                        shouldValidate: true,
+                      })
+                      form.setValue(`customerEmail`, selectedItem.email, {
+                        shouldDirty: true,
+                        shouldTouch: true,
+                        shouldValidate: true,
                       })
                     }}
-                  >
-                    <SelectTrigger
-                      id="customer"
-                      aria-invalid={fieldState.invalid}
-                      className="data-[size=default]:h-12"
-                    >
-                      <SelectValue
-                        placeholder={
-                          isCustomersLoading
-                            ? "Loading customers..."
-                            : "Select a customer"
-                        }
-                      >
-                        {selectedCustomer?.name}
-                      </SelectValue>
-                    </SelectTrigger>
-
-                    <SelectContent>
-                      {isCustomersError ? (
-                        <div className="px-3 py-2 text-sm text-destructive">
-                          {customersError instanceof Error
-                            ? customersError.message
-                            : "Failed to load customers."}
-                        </div>
-                      ) : customers.length === 0 && !isCustomersLoading ? (
-                        <div className="px-3 py-2 text-sm text-muted-foreground">
-                          No customers found.
-                        </div>
-                      ) : (
-                        customers.map((customer) => (
-                          <SelectItem key={customer.id} value={customer.id}>
-                            <div className="flex flex-col">
-                              <span>{customer.name}</span>
-
-                              <span className="text-xs text-muted-foreground">
-                                {customer.email}
-                              </span>
-                            </div>
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
+                  />
 
                   {fieldState.error && (
                     <FieldError>{fieldState.error.message}</FieldError>
@@ -719,18 +672,13 @@ export function InvoiceFormEdit({ invoice }: InvoiceFormProps) {
                   control={form.control}
                   name={`items.${index}.name`}
                   render={({ field, fieldState }) => {
-                    // const currentItemId = form.getValues(`items.${index}.id`)
-
-                    // const isCatalogItem = catalogItems.some(
-                    //   (item) => item.id === currentItemId
-                    // )
                     return (
                       <Field data-invalid={fieldState.invalid}>
                         <InvoiceItemField
                           id={`invoice-item-${index}`}
-                          value={field.value ?? ""}
+                          value={field.value}
+                          field={fieldState.invalid}
                           // items={catalogItems}
-                          items={products}
                           onChange={field.onChange}
                           onSelect={(selectedItem) => {
                             form.setValue(
@@ -800,11 +748,13 @@ export function InvoiceFormEdit({ invoice }: InvoiceFormProps) {
                               />
 
                               <div className="space-y-1">
-                                <FieldLabel
+                                {/* <FieldLabel
                                   htmlFor={`item-${index}-save-to-catalog`}
-                                >
+                                > */}
+                                <p className="text-sm leading-4 font-semibold text-gray-900 dark:text-white">
                                   Save this item to your item catalog
-                                </FieldLabel>
+                                </p>
+                                {/* </FieldLabel> */}
 
                                 <FieldDescription>
                                   Make this item available for future invoices.

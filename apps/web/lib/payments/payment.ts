@@ -38,9 +38,9 @@ export async function createCheckout(
     customerCountry,
   })
 
-  console.log(
-    `➡️ Resolved adapter name to invoke: [${provider.name.toUpperCase()}]`
-  )
+  // console.log(
+  //   `➡️ Resolved adapter name to invoke: [${provider.name.toUpperCase()}]`
+  // )
 
   // 2. Call your polymorphic interface strategy to get checkout url
   let result: any
@@ -80,7 +80,7 @@ export async function createCheckout(
       cancelUrl: `${process.env.NEXT_PUBLIC_APP_URL}/pay/${invoice.publicToken}`,
       paystackSecret,
     })
-    console.log("✅ Gateway initialized checkout successfully:", result)
+    // console.log("✅ Gateway initialized checkout successfully:", result)
   } catch (gatewayError: any) {
     console.error(
       `💥 FAILURE CAUGHT INSIDE ADAPTER: [${provider.name.toUpperCase()}]`
@@ -104,9 +104,9 @@ export async function createCheckout(
       })
 
       if (existingSuccessfulPayment) {
-        console.log(
-          `⚠️ Prevented double-write: Invoice ${invoice.id} has already been settled.`
-        )
+        // console.log(
+        //   `⚠️ Prevented double-write: Invoice ${invoice.id} has already been settled.`
+        // )
         return { payment: existingSuccessfulPayment }
       }
 
@@ -128,9 +128,9 @@ export async function createCheckout(
       return { payment: newPayment }
     })
 
-    console.log(
-      `✅ PENDING payment link record tracked for Invoice ${invoice.id}`
-    )
+    // console.log(
+    //   `✅ PENDING payment link record tracked for Invoice ${invoice.id}`
+    // )
   } catch (prismaError: any) {
     console.error("💥 FAILURE CAUGHT INSIDE DATABASE PERSISTENCE PASS!")
     console.error(prismaError)

@@ -72,7 +72,7 @@ export function AuthHydrationProvider({
 
       // ⚠️ Guard 2: Skip interval checks completely if offline
       if (typeof window !== "undefined" && !navigator.onLine) {
-        console.log("Device is offline. Skipping authorization check.")
+        // console.log("Device is offline. Skipping authorization check.")
         return
       }
 
@@ -84,7 +84,7 @@ export function AuthHydrationProvider({
           cache: "no-store",
         })
 
-        console.log("Session response:", response.status)
+        // console.log("Session response:", response.status)
 
         if (response.ok) {
           return
@@ -95,7 +95,7 @@ export function AuthHydrationProvider({
          * AND the browser confirms it actually has a valid internet connection.
          */
         if (response.status === 401 && navigator.onLine) {
-          console.log("Session verified as expired by remote server.")
+          // console.log("Session verified as expired by remote server.")
           setSessionInvalid(true)
 
           try {
