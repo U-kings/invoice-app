@@ -22,6 +22,7 @@ export interface PaymentSettings {
   automaticPaymentConfirmation: boolean
 
   bankName: string | null
+  bankCode: string | null
   accountName: string | null
   accountNumber: string | null
   additionalInformation: string | null

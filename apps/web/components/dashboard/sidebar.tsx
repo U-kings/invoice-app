@@ -13,7 +13,7 @@ export function Sidebar() {
 
   const isPro =
     data?.subscription.plan === "PRO" && data.subscription.status === "ACTIVE"
-  console.log(isPro)
+  
   return (
     <aside className="fixed top-0 left-0 hidden h-screen w-72 border-r bg-background/80 backdrop-blur-xl lg:flex lg:flex-col">
       {/* Logo */}
@@ -41,7 +41,7 @@ export function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 space-y-2 overflow-y-auto p-5">
         {navLinks.map((item) => {
-          if (item.title === "Reports" && !isPro) {
+          if ((item.title === "Reports" || item.title === "Payments") && !isPro) {
             return
           } else {
             return <NavItem key={item.href} {...item} />

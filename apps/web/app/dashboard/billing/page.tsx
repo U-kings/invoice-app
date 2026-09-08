@@ -217,7 +217,7 @@ export default function BillingPage() {
                 </div>
 
                 {!isPro && (
-                  <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                  <span className="rounded-full text-nowrap bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
                     Current plan
                   </span>
                 )}

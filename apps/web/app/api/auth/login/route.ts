@@ -86,6 +86,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     })
 
     const subscriptionStatus = user.subscription?.status || "EXPIRED"
+    const subscriptionPlan = user.subscription?.plan || "FREE"
 
     // 8. Create JWT containing the session ID
     const token = jwt.sign(
@@ -95,6 +96,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         class: user.class,
         sessionId: session.id,
         subscriptionStatus,
+        subscriptionPlan,
       },
       jwtSecret,
       {
@@ -108,6 +110,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const publicUser = {
       ...userWithoutPassword,
       subscriptionStatus, // ✨ Flattened directly onto the user object
+      subscriptionPlan,
     }
 
     // 10. Create response

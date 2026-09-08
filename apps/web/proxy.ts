@@ -31,14 +31,18 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   // ---------------------------------------------------------
 
   // Target your reports route specifically
-  const isPremiumRoute = pathname.startsWith("/dashboard/reports")
+  const isPremiumRoute =
+    pathname.startsWith("/dashboard/reports") ||
+    pathname.startsWith("/dashboard/payments")
 
   if (isPremiumRoute) {
     // Extract the status string passed from your login JWT payload
     const subStatus = verifiedToken.subscriptionStatus
+    const subPlan = verifiedToken.subscriptionPlan
 
     // Allow access only if they are actively paying or on a free trial
-    const hasProAccess = subStatus === "ACTIVE" || subStatus === "TRIALING"
+    const hasProAccess =
+      (subStatus === "ACTIVE" || subStatus === "TRIALING") && subPlan === "PRO"
 
     if (!hasProAccess) {
       // Redirect users who are PENDING, PAST_DUE, or EXPIRED to the upgrade page

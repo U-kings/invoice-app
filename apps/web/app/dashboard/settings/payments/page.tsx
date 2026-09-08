@@ -32,6 +32,13 @@ import {
   useUpdatePaymentSettings,
 } from "@/hooks/use-payment-settings"
 import BackToSettings from "@/components/settings/back-to-settings"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select"
 
 type PaymentProvider = "paystack" | "stripe" | "flutterwave"
 
@@ -64,6 +71,11 @@ const providers: Provider[] = [
   // },
 ]
 
+interface Bank {
+  name: string
+  code: string
+}
+
 export default function PaymentSettingsPage() {
   const { data, isLoading } = usePaymentSettings()
   const updatePaymentSettings = useUpdatePaymentSettings()
@@ -95,10 +107,16 @@ export default function PaymentSettingsPage() {
 
   const [bankDetails, setBankDetails] = useState({
     bankName: "",
+    bankCode: "",
     accountName: "",
     accountNumber: "",
     additionalInformation: "",
   })
+
+  const [banks, setBanks] = useState<Bank[]>([])
+  const [isLoadingBanks, setIsLoadingBanks] = useState(true)
+  const [isVerifying, setIsVerifying] = useState(false)
+  const [errorMsg, setErrorMsg] = useState("")
 
   function isProviderConnected(providerId: PaymentProvider) {
     const providerName = providerId.toUpperCase()
@@ -166,6 +184,7 @@ export default function PaymentSettingsPage() {
 
     setBankDetails({
       bankName: data.bankName ?? "",
+      bankCode: data.bankCode ?? "",
       accountName: data.accountName ?? "",
       accountNumber: data.accountNumber ?? "",
       additionalInformation: data.additionalInformation ?? "",
@@ -191,6 +210,60 @@ export default function PaymentSettingsPage() {
       [preference]: checked,
     }))
   }
+
+  useEffect(() => {
+    async function loadBanks() {
+      try {
+        const res = await fetch("/api/auth/verify-account") // Calls our new GET endpoint
+        const data = await res.json()
+        if (data.success) {
+          setBanks(data.banks)
+        } else {
+          setErrorMsg("Could not render the bank list.")
+        }
+      } catch {
+        setErrorMsg("Failed to connect to the bank server.")
+      } finally {
+        setIsLoadingBanks(false)
+      }
+    }
+    loadBanks()
+  }, [])
+
+  useEffect(() => {
+    if (bankDetails.accountNumber.length === 10 && bankDetails.bankCode) {
+      const verifyAccount = async () => {
+        setIsVerifying(true)
+        setErrorMsg("")
+        try {
+          const response = await fetch("/api/auth/verify-account", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              accountNumber: bankDetails.accountNumber,
+              bankCode: bankDetails.bankCode,
+            }),
+          })
+          const data = await response.json()
+          if (data.success) {
+            setBankDetails((prev) => ({
+              ...prev,
+              accountName: data.accountName,
+            }))
+          } else {
+            setErrorMsg(data.error || "Verification mismatch.")
+          }
+        } catch {
+          setErrorMsg("Network lookup timeout.")
+        } finally {
+          setIsVerifying(false)
+        }
+      }
+      verifyAccount()
+    } else {
+      setBankDetails((prev) => ({ ...prev, accountName: "" }))
+    }
+  }, [bankDetails.accountNumber, bankDetails.bankCode])
 
   function handleSave() {
     updatePaymentSettings.mutate({
@@ -232,14 +305,14 @@ export default function PaymentSettingsPage() {
     )
   }
 
+  console.log(bankDetails)
+
   return (
     <div className="w-full space-y-8">
       {/* Header */}
       <div className="space-y-1">
-        <BackToSettings/>
-        <h1 className="text-2xl font-bold tracking-tight">
-          Payment settings
-        </h1>
+        <BackToSettings />
+        <h1 className="text-2xl font-bold tracking-tight">Payment settings</h1>
 
         <p className="text-sm text-muted-foreground">
           Configure how your customers can pay invoices and manage your payment
@@ -482,7 +555,38 @@ export default function PaymentSettingsPage() {
               <div className="space-y-2">
                 <Label htmlFor="bank-name">Bank name</Label>
 
-                <Input
+                <Select
+                  value={bankDetails.bankName}
+                  onValueChange={(value) => {
+                    const selectedCode = banks.find(
+                      (bank) => bank.name === value
+                    )?.code
+
+                    setBankDetails((prev) => ({
+                      ...prev,
+                      bankName: value ?? "",
+                      bankCode: selectedCode ?? "",
+                      accountName: "",
+                    }))
+                  }}
+                >
+                  <SelectTrigger
+                    id="bank-name"
+                    className="w-full data-[size=default]:h-12"
+                  >
+                    <SelectValue placeholder="Select a bank" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {/* 2. Map through the array dynamically */}
+                    {banks.map((bank) => (
+                      <SelectItem key={bank.name} value={bank.name}>
+                        {bank.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {/* <Input
                   id="bank-name"
                   placeholder="e.g. First Bank"
                   value={bankDetails.bankName}
@@ -492,7 +596,7 @@ export default function PaymentSettingsPage() {
                       bankName: event.target.value,
                     }))
                   }
-                />
+                /> */}
               </div>
 
               <div className="space-y-2">
@@ -527,6 +631,12 @@ export default function PaymentSettingsPage() {
                   }
                 />
               </div>
+
+              {isVerifying && (
+                <p className="animate-pulse text-xs text-muted-foreground">
+                  Verifying account holder...
+                </p>
+              )}
 
               <div className="space-y-2 sm:col-span-2">
                 <Label htmlFor="bank-information">
@@ -572,7 +682,7 @@ export default function PaymentSettingsPage() {
 
         <Button
           type="button"
-          className="ml-auto min-w-32 h-10"
+          className="ml-auto h-10 min-w-32"
           disabled={updatePaymentSettings.isPending}
           onClick={handleSave}
         >

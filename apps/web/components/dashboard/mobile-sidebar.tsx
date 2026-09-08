@@ -20,10 +20,15 @@ import {
 
 import { Button } from "@workspace/ui/components/button"
 import { Logo } from "../logo"
+import { useBilling } from "@/hooks/use-billing"
 
 export function MobileSidebar() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
+  const { data } = useBilling()
+
+  const isPro =
+    data?.subscription.plan === "PRO" && data.subscription.status === "ACTIVE"
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -70,35 +75,42 @@ export function MobileSidebar() {
               pathname?.includes(item.href?.split("/")[2] ?? "Default")
             const Icon = item.icon
 
-            return (
-              <motion.div
-                key={item.href}
-                initial={{
-                  opacity: 0,
-                  x: -20,
-                }}
-                animate={{
-                  opacity: 1,
-                  x: 0,
-                }}
-                transition={{
-                  delay: index * 0.05,
-                }}
-              >
-                <Link
-                  href={item.href}
-                  onClick={() => setOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 rounded-xl px-4 py-3 transition-colors",
-                    active ? "bg-[#2EAFB4] text-white" : "hover:bg-muted"
-                  )}
+            if (
+              (item.title === "Reports" || item.title === "Payments") &&
+              !isPro
+            ) {
+              return
+            } else {
+              return (
+                <motion.div
+                  key={item.href}
+                  initial={{
+                    opacity: 0,
+                    x: -20,
+                  }}
+                  animate={{
+                    opacity: 1,
+                    x: 0,
+                  }}
+                  transition={{
+                    delay: index * 0.05,
+                  }}
                 >
-                  <Icon className="h-5 w-5" />
+                  <Link
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 rounded-xl px-4 py-3 transition-colors",
+                      active ? "bg-[#2EAFB4] text-white" : "hover:bg-muted"
+                    )}
+                  >
+                    <Icon className="h-5 w-5" />
 
-                  <span>{item.title}</span>
-                </Link>
-              </motion.div>
-            )
+                    <span>{item.title}</span>
+                  </Link>
+                </motion.div>
+              )
+            }
           })}
         </nav>
 
