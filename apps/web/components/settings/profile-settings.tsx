@@ -412,19 +412,18 @@ export function ProfileSettings() {
         <Field className="md:col-span-2">
           <FieldLabel htmlFor="email">Email</FieldLabel>
 
-          <div className="flex flex-col gap-2 sm:flex-row">
+          <div className="flex flex-col gap-2 gap-y-4 sm:flex-row">
             <Input
               id="email"
               type="email"
               readOnly
               {...form.register("email")}
-              className="flex-1"
             />
 
             <Button
               type="button"
               variant="outline"
-              className="h-12"
+              className="h-12 px-5"
               onClick={() => {
                 setNewEmail(profileQuery.data?.email ?? "")
                 setShowEmailChange(true)
@@ -494,6 +493,7 @@ export function ProfileSettings() {
                   setCurrentPassword("")
                 }}
                 disabled={requestEmailChangeMutation.isPending}
+                className="h-12 px-5"
               >
                 Cancel
               </Button>
@@ -508,7 +508,7 @@ export function ProfileSettings() {
                   !currentPassword ||
                   requestEmailChangeMutation.isPending
                 }
-                className="bg-[#2EAFB4] text-white hover:bg-[#269ba0]"
+                className="bg-[#2EAFB4] text-white h-12 px-5 hover:bg-[#269ba0]"
               >
                 {requestEmailChangeMutation.isPending
                   ? "Sending..."
@@ -525,7 +525,7 @@ export function ProfileSettings() {
         <Button
           type="submit"
           disabled={updateProfileMutation.isPending || !form.formState.isDirty}
-          className="bg-[#2EAFB4] text-white hover:bg-[#269ba0]"
+          className="bg-[#2EAFB4] text-white h-12 px-5 hover:bg-[#269ba0]"
         >
           {updateProfileMutation.isPending ? "Saving..." : "Save changes"}
         </Button>

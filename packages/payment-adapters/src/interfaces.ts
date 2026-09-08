@@ -50,4 +50,5 @@ export interface PaymentProvider {
   createSubscriptionCheckout(
     input: CreateSubscriptionInput
   ): Promise<SubscriptionCheckoutResult>
+  manageSubscription(subscriptionCode: string): Promise<{ url: string }>
 }

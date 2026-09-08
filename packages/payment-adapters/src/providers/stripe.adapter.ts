@@ -160,4 +160,8 @@ export class StripeAdapter implements PaymentProvider {
       providerSubscriptionId: result.subscription || clientReferenceId,
     }
   }
+
+  async manageSubscription(subscriptionCode: string): Promise<{ url: string }> {
+    return { url: "" }
+  }
 }

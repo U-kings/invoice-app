@@ -131,4 +131,8 @@ export class FlutterwaveAdapter implements PaymentProvider {
       providerSubscriptionId: reference,
     }
   }
+
+  async manageSubscription(subscriptionCode: string): Promise<{ url: string }> {
+    return { url: "" }
+  }
 }

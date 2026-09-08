@@ -36,8 +36,7 @@ export function HeroLeft() {
     >
       <motion.div variants={item}>
         <Badge className="rounded-full bg-[#2EAFB4]/15 px-4 py-4 text-[#2EAFB4]">
-          ✨ New
-          <span className="ml-2">Automated reminders are here!</span>
+          ✨ New<span className="ml-1">Automated reminders are here!</span>
         </Badge>
       </motion.div>
 
@@ -46,7 +45,7 @@ export function HeroLeft() {
         className="mt-8 text-5xl leading-tight font-bold lg:text-6xl"
       >
         Send Invoices, Track Payments &{/* Create invoices that */}
-        <span className="mt-2 block bg-gradient-to-r from-[#2EAFB4] to-cyan-400 bg-clip-text text-transparent">
+        <span className="mt-2 block bg-linear-to-r from-[#2EAFB4] to-cyan-400 bg-clip-text text-transparent">
           {/* actually get paid. */}
           Get Paid Faster
         </span>
@@ -69,7 +68,7 @@ export function HeroLeft() {
         > */}
         <Link
           href="/signup"
-          className="flex text-white items-center rounded-xl bg-[#2EAFB4] px-3 py-1.5 font-medium"
+          className="flex items-center rounded-xl bg-[#2EAFB4] px-3 py-1.5 font-medium text-white"
         >
           {/* Get Started */}
           Get Started

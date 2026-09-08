@@ -7,6 +7,11 @@ import {
   SubscriptionCheckoutResult,
 } from "../interfaces"
 
+const PAYSTACK_API_URL = "https://api.paystack.co"
+
+const PAYSTACK_TRANSACTION_URL =
+  `${PAYSTACK_API_URL}/transaction/initialize`
+
 export class PaystackAdapter implements PaymentProvider {
   readonly name: PaymentProviderName = "paystack"
 
@@ -15,21 +20,32 @@ export class PaystackAdapter implements PaymentProvider {
     businessCountry: string
     customerCountry?: string
   }): boolean {
-    return input.businessCountry === "NG" && input.currency === "NGN"
+    return (
+      input.businessCountry === "NG" &&
+      input.currency === "NGN"
+    )
   }
 
-  async createCheckout(input: CreateCheckoutInput): Promise<CheckoutResult> {
-    // ... your existing createCheckout logic for single payments (unchanged)
+  async createCheckout(
+    input: CreateCheckoutInput,
+  ): Promise<CheckoutResult> {
     if (input.currency !== "NGN") {
-      throw new Error("Paystack checkout currently supports NGN invoices only.")
+      throw new Error(
+        "Paystack checkout currently supports NGN invoices only.",
+      )
     }
+
     if (!input.paystackSecret) {
-      throw new Error("Paystack secret key is not configured for this account.")
+      throw new Error(
+        "Paystack secret key is not configured for this account.",
+      )
     }
+
     const amountInKobo = Math.round(input.amount * 100)
     const reference = `PAYSTACK-${input.invoiceId}-${Date.now()}`
+
     const response = await fetch(
-      "https://paystack.co",
+      PAYSTACK_TRANSACTION_URL,
       {
         method: "POST",
         headers: {
@@ -43,14 +59,39 @@ export class PaystackAdapter implements PaymentProvider {
           currency: input.currency,
           reference,
           callback_url: input.successUrl,
-          metadata: { invoiceId: input.invoiceId },
+          metadata: {
+            invoiceId: input.invoiceId,
+          },
         }),
-      }
+      },
     )
-    const result = await response.json()
-    if (!response.ok || !result.status) {
-      throw new Error(result.message || "Paystack transaction initialization failed.")
+
+    const contentType = response.headers.get("content-type")
+
+    if (
+      !contentType ||
+      !contentType.includes("application/json")
+    ) {
+      throw new Error(
+        `Paystack returned an invalid response format (HTTP ${response.status}).`,
+      )
     }
+
+    const result = await response.json()
+
+    if (!response.ok || !result.status) {
+      throw new Error(
+        result.message ||
+          "Paystack transaction initialization failed.",
+      )
+    }
+
+    if (!result.data?.authorization_url) {
+      throw new Error(
+        "Paystack did not return a valid checkout authorization URL.",
+      )
+    }
+
     return {
       provider: this.name,
       checkoutUrl: result.data.authorization_url,
@@ -58,30 +99,34 @@ export class PaystackAdapter implements PaymentProvider {
     }
   }
 
-  // ✨ Clean subscription implementation using system environment variables
   async createSubscriptionCheckout(
-    input: CreateSubscriptionInput
+    input: CreateSubscriptionInput,
   ): Promise<SubscriptionCheckoutResult> {
     if (input.currency !== "NGN") {
-      throw new Error("Paystack subscriptions currently support NGN only.")
+      throw new Error(
+        "Paystack subscriptions currently support NGN only.",
+      )
     }
 
-    // 🔒 Grab your global keys from process.env
     const secretKey = process.env.PAYSTACK_SECRET_KEY
-    const planCode = process.env.PAYSTACK_PRO_PLAN_CODE // e.g., PLN_xxxxxxxx
+    const planCode = process.env.PAYSTACK_PRO_PLAN_CODE
 
     if (!secretKey) {
-      throw new Error("System configuration error: PAYSTACK_SECRET_KEY is missing.")
-    }
-    if (!planCode) {
-      throw new Error("System configuration error: PAYSTACK_PRO_PLAN_CODE is missing.")
+      throw new Error(
+        "System configuration error: PAYSTACK_SECRET_KEY is missing.",
+      )
     }
 
-    // Unique tracking reference for this specific checkout attempt
+    if (!planCode) {
+      throw new Error(
+        "System configuration error: PAYSTACK_PRO_PLAN_CODE is missing.",
+      )
+    }
+
     const reference = `SUB-PRO-${input.userId}-${Date.now()}`
 
     const response = await fetch(
-      "https://paystack.co",
+      PAYSTACK_TRANSACTION_URL,
       {
         method: "POST",
         headers: {
@@ -91,7 +136,7 @@ export class PaystackAdapter implements PaymentProvider {
         },
         body: JSON.stringify({
           email: input.email,
-          plan: planCode, // Binding this transaction initialization directly to your Paystack dashboard subscription plan
+          plan: planCode,
           reference,
           callback_url: input.successUrl,
           metadata: {
@@ -99,32 +144,111 @@ export class PaystackAdapter implements PaymentProvider {
             plan: input.plan,
           },
         }),
-      }
+      },
     )
 
     const contentType = response.headers.get("content-type")
-    if (!contentType || !contentType.includes("application/json")) {
-      throw new Error(`Paystack returned an invalid response format (HTTP ${response.status}).`)
+
+    if (
+      !contentType ||
+      !contentType.includes("application/json")
+    ) {
+      throw new Error(
+        `Paystack returned an invalid response format (HTTP ${response.status}).`,
+      )
     }
 
     const result = await response.json()
 
     if (!response.ok || !result.status) {
-      console.error("Paystack subscription checkout failed:", result)
-      throw new Error(result.message || "Paystack subscription initialization failed.")
+      console.error(
+        "Paystack subscription checkout failed:",
+        result,
+      )
+
+      throw new Error(
+        result.message ||
+          "Paystack subscription initialization failed.",
+      )
     }
 
     if (!result.data?.authorization_url) {
-      throw new Error("Paystack did not return a valid checkout authorization URL.")
+      throw new Error(
+        "Paystack did not return a valid checkout authorization URL.",
+      )
     }
 
     return {
       provider: this.name,
       checkoutUrl: result.data.authorization_url,
-      // Paystack provisions official customer/subscription tokens AFTER successful authorization.
-      // We pass the unique reference up to your Prisma upsert handler as a temporary placeholder identifier.
       providerCustomerId: `PENDING-${input.userId}`,
-      providerSubscriptionId: reference, 
+      providerSubscriptionId: reference,
+    }
+  }
+
+  async manageSubscription(
+    subscriptionCode: string,
+  ): Promise<{ url: string }> {
+    const secretKey = process.env.PAYSTACK_SECRET_KEY
+
+    if (!secretKey) {
+      throw new Error(
+        "System configuration error: PAYSTACK_SECRET_KEY is missing.",
+      )
+    }
+
+    if (!subscriptionCode) {
+      throw new Error(
+        "Paystack subscription code is missing.",
+      )
+    }
+
+    const response = await fetch(
+      `${PAYSTACK_API_URL}/subscription/${encodeURIComponent(
+        subscriptionCode,
+      )}/manage/link`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${secretKey}`,
+          Accept: "application/json",
+        },
+      },
+    )
+
+    const contentType = response.headers.get("content-type")
+
+    if (
+      !contentType ||
+      !contentType.includes("application/json")
+    ) {
+      throw new Error(
+        `Paystack returned an invalid response format (HTTP ${response.status}).`,
+      )
+    }
+
+    const result = await response.json()
+
+    if (!response.ok || !result.status) {
+      console.error(
+        "Paystack subscription management link failed:",
+        result,
+      )
+
+      throw new Error(
+        result.message ||
+          "Unable to generate subscription management link.",
+      )
+    }
+
+    if (!result.data?.link) {
+      throw new Error(
+        "Paystack did not return a subscription management link.",
+      )
+    }
+
+    return {
+      url: result.data.link,
     }
   }
 }

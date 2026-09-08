@@ -449,7 +449,7 @@ export function InvoiceSettingsForm() {
                   })
                 }
               >
-                <SelectTrigger id="defaultCurrency">
+                <SelectTrigger id="defaultCurrency" className="data-[size=default]:h-12 data-[size=sm]:h-12">
                   <SelectValue placeholder="Select currency" />
                 </SelectTrigger>
 
@@ -480,8 +480,9 @@ export function InvoiceSettingsForm() {
                     shouldValidate: true,
                   })
                 }
+                
               >
-                <SelectTrigger id="defaultPaymentTerm">
+                <SelectTrigger id="defaultPaymentTerm" className="data-[size=default]:h-12 data-[size=sm]:h-12">
                   <SelectValue placeholder="Select payment terms" />
                 </SelectTrigger>
 
@@ -594,6 +595,7 @@ export function InvoiceSettingsForm() {
         <Button
           type="submit"
           disabled={!isDirty || updateInvoiceSettings.isPending}
+          className="h-10 px-5"
         >
           {updateInvoiceSettings.isPending && (
             <Loader2 className="size-4 animate-spin" />

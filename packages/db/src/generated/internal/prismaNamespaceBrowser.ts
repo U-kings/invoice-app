@@ -55,6 +55,7 @@ export const ModelName = {
   UserTwoFactor: 'UserTwoFactor',
   Session: 'Session',
   Subscription: 'Subscription',
+  BillingTransaction: 'BillingTransaction',
   BusinessProfile: 'BusinessProfile',
   Customer: 'Customer',
   Invoice: 'Invoice',
@@ -159,6 +160,25 @@ export const SubscriptionScalarFieldEnum = {
 } as const
 
 export type SubscriptionScalarFieldEnum = (typeof SubscriptionScalarFieldEnum)[keyof typeof SubscriptionScalarFieldEnum]
+
+
+export const BillingTransactionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  subscriptionId: 'subscriptionId',
+  provider: 'provider',
+  providerTransactionId: 'providerTransactionId',
+  providerReference: 'providerReference',
+  amount: 'amount',
+  currency: 'currency',
+  status: 'status',
+  description: 'description',
+  paidAt: 'paidAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BillingTransactionScalarFieldEnum = (typeof BillingTransactionScalarFieldEnum)[keyof typeof BillingTransactionScalarFieldEnum]
 
 
 export const BusinessProfileScalarFieldEnum = {

@@ -38,6 +38,11 @@ export type Session = Prisma.SessionModel
  */
 export type Subscription = Prisma.SubscriptionModel
 /**
+ * Model BillingTransaction
+ * 
+ */
+export type BillingTransaction = Prisma.BillingTransactionModel
+/**
  * Model BusinessProfile
  * 
  */

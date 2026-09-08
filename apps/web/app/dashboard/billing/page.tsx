@@ -21,12 +21,18 @@ import {
 } from "@workspace/ui/components/card"
 import { useCreateCheckout } from "@/hooks/use-create-checkout"
 import { cn } from "@workspace/ui/lib/utils"
-import { useRouter } from "next/navigation"
+import { useBillingHistory } from "@/hooks/use-billing-history"
+import { useManageSubscription } from "@/hooks/use-manage-subscription"
 
 export default function BillingPage() {
   const checkoutMutation = useCreateCheckout()
   const { data, isLoading, isError } = useBilling()
-  const router = useRouter()
+  const {
+    data: billingHistory,
+    isLoading: isBillingHistoryLoading,
+    isError: isBillingHistoryError,
+  } = useBillingHistory()
+  const manageSubscriptionMutation = useManageSubscription()
 
   if (isLoading) {
     return (
@@ -62,6 +68,32 @@ export default function BillingPage() {
 
   const subscription = data.subscription
   const isPro = subscription.plan === "PRO" && subscription.status === "ACTIVE"
+  const isPendingSubscription = subscription.status === "PENDING"
+
+  const statusLabel: Record<typeof subscription.status, string> = {
+    ACTIVE: "Active",
+    PENDING: "Payment pending",
+    TRIALING: "Trial",
+    PAST_DUE: "Payment past due",
+    CANCELLED: "Cancelled",
+    EXPIRED: "Expired",
+  }
+
+  function formatBillingAmount(amount: string, currency: string) {
+    return new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency,
+      minimumFractionDigits: 2,
+    }).format(Number(amount))
+  }
+
+  function formatBillingDate(date: string) {
+    return new Intl.DateTimeFormat("en-NG", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }).format(new Date(date))
+  }
 
   return (
     <div className="space-y-8">
@@ -86,8 +118,22 @@ export default function BillingPage() {
               </CardDescription>
             </div>
 
-            <div className="rounded-full border px-3 py-1 text-xs font-medium">
-              {subscription.status}
+            <div
+              className={cn(
+                "rounded-full border px-3 py-1 text-xs font-medium",
+                subscription.status === "ACTIVE" &&
+                  "border-primary/20 bg-primary/10 text-primary",
+                subscription.status === "PENDING" &&
+                  "border-amber-200 bg-amber-50 text-amber-700",
+                subscription.status === "PAST_DUE" &&
+                  "border-red-200 bg-red-50 text-red-700",
+                subscription.status === "CANCELLED" &&
+                  "bg-muted text-muted-foreground",
+                subscription.status === "EXPIRED" &&
+                  "bg-muted text-muted-foreground"
+              )}
+            >
+              {statusLabel[subscription.status]}
             </div>
           </div>
         </CardHeader>
@@ -107,7 +153,9 @@ export default function BillingPage() {
                 <p className="text-sm text-muted-foreground">
                   {isPro
                     ? "You're on the Pro plan."
-                    : "You're currently using the Free plan."}
+                    : isPendingSubscription
+                      ? "Your Pro payment is being confirmed."
+                      : "You're currently using the Free plan."}
                 </p>
               </div>
             </div>
@@ -197,7 +245,7 @@ export default function BillingPage() {
                     <span>{feature}</span>
                     {feature === "Create invoices" && (
                       <span className="text-xs text-gray-400">
-                        (5 invoices/month)
+                        (5 invoices/mo.)
                       </span>
                     )}
                   </li>
@@ -240,7 +288,7 @@ export default function BillingPage() {
               </CardDescription>
 
               <div className="pt-4">
-                <span className="text-3xl font-bold">₦5000</span>
+                <span className="text-3xl font-bold">₦5,000</span>
 
                 <span className="ml-1 text-sm text-muted-foreground">
                   /month
@@ -268,10 +316,12 @@ export default function BillingPage() {
               {isPro ? (
                 <Button
                   variant="outline"
-                  className="mt-6 h-12 w-full"
-                  onClick={() => router.push("/dashboard/settings/billing")}
+                  onClick={() => manageSubscriptionMutation.mutate()}
+                  disabled={manageSubscriptionMutation.isPending}
                 >
-                  Manage subscription
+                  {manageSubscriptionMutation.isPending
+                    ? "Opening..."
+                    : "Manage subscription"}
                 </Button>
               ) : (
                 <Button
@@ -313,7 +363,7 @@ export default function BillingPage() {
                 </p>
               </div>
 
-              <Button variant="outline" className="h-10">
+              <Button variant="outline" className="h-10" disabled>
                 Update
               </Button>
             </div>
@@ -334,27 +384,130 @@ export default function BillingPage() {
       {/* Billing history */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Receipt className="size-5" />
-            Billing history
-          </CardTitle>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <CardTitle>Billing history</CardTitle>
+              <CardDescription>
+                Your Invoice Flow subscription payments.
+              </CardDescription>
+            </div>
 
-          <CardDescription>
-            Your subscription invoices and receipts will appear here.
-          </CardDescription>
+            <Receipt className="size-5 text-muted-foreground" />
+          </div>
         </CardHeader>
 
         <CardContent>
-          <div className="rounded-lg border border-dashed p-8 text-center">
-            <Receipt className="mx-auto size-7 text-muted-foreground" />
+          {isBillingHistoryLoading ? (
+            <div className="space-y-4">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between gap-4"
+                >
+                  <div className="space-y-2">
+                    <div className="h-4 w-32 animate-pulse rounded bg-muted" />
+                    <div className="h-3 w-24 animate-pulse rounded bg-muted" />
+                  </div>
 
-            <p className="mt-3 font-medium">No billing history yet</p>
+                  <div className="h-4 w-20 animate-pulse rounded bg-muted" />
+                </div>
+              ))}
+            </div>
+          ) : isBillingHistoryError ? (
+            <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4">
+              <p className="text-sm font-medium text-destructive">
+                Unable to load billing history
+              </p>
 
-            <p className="mt-1 text-sm text-muted-foreground">
-              Subscription invoices will appear here after your first Pro
-              payment.
-            </p>
-          </div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Please try refreshing the page.
+              </p>
+            </div>
+          ) : !billingHistory?.transactions.length ? (
+            <div className="flex flex-col items-center justify-center py-10 text-center">
+              <div className="mb-3 flex size-10 items-center justify-center rounded-full bg-muted">
+                <Receipt className="size-5 text-muted-foreground" />
+              </div>
+
+              <p className="text-sm font-medium">No billing history yet</p>
+
+              <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+                Your subscription payments will appear here once you make your
+                first payment.
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y">
+              {billingHistory.transactions.map((transaction) => (
+                <div
+                  key={transaction.id}
+                  className="flex flex-col gap-3 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">
+                      {transaction.description ||
+                        "Invoice Flow Pro subscription"}
+                    </p>
+
+                    <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+                      <span>
+                        {formatBillingDate(
+                          transaction.paidAt || transaction.createdAt
+                        )}
+                      </span>
+
+                      <span>•</span>
+
+                      <span className="capitalize">
+                        {transaction.provider.toLowerCase()}
+                      </span>
+
+                      {transaction.providerReference && (
+                        <>
+                          <span>•</span>
+
+                          <span className="max-w-36 truncate">
+                            {transaction.providerReference}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-4 sm:flex-col sm:items-end sm:gap-1">
+                    <p className="text-sm font-semibold">
+                      {formatBillingAmount(
+                        transaction.amount,
+                        transaction.currency
+                      )}
+                    </p>
+
+                    <span
+                      className={cn(
+                        "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
+                        transaction.status === "SUCCESS" &&
+                          "bg-emerald-500/10 text-emerald-600",
+                        transaction.status === "PENDING" &&
+                          "bg-amber-500/10 text-amber-600",
+                        transaction.status === "FAILED" &&
+                          "bg-destructive/10 text-destructive",
+                        transaction.status === "REFUNDED" &&
+                          "bg-muted text-muted-foreground"
+                      )}
+                    >
+                      {transaction.status === "SUCCESS"
+                        ? "Paid"
+                        : transaction.status === "PENDING"
+                          ? "Pending"
+                          : transaction.status === "FAILED"
+                            ? "Failed"
+                            : "Refunded"}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 

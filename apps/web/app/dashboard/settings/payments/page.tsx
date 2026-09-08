@@ -572,7 +572,7 @@ export default function PaymentSettingsPage() {
 
         <Button
           type="button"
-          className="ml-auto min-w-32"
+          className="ml-auto min-w-32 h-10"
           disabled={updatePaymentSettings.isPending}
           onClick={handleSave}
         >

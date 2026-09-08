@@ -12,7 +12,7 @@ const plans = [
     period: "/mo",
     buttonText: "Get Started Free",
     features: [
-      "Unlimited Invoices",
+      "Create Invoices",
       "Accept Payments (Paystack)",
       "Client Portal",
       "Basic Reports",
@@ -22,9 +22,10 @@ const plans = [
     title: "Pro",
     description:
       "For growing businesses that need more.",
-    price: "₦5000",
+    price: "₦5,000",
     period: "/mo",
-    buttonText: "Start 14-Day Free Trial",
+    // buttonText: "Start 14-Day Free Trial",
+    buttonText: "Upgrade to Pro",
     popular: true,
     features: [
       "Everything in Starter",

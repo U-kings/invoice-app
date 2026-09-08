@@ -401,6 +401,7 @@ export const ModelName = {
   UserTwoFactor: 'UserTwoFactor',
   Session: 'Session',
   Subscription: 'Subscription',
+  BillingTransaction: 'BillingTransaction',
   BusinessProfile: 'BusinessProfile',
   Customer: 'Customer',
   Invoice: 'Invoice',
@@ -428,7 +429,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "userTwoFactor" | "session" | "subscription" | "businessProfile" | "customer" | "invoice" | "product" | "lineItem" | "invoiceSettings" | "invoiceReminderSettings" | "invoiceReminder" | "paymentSettings" | "paymentProviderConnection" | "payment" | "paymentProviderConfig"
+    modelProps: "user" | "userTwoFactor" | "session" | "subscription" | "billingTransaction" | "businessProfile" | "customer" | "invoice" | "product" | "lineItem" | "invoiceSettings" | "invoiceReminderSettings" | "invoiceReminder" | "paymentSettings" | "paymentProviderConnection" | "payment" | "paymentProviderConfig"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -725,6 +726,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.SubscriptionCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.SubscriptionCountAggregateOutputType> | number
+        }
+      }
+    }
+    BillingTransaction: {
+      payload: Prisma.$BillingTransactionPayload<ExtArgs>
+      fields: Prisma.BillingTransactionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BillingTransactionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingTransactionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BillingTransactionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingTransactionPayload>
+        }
+        findFirst: {
+          args: Prisma.BillingTransactionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingTransactionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BillingTransactionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingTransactionPayload>
+        }
+        findMany: {
+          args: Prisma.BillingTransactionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingTransactionPayload>[]
+        }
+        create: {
+          args: Prisma.BillingTransactionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingTransactionPayload>
+        }
+        createMany: {
+          args: Prisma.BillingTransactionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BillingTransactionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingTransactionPayload>[]
+        }
+        delete: {
+          args: Prisma.BillingTransactionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingTransactionPayload>
+        }
+        update: {
+          args: Prisma.BillingTransactionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingTransactionPayload>
+        }
+        deleteMany: {
+          args: Prisma.BillingTransactionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BillingTransactionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BillingTransactionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingTransactionPayload>[]
+        }
+        upsert: {
+          args: Prisma.BillingTransactionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillingTransactionPayload>
+        }
+        aggregate: {
+          args: Prisma.BillingTransactionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBillingTransaction>
+        }
+        groupBy: {
+          args: Prisma.BillingTransactionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BillingTransactionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BillingTransactionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BillingTransactionCountAggregateOutputType> | number
         }
       }
     }
@@ -1731,6 +1806,25 @@ export const SubscriptionScalarFieldEnum = {
 export type SubscriptionScalarFieldEnum = (typeof SubscriptionScalarFieldEnum)[keyof typeof SubscriptionScalarFieldEnum]
 
 
+export const BillingTransactionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  subscriptionId: 'subscriptionId',
+  provider: 'provider',
+  providerTransactionId: 'providerTransactionId',
+  providerReference: 'providerReference',
+  amount: 'amount',
+  currency: 'currency',
+  status: 'status',
+  description: 'description',
+  paidAt: 'paidAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BillingTransactionScalarFieldEnum = (typeof BillingTransactionScalarFieldEnum)[keyof typeof BillingTransactionScalarFieldEnum]
+
+
 export const BusinessProfileScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -2057,6 +2151,34 @@ export type ListEnumSubscriptionStatusFieldRefInput<$PrismaModel> = FieldRefInpu
 
 
 /**
+ * Reference to a field of type 'Decimal'
+ */
+export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
+    
+
+
+/**
+ * Reference to a field of type 'Decimal[]'
+ */
+export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
+    
+
+
+/**
+ * Reference to a field of type 'BillingTransactionStatus'
+ */
+export type EnumBillingTransactionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BillingTransactionStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'BillingTransactionStatus[]'
+ */
+export type ListEnumBillingTransactionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BillingTransactionStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'CustomerStatus'
  */
 export type EnumCustomerStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CustomerStatus'>
@@ -2081,20 +2203,6 @@ export type EnumInvoiceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Pr
  * Reference to a field of type 'InvoiceStatus[]'
  */
 export type ListEnumInvoiceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InvoiceStatus[]'>
-    
-
-
-/**
- * Reference to a field of type 'Decimal'
- */
-export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
-    
-
-
-/**
- * Reference to a field of type 'Decimal[]'
- */
-export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
     
 
 
@@ -2350,6 +2458,7 @@ export type GlobalOmitConfig = {
   userTwoFactor?: Prisma.UserTwoFactorOmit
   session?: Prisma.SessionOmit
   subscription?: Prisma.SubscriptionOmit
+  billingTransaction?: Prisma.BillingTransactionOmit
   businessProfile?: Prisma.BusinessProfileOmit
   customer?: Prisma.CustomerOmit
   invoice?: Prisma.InvoiceOmit

@@ -6,6 +6,7 @@ export type SubscriptionPlan = "FREE" | "PRO"
 
 export type SubscriptionStatus =
   | "ACTIVE"
+  | "PENDING"
   | "TRIALING"
   | "PAST_DUE"
   | "CANCELLED"

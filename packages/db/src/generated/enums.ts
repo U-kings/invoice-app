@@ -29,6 +29,16 @@ export const SubscriptionStatus = {
 export type SubscriptionStatus = (typeof SubscriptionStatus)[keyof typeof SubscriptionStatus]
 
 
+export const BillingTransactionStatus = {
+  PENDING: 'PENDING',
+  SUCCESS: 'SUCCESS',
+  FAILED: 'FAILED',
+  REFUNDED: 'REFUNDED'
+} as const
+
+export type BillingTransactionStatus = (typeof BillingTransactionStatus)[keyof typeof BillingTransactionStatus]
+
+
 export const InvoiceReminderType = {
   BEFORE_DUE: 'BEFORE_DUE',
   DUE_DATE: 'DUE_DATE',

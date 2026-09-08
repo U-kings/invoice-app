@@ -6,6 +6,7 @@ import { sendInvoice } from "@/lib/invoices/send-invoice"
 
 import { getInvoiceReminderSettings } from "@/lib/invoice-reminders/get-reminder-settings"
 import { scheduleInvoiceReminders } from "@/lib/invoice-reminders/schedule-invoice-reminders"
+import { checkInvoiceCreationLimit } from "@/lib/billing/check-invoice-creation-limit"
 
 interface AuthPayload {
   userId: string
@@ -487,6 +488,18 @@ export async function POST(req: NextRequest) {
     const invoice = await prisma.$transaction(
       async (tx) => {
         // ----------------------------------------------
+        // Check invoice creation limit
+        // ----------------------------------------------
+
+        const invoiceLimit = await checkInvoiceCreationLimit(tx, userId)
+
+        if (!invoiceLimit.allowed) {
+          throw new Error(
+            `FREE_INVOICE_LIMIT_REACHED:${invoiceLimit.count}:${invoiceLimit.limit}`
+          )
+        }
+
+        // ----------------------------------------------
         // Get or create invoice settings
         // ----------------------------------------------
 
@@ -598,7 +611,6 @@ export async function POST(req: NextRequest) {
         isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
       }
     )
-
     // --------------------------------------------------
     // Send invoice if requested
     // --------------------------------------------------
@@ -633,6 +645,26 @@ export async function POST(req: NextRequest) {
     )
   } catch (error) {
     console.error("Create Invoice Error:", error)
+
+    if (
+      error instanceof Error &&
+      error.message.startsWith("FREE_INVOICE_LIMIT_REACHED:")
+    ) {
+      const [, count, limit] = error.message.split(":")
+
+      return NextResponse.json(
+        {
+          error:
+            "You have reached your free plan invoice limit for this month.",
+          code: "FREE_INVOICE_LIMIT_REACHED",
+          usage: {
+            count: Number(count),
+            limit: Number(limit),
+          },
+        },
+        { status: 403 }
+      )
+    }
 
     return NextResponse.json(
       {

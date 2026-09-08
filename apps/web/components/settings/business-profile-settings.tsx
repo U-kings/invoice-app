@@ -641,6 +641,7 @@ export function BusinessProfileSettings() {
         <Button
           type="submit"
           disabled={!isDirty || updateBusinessProfile.isPending}
+          className="h-10 px-5"
         >
           {updateBusinessProfile.isPending && (
             <Loader2 className="size-4 animate-spin" />

@@ -19,6 +19,10 @@ import {
 } from "@workspace/ui/components/select"
 import { Textarea } from "@workspace/ui/components/textarea"
 import { Plus, Trash2 } from "lucide-react"
+import { FileText, Sparkles } from "lucide-react"
+
+import { useCreateCheckout } from "@/hooks/use-create-checkout"
+import { useInvoiceUsage } from "@/hooks/use-invoice-usage"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import {
@@ -38,6 +42,7 @@ import { useCustomers } from "@/hooks/use-customers"
 import { toast } from "@workspace/ui/components/toast"
 import { useInvoiceSettings } from "@/hooks/use-invoice-settings"
 import { useProducts } from "@/hooks/use-products"
+import { Card, CardContent } from "@workspace/ui/components/card"
 
 const paymentTerms = [
   {
@@ -120,6 +125,10 @@ function calculateDueDate(issueDate: string, paymentTerm: string) {
 export function InvoiceForm() {
   const router = useRouter()
   const { data, isLoading } = useProducts()
+  const createInvoiceMutation = useCreateInvoice()
+  const checkoutMutation = useCreateCheckout()
+  const { data: invoiceUsage, isLoading: isInvoiceUsageLoading } =
+    useInvoiceUsage()
 
   const products = data?.products ?? []
   const [saveToCatalog, setSaveToCatalog] = useState<Record<string, boolean>>(
@@ -131,8 +140,6 @@ export function InvoiceForm() {
 
     return storedItems.length > 0 ? storedItems : invoiceItems
   })
-
-  const createInvoiceMutation = useCreateInvoice()
 
   const {
     data: invoiceSettingsData,
@@ -482,6 +489,86 @@ export function InvoiceForm() {
       onSubmit={form.handleSubmit(onSubmit)}
       className="space-y-6"
     >
+      {/* Invoice usage */}
+      {!isInvoiceUsageLoading && invoiceUsage && !invoiceUsage.isPro && (
+        <Card
+          className={
+            invoiceUsage.usage.count !== null &&
+            invoiceUsage.usage.limit !== null &&
+            invoiceUsage.usage.count >= invoiceUsage.usage.limit
+              ? "border-destructive/30 bg-destructive/5 py-0"
+              : "border-primary/20 bg-primary/3 py-0"
+          }
+        >
+          <CardContent className="p-5">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-3">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                  <FileText className="size-5 text-primary" />
+                </div>
+
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-semibold">Monthly invoice usage</h2>
+
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
+                      Free plan
+                    </span>
+                  </div>
+
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {invoiceUsage.usage.count} of {invoiceUsage.usage.limit}{" "}
+                    invoices used this month.
+                  </p>
+
+                  <div className="mt-3 h-2 w-full max-w-md overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full bg-primary transition-all"
+                      style={{
+                        width: `${invoiceUsage.usage.percentage}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                type="button"
+                onClick={() => checkoutMutation.mutate()}
+                disabled={checkoutMutation.isPending}
+                className="shrink-0"
+              >
+                <Sparkles className="mr-2 size-4" />
+
+                {checkoutMutation.isPending
+                  ? "Redirecting..."
+                  : "Upgrade to Pro"}
+              </Button>
+            </div>
+
+            {invoiceUsage.usage.remaining !== null &&
+              invoiceUsage.usage.remaining > 0 && (
+                <p className="mt-4 text-xs text-muted-foreground">
+                  You have{" "}
+                  <span className="font-medium text-foreground">
+                    {invoiceUsage.usage.remaining}
+                  </span>{" "}
+                  invoice
+                  {invoiceUsage.usage.remaining === 1 ? "" : "s"} remaining this
+                  month.
+                </p>
+              )}
+
+            {invoiceUsage.usage.remaining === 0 && (
+              <div className="mt-4 rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2.5 text-sm text-destructive">
+                You've reached your monthly invoice limit. Upgrade to Pro to
+                create unlimited invoices.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Invoice information */}
       <section className="rounded-2xl border bg-background p-6">
         <div className="mb-6">
