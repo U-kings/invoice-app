@@ -1,5 +1,7 @@
+import { useBusinessProfile } from "@/hooks/use-business-profile"
 import { useCustomers } from "@/hooks/use-customers"
 import { Invoice } from "@/hooks/use-invoice"
+import { useProfile } from "@/hooks/use-profile"
 import { Mail, User } from "lucide-react"
 
 interface InvoiceSummaryProps {
@@ -8,6 +10,8 @@ interface InvoiceSummaryProps {
 
 export function InvoiceSummary({ invoice }: InvoiceSummaryProps) {
   const { data } = useCustomers({ search: invoice?.customerId })
+  const profileQuery = useProfile()
+  const { data: businessProfileData, isLoading, isError } = useBusinessProfile()
   // const customers: any[] = []
   const currentCustomer = data?.customers?.find(
     (customer) => customer.id === invoice?.customerId
@@ -21,15 +25,23 @@ export function InvoiceSummary({ invoice }: InvoiceSummaryProps) {
         </p>
 
         <div className="space-y-2">
-          <p className="font-semibold">Your Company</p>
+          <p className="font-semibold">{}</p>
+          <p className="font-semibold">
+            {businessProfileData?.businessProfile?.businessName ||
+              `${profileQuery.data?.firstName} ${profileQuery.data?.lastName}`}
+          </p>
 
-          <p className="text-sm text-muted-foreground">123 Business Street</p>
+          <p className="text-sm text-muted-foreground">
+            {businessProfileData?.businessProfile?.address || profileQuery.data?.phoneNumber}
+          </p>
 
-          <p className="text-sm text-muted-foreground">Lagos, Nigeria</p>
+          <p className="text-sm text-muted-foreground">
+            {businessProfileData?.businessProfile?.state}
+          </p>
 
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Mail className="h-4 w-4" />
-            hello@company.com
+            {businessProfileData?.businessProfile?.email || profileQuery.data?.email}
           </div>
         </div>
       </div>
@@ -43,9 +55,9 @@ export function InvoiceSummary({ invoice }: InvoiceSummaryProps) {
         <div className="space-y-2">
           <p className="font-semibold">{currentCustomer?.name}</p>
 
-          <p className="text-sm text-muted-foreground">45 Market Street</p>
+          <p className="text-sm text-muted-foreground">{currentCustomer?.address}</p>
 
-          <p className="text-sm text-muted-foreground">Lagos, Nigeria</p>
+          <p className="text-sm text-muted-foreground">{currentCustomer?.phone}</p>
 
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <User className="h-4 w-4" />

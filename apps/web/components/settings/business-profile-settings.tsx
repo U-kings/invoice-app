@@ -8,6 +8,7 @@ import { ImagePlus, Loader2, Trash2, Upload } from "lucide-react"
 
 import {
   useRemoveBusinessLogo,
+  useUpdateBusinessProfile,
   useUploadBusinessLogo,
 } from "@/hooks/use-business-profile"
 
@@ -160,25 +161,10 @@ export function BusinessProfileSettings() {
     })
   }, [data, reset])
 
-  const updateBusinessProfile = useMutation({
-    mutationFn: async (values: BusinessProfileFormValues) => {
-      const response = await fetch("/api/dashboard/settings/business", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      })
+  const updateBusinessProfile = useUpdateBusinessProfile()
 
-      const result = await response.json()
-
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to update business profile")
-      }
-
-      return result
-    },
-
+  const onSubmit = (values: BusinessProfileFormValues) => {
+    updateBusinessProfile.mutate(values, {
     onSuccess: (result) => {
       if (result.businessProfile) {
         reset({
@@ -195,31 +181,8 @@ export function BusinessProfileSettings() {
           taxId: result.businessProfile.taxId ?? "",
         })
       }
-
-      queryClient.invalidateQueries({
-        queryKey: ["business-profile"],
-      })
-
-      toast.add({
-        title: "Success",
-        description: result.message || "Business profile updated successfully",
-        type: "success",
-      })
-    },
-    onError: (error) => {
-      toast.add({
-        title: "Error",
-        description:
-          error instanceof Error
-            ? error.message
-            : "Failed to update business profile",
-        type: "error",
-      })
     },
   })
-
-  const onSubmit = (values: BusinessProfileFormValues) => {
-    updateBusinessProfile.mutate(values)
   }
 
   const handleCountryChange = (value: string | null) => {

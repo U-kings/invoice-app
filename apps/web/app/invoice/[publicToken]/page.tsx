@@ -22,6 +22,11 @@ export default async function PublicInvoicePage({
     include: {
       customer: true,
       lineItems: true,
+      user: {
+        include: {
+          businessProfile: true,
+        },
+      },
     },
   })
 
@@ -75,7 +80,8 @@ export default async function PublicInvoicePage({
                 </div>
 
                 <h2 className="mt-4 text-lg font-semibold tracking-tight">
-                  Your Company
+                  {invoice.user.businessProfile?.businessName}
+                  {/* Your Company */}
                 </h2>
 
                 <p className="mt-1 text-sm text-muted-foreground">

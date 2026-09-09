@@ -61,18 +61,12 @@ export async function POST(
     const margin = 50
     let page = pdf.addPage([pageWidth, pageHeight])
 
-    // const primaryColor = rgb(0.18, 0.69, 0.71)
-    // const darkColor = rgb(0.12, 0.12, 0.14)
-    // const mutedColor = rgb(0.45, 0.45, 0.48)
-    // const lightColor = rgb(0.9, 0.9, 0.92)
-    // const whiteColor = rgb(1, 1, 1)
-
-    // Updated constants to match the professional neutral palette
-    const primaryColor = rgb(0.18, 0.21, 0.25) // Charcoal (was #2F3640) - For main headers & totals
-    const darkColor = rgb(0.2, 0.2, 0.2) // Off-Black (was #333333) - For body text and line items
-    const mutedColor = rgb(0.44, 0.5, 0.58) // Slate Gray (was #718093) - For labels and borders
-    const lightColor = rgb(0.96, 0.96, 0.98) // Light Gray (was #F5F6FA) - For zebra striping background
-    const whiteColor = rgb(1, 1, 1) // Pure White          - For clean backgrounds
+    // Professional neutral palette
+    const primaryColor = rgb(0.18, 0.21, 0.25) // Charcoal
+    const darkColor = rgb(0.2, 0.2, 0.2) // Off-Black
+    const mutedColor = rgb(0.44, 0.5, 0.58) // Slate Gray
+    const lightColor = rgb(0.96, 0.96, 0.98) // Light Gray
+    const whiteColor = rgb(1, 1, 1) // Pure White
 
     // Helpers
     const formatCurrency = (v: number) =>
@@ -116,7 +110,6 @@ export async function POST(
     // ---------------------------------------------------------
     let currentY = pageHeight - margin
 
-    // Stacked Meta Info (Top Right - Always present)
     const metaX = pageWidth - margin
     drawRightText(`Invoice No: ${invoice.invoiceNumber}`, metaX, currentY, {
       font: boldFont,
@@ -183,7 +176,6 @@ export async function POST(
     const fromAddress = businessProfile?.address || ""
 
     const colFromX = pageWidth - margin
-    // const colFromX = 520
     const billToExists = !!invoice.customer.name
     const fromExists = !!fromName
 
@@ -259,8 +251,13 @@ export async function POST(
     }
 
     // ---------------------------------------------------------
-    // 6. Items Table
+    // 6. Items Table (WITH QUANTITY AND RATE)
     // ---------------------------------------------------------
+    const colDescX = margin + 10
+    const colQtyRightX = 350
+    const colRateRightX = 435
+    const colAmountRightX = pageWidth - margin - 10
+
     page.drawRectangle({
       x: margin,
       y: currentY - 25,
@@ -268,12 +265,22 @@ export async function POST(
       height: 25,
       color: primaryColor,
     })
-    drawText("Description", margin + 10, currentY - 15, {
+    drawText("Description", colDescX, currentY - 15, {
       color: whiteColor,
       font: boldFont,
       size: 9,
     })
-    drawRightText("Amount", pageWidth - margin - 10, currentY - 15, {
+    drawRightText("Qty", colQtyRightX, currentY - 15, {
+      color: whiteColor,
+      font: boldFont,
+      size: 9,
+    })
+    drawRightText("Rate", colRateRightX, currentY - 15, {
+      color: whiteColor,
+      font: boldFont,
+      size: 9,
+    })
+    drawRightText("Amount", colAmountRightX, currentY - 15, {
       color: whiteColor,
       font: boldFont,
       size: 9,
@@ -281,10 +288,16 @@ export async function POST(
 
     currentY -= 40
     for (const item of invoice.lineItems) {
-      drawText(item.name, margin + 10, currentY, { size: 9 })
+      drawText(item.name, colDescX, currentY, { size: 9 })
+      drawRightText(String(item.quantity), colQtyRightX, currentY, {
+        size: 9,
+      })
+      drawRightText(formatCurrency(Number(item.rate)), colRateRightX, currentY, {
+        size: 9,
+      })
       drawRightText(
         formatCurrency(item.quantity * Number(item.rate)),
-        pageWidth - margin - 10,
+        colAmountRightX,
         currentY,
         { size: 9, font: boldFont }
       )
@@ -301,13 +314,25 @@ export async function POST(
     // 7. Totals
     // ---------------------------------------------------------
     currentY -= 15
-    const tX = 400
+    const tX = 370
     const rX = pageWidth - margin - 10
     drawText("Subtotal", tX, currentY, { size: 9, color: mutedColor })
     drawRightText(formatCurrency(subtotal), rX, currentY, {
       size: 9,
       font: boldFont,
     })
+
+    if (invoice.discount && Number(invoice.discount) > 0) {
+      currentY -= 18
+      drawText(`Discount (${invoice.discount}%)`, tX, currentY, {
+        size: 9,
+        color: mutedColor,
+      })
+      drawRightText(`-${formatCurrency(discountAmount)}`, rX, currentY, {
+        size: 9,
+        font: boldFont,
+      })
+    }
 
     currentY -= 18
     drawText(`Tax (${invoice.taxRate}%)`, tX, currentY, {
