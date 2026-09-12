@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
-import jwt from "jsonwebtoken"
-
 import { prisma } from "@repo/db"
 import { getInvoiceTotal } from "@/lib/invoices/invoice"
+import { getAuthenticatedSession } from "@/lib/auth/session"
 
 type RevenuePeriod = "month" | "6months" | "year"
 
@@ -51,35 +50,19 @@ function calculatePercentageChange(current: number, previous: number) {
   return ((current - previous) / previous) * 100
 }
 
-export async function GET(req: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const token = req.cookies.get("token")?.value
+    const auth = await getAuthenticatedSession(request)
 
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (!auth) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
-    let decoded: { userId?: string }
-
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-        userId?: string
-      }
-    } catch {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const userId = decoded.userId
-
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const requestedCurrency = req.nextUrl.searchParams
+    const requestedCurrency = request.nextUrl.searchParams
       .get("currency")
       ?.toUpperCase()
 
-    const { searchParams } = new URL(req.url)
+    const { searchParams } = new URL(request.url)
 
     const revenuePeriod = getRevenuePeriod(searchParams.get("period"))
 
@@ -121,7 +104,7 @@ export async function GET(req: NextRequest) {
        */
       prisma.businessProfile.findUnique({
         where: {
-          userId,
+          userId: auth.userId,
         },
         select: {
           currency: true,
@@ -141,7 +124,7 @@ export async function GET(req: NextRequest) {
        */
       prisma.invoice.findMany({
         where: {
-          userId,
+          userId: auth.userId,
         },
         select: {
           id: true,
@@ -180,7 +163,7 @@ export async function GET(req: NextRequest) {
        */
       prisma.invoice.findMany({
         where: {
-          userId,
+          userId: auth.userId,
           status: "PAID",
           paidAt: {
             gte: revenueStartDate,
@@ -196,7 +179,7 @@ export async function GET(req: NextRequest) {
        */
       prisma.customer.count({
         where: {
-          userId,
+          userId: auth.userId,
         },
       }),
 
@@ -205,7 +188,7 @@ export async function GET(req: NextRequest) {
        */
       prisma.invoice.findMany({
         where: {
-          userId,
+          userId: auth.userId,
         },
         orderBy: {
           createdAt: "desc",
@@ -245,7 +228,7 @@ export async function GET(req: NextRequest) {
       prisma.payment.findMany({
         where: {
           invoice: {
-            userId,
+            userId: auth.userId,
           },
         },
         orderBy: {
@@ -282,7 +265,7 @@ export async function GET(req: NextRequest) {
       prisma.invoice.groupBy({
         by: ["status", "currency"],
         where: {
-          userId,
+          userId: auth.userId,
         },
         _count: {
           _all: true,
@@ -294,7 +277,7 @@ export async function GET(req: NextRequest) {
        */
       prisma.customer.findMany({
         where: {
-          userId,
+          userId: auth.userId,
           createdAt: {
             gte: startOfSixMonthsAgo,
           },
@@ -308,7 +291,7 @@ export async function GET(req: NextRequest) {
 
       prisma.invoice.findMany({
         where: {
-          userId,
+          userId: auth.userId,
           dueDate: {
             gte: startOfToday,
           },

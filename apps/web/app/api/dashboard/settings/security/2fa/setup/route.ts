@@ -1,31 +1,20 @@
 import { NextRequest, NextResponse } from "next/server"
-import jwt from "jsonwebtoken"
 import QRCode from "qrcode"
-
 import { prisma } from "@repo/db"
 import { generateTwoFactorSecret } from "@/lib/auth/two-factor"
+import { getAuthenticatedSession } from "@/lib/auth/session"
 
 export async function POST(request: NextRequest) {
   try {
-    const token = request.cookies.get("token")?.value
+    const auth = await getAuthenticatedSession(request)
 
-    if (!token) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 },
-      )
-    }
-
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET!,
-    ) as {
-      userId: string
+    if (!auth) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
     const user = await prisma.user.findUnique({
       where: {
-        id: decoded.userId,
+        id: auth.userId,
       },
       select: {
         id: true,
@@ -39,22 +28,17 @@ export async function POST(request: NextRequest) {
     })
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 },
-      )
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
     if (user.userTwoFactor?.enabled) {
       return NextResponse.json(
         { error: "Two-factor authentication is already enabled" },
-        { status: 400 },
+        { status: 400 }
       )
     }
 
-    const { secret, otpauthUrl } = generateTwoFactorSecret(
-      user.email,
-    )
+    const { secret, otpauthUrl } = generateTwoFactorSecret(user.email)
 
     const qrCode = await QRCode.toDataURL(otpauthUrl)
 
@@ -84,7 +68,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       { error: "Failed to set up two-factor authentication" },
-      { status: 500 },
+      { status: 500 }
     )
   }
 }

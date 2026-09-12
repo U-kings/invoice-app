@@ -155,6 +155,7 @@ export function InvoiceForm() {
 
   const [isDraftLoading, setIsDraftLoading] = useState(false)
   const [isSubmitLoading, setIsSubmitLoading] = useState(false)
+  const [isCustomerFound, setIsCustomerFound] = useState(true)
 
   const form = useForm<InvoiceFormValues>({
     resolver: zodResolver(invoiceSchema),
@@ -163,6 +164,7 @@ export function InvoiceForm() {
       invoiceNumber: "",
       customerId: "",
       customerEmail: "",
+      customerName: "",
       currency: "NGN",
       issueDate: MAX_DATE_BUILT,
       paymentTerm: "Due-on-receipt",
@@ -358,7 +360,9 @@ export function InvoiceForm() {
 
     createInvoiceMutation.mutate(
       {
-        customerId: values.customerId,
+        customerId: isCustomerFound ? values.customerId : "",
+        customerEmail: values.customerEmail,
+        customerName: isCustomerFound ? values.customerName : values.customerId,
         currency: values.currency,
         issueDate: values.issueDate,
         dueDate: values.dueDate,
@@ -443,6 +447,8 @@ export function InvoiceForm() {
     createInvoiceMutation.mutate(
       {
         customerId: values.customerId,
+        customerEmail: values.customerEmail,
+        customerName: values.customerName,
         currency: values.currency,
         issueDate: values.issueDate,
         dueDate: values.dueDate,
@@ -622,6 +628,7 @@ export function InvoiceForm() {
                     field={fieldState.invalid}
                     // items={catalogItems}
                     onChange={field.onChange}
+                    setIsCustomerFound={setIsCustomerFound}
                     onSelect={(selectedItem) => {
                       form.setValue(`customerId`, selectedItem.id, {
                         shouldDirty: true,
@@ -632,6 +639,11 @@ export function InvoiceForm() {
                         shouldDirty: true,
                         shouldTouch: true,
                         shouldValidate: true,
+                      })
+                      form.setValue(`customerName`, selectedItem.name, {
+                        shouldDirty: true,
+                        shouldTouch: true,
+                        // shouldValidate: true,
                       })
                     }}
                   />
@@ -1274,6 +1286,7 @@ export function InvoiceForm() {
           nativeButton={false}
           type="button"
           className="h-10"
+          disabled={isDraftLoading || isSubmitLoading}
           variant="ghost"
           render={<Link href="/dashboard/invoices" />}
         >

@@ -8,12 +8,20 @@ import { useDebounce } from "@/hooks/use-debounce"
 import { cn } from "@workspace/ui/lib/utils"
 import { Customer } from "@/hooks/use-create-customer"
 import { useCustomers } from "@/hooks/use-customers"
-import { useEffect, useMemo, useRef, useState } from "react"
+import {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 
 interface CustomerListFieldProps {
   id: string
   value?: string // Represents the active Customer ID string (from your form controller)
   field: boolean
+  setIsCustomerFound: Dispatch<SetStateAction<boolean>>
   onChange: (value: string) => void
   onSelect: (item: Customer) => void
 }
@@ -21,8 +29,9 @@ interface CustomerListFieldProps {
 export function CustomerListField({
   id,
   value,
-  onChange,
   field,
+  setIsCustomerFound,
+  onChange,
   onSelect,
 }: CustomerListFieldProps) {
   const [open, setOpen] = useState(false)
@@ -73,6 +82,26 @@ export function CustomerListField({
   }, [data?.customers, searchQuery, activeCustomer])
 
   const containerRef = useRef<HTMLDivElement>(null)
+
+  // 2. Safely sync the "customer found" state to the parent via useEffect
+  useEffect(() => {
+    // If the query is empty or mirrors the selected customer, consider them "found" (or adjust logic as needed)
+    const search = searchQuery.trim().toLowerCase()
+    if (
+      !search ||
+      (activeCustomer && activeCustomer.name.toLowerCase() === search)
+    ) {
+      setIsCustomerFound(true)
+      return
+    }
+
+    // Otherwise, set status based on actual filtered results
+    if (filteredItems.length === 0) {
+      setIsCustomerFound(false)
+    } else {
+      setIsCustomerFound(true)
+    }
+  }, [filteredItems, searchQuery, activeCustomer, setIsCustomerFound])
 
   // Handle outside pointers to drop component focus panels cleanly
   useEffect(() => {

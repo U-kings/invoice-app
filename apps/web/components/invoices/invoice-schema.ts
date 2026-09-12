@@ -15,7 +15,9 @@ export const invoiceSchema = z
 
     customerId: z.string().min(1, "Please select a customer"),
 
-    customerEmail: z.string().email("Enter a valid email address"),
+    customerEmail: z.email("Enter a valid email address"),
+
+    customerName: z.string().optional(),
 
     currency: z.string().min(1, "Please select a currency"),
 

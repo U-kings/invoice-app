@@ -1,44 +1,18 @@
 import { NextRequest, NextResponse } from "next/server"
-import jwt from "jsonwebtoken"
 import { prisma } from "@repo/db"
+import { getAuthenticatedSession } from "@/lib/auth/session"
 
-interface AuthPayload {
-  userId: string
-}
-
-async function getAuthenticatedUserId(req: NextRequest) {
-  const token = req.cookies.get("token")?.value
-
-  if (!token) {
-    return null
-  }
-
-  const jwtSecret = process.env.JWT_SECRET
-
-  if (!jwtSecret) {
-    throw new Error("JWT_SECRET environment variable is missing")
-  }
-
+export async function GET(request: NextRequest) {
   try {
-    const decoded = jwt.verify(token, jwtSecret) as AuthPayload
+    const auth = await getAuthenticatedSession(request)
 
-    return decoded.userId || null
-  } catch {
-    return null
-  }
-}
-
-export async function GET(req: NextRequest) {
-  try {
-    const userId = await getAuthenticatedUserId(req)
-
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (!auth) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
     const user = await prisma.user.findUnique({
       where: {
-        id: userId,
+        id: auth.userId,
       },
       select: {
         id: true,
@@ -71,15 +45,15 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function PATCH(req: NextRequest) {
+export async function PATCH(request: NextRequest) {
   try {
-    const userId = await getAuthenticatedUserId(req)
+    const auth = await getAuthenticatedSession(request)
 
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (!auth) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
-    const body = await req.json()
+    const body = await request.json()
 
     const { firstName, middleName, lastName, phoneNumber } = body
 
@@ -106,7 +80,7 @@ export async function PATCH(req: NextRequest) {
 
     const user = await prisma.user.update({
       where: {
-        id: userId,
+        id: auth.userId,
       },
       data: {
         firstName: firstName.trim(),

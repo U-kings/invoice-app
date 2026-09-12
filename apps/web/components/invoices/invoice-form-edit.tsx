@@ -40,6 +40,8 @@ import { Invoice } from "@/hooks/use-invoice"
 import { useCustomers } from "@/hooks/use-customers"
 import { useProducts } from "@/hooks/use-products"
 import { CustomerListField } from "./customer-list-field"
+import { useUpdateInvoice } from "@/hooks/use-update-invoice"
+import { getEffectiveInvoiceStatus } from "@/lib/invoices/invoice"
 
 const paymentTerms = [
   {
@@ -88,12 +90,13 @@ const currencies = [
 ]
 
 interface InvoiceFormProps {
-  invoice?: Invoice
+  invoice: Invoice
 }
 
 export function InvoiceFormEdit({ invoice }: InvoiceFormProps) {
   const router = useRouter()
   const { data, isLoading } = useProducts()
+  const updateInvoice = useUpdateInvoice(invoice.id)
 
   const products = data?.products ?? []
   const [saveToCatalog, setSaveToCatalog] = useState<Record<string, boolean>>(
@@ -105,6 +108,8 @@ export function InvoiceFormEdit({ invoice }: InvoiceFormProps) {
     return storedItems.length > 0 ? storedItems : invoiceItems
   })
 
+  const [isCustomerFound, setIsCustomerFound] = useState(true)
+
   const form = useForm<InvoiceFormValues>({
     resolver: zodResolver(invoiceSchema),
 
@@ -112,20 +117,22 @@ export function InvoiceFormEdit({ invoice }: InvoiceFormProps) {
       invoiceNumber: invoice?.invoiceNumber ?? "INV-001",
       customerId: invoice?.customerId ?? "",
       customerEmail: invoice?.customer?.email ?? "",
+      customerName: invoice?.customer?.name ?? "",
       currency: invoice?.currency ?? "NGN",
       issueDate:
         formatDateForInput(invoice?.issueDate) ??
         new Date().toISOString().split("T")[0],
       paymentTerm: invoice?.paymentTerm ?? "Due-on-receipt",
       dueDate: formatDateForInput(invoice?.dueDate),
-      status: invoice?.status ?? "Draft",
+      status: getEffectiveInvoiceStatus(invoice) ?? "Draft",
+      // status: invoice?.status ?? "Draft",
 
       items: invoice?.lineItems?.map((item) => ({
         id: item.id,
         name: item.name,
         description: item.description,
         quantity: item.quantity,
-        rate: item.rate,
+        rate: Number(item.rate),
       })) ?? [
         {
           id: "",
@@ -136,8 +143,8 @@ export function InvoiceFormEdit({ invoice }: InvoiceFormProps) {
         },
       ],
 
-      discount: invoice?.discount ?? 0,
-      taxRate: invoice?.taxRate ?? 0,
+      discount: Number(invoice?.discount) ?? 0,
+      taxRate: Number(invoice?.taxRate) ?? 0,
       notes: invoice?.notes ?? "",
     },
   })
@@ -276,58 +283,32 @@ export function InvoiceFormEdit({ invoice }: InvoiceFormProps) {
     saveCatalogItems(updatedCatalog)
     setCatalogItems(updatedCatalog)
 
-    // --------------------------------
-    // 2. Create the invoice
-    // --------------------------------
-
-    const invoiceData: Invoice = {
-      id: invoice?.id ?? crypto.randomUUID(),
-
-      invoiceNumber: values.invoiceNumber,
-      customerId: values.customerId,
-      // customerEmail: values.customer.email,
+    updateInvoice.mutate({
+      customerId: isCustomerFound ? values.customerId : "",
+      customerEmail: values.customerEmail,
+      customerName: isCustomerFound ? values.customerName : values.customerId,
       currency: values.currency,
       issueDate: values.issueDate,
       dueDate: values.dueDate,
       paymentTerm: values.paymentTerm,
-      status: values.status,
+      discount: values.discount,
+      taxRate: values.taxRate,
+      notes: values.notes,
 
-      lineItems: values.items.map((item) => ({
-        id: item.id || crypto.randomUUID(),
+      items: values.items.map((item) => ({
         name: item.name,
         description: item.description,
         quantity: item.quantity,
         rate: item.rate,
       })),
-
-      discount: values.discount,
-      taxRate: values.taxRate,
-      notes: values.notes,
-    }
-
-    // --------------------------------
-    // 3. Save the invoice
-    // --------------------------------
-
-    // if (invoiceData) {
-    //   updateInvoice(invoiceData)
-    // } else {
-    //   addInvoice(invoiceData)
-    // }
-
-    // --------------------------------
-    // 4. Continue with your existing
-    //    success / redirect logic
-    // --------------------------------
-
-    router.push("/dashboard/invoices")
+    })
   }
 
   return (
     <form
       id="invoice-form"
       onSubmit={form.handleSubmit(onSubmit, (errors) => {
-        // console.log("Invoice validation errors:", errors)
+        console.log("Invoice validation errors:", errors)
       })}
       className="space-y-6"
     >
@@ -381,7 +362,7 @@ export function InvoiceFormEdit({ invoice }: InvoiceFormProps) {
                     id={`customer`}
                     value={field.value}
                     field={fieldState.invalid}
-                    // items={catalogItems}
+                    setIsCustomerFound={setIsCustomerFound}
                     onChange={field.onChange}
                     onSelect={(selectedItem) => {
                       form.setValue(`customerId`, selectedItem.id, {
@@ -393,6 +374,11 @@ export function InvoiceFormEdit({ invoice }: InvoiceFormProps) {
                         shouldDirty: true,
                         shouldTouch: true,
                         shouldValidate: true,
+                      })
+                      form.setValue(`customerName`, selectedItem.name, {
+                        shouldDirty: true,
+                        shouldTouch: true,
+                        // shouldValidate: true,
                       })
                     }}
                   />
@@ -1060,6 +1046,7 @@ export function InvoiceFormEdit({ invoice }: InvoiceFormProps) {
           nativeButton={false}
           type="button"
           className="h-10"
+          disabled={updateInvoice.isPending}
           variant="ghost"
           render={<Link href="/dashboard/invoices" />}
         >
@@ -1067,24 +1054,12 @@ export function InvoiceFormEdit({ invoice }: InvoiceFormProps) {
         </Button>
 
         <div className="flex flex-col-reverse gap-3 sm:flex-row">
-          {/* <Button
-            disabled={form.formState.isSubmitting}
-            type="button"
-            className="h-10"
-            variant="outline"
-            onClick={handleSubmit(handleSaveDraft)}
-          >
-            {form.formState.isSubmitting
-              ? "Saving to draft..."
-              : "Save as draft"}
-          </Button> */}
-
           <Button
             type="submit"
-            disabled={form.formState.isSubmitting}
+            disabled={updateInvoice.isPending}
             className="h-10 bg-[#2EAFB4] text-white hover:bg-[#269ba0]"
           >
-            {form.formState.isSubmitting ? "Updating..." : "Update Invoice"}
+            {updateInvoice.isPending ? "Updating..." : "Update Invoice"}
           </Button>
         </div>
       </div>

@@ -8,6 +8,8 @@ import { Invoice } from "./use-invoice"
 
 export interface CreateInvoicePayload {
   customerId: string
+  customerEmail?: string
+  customerName?: string
   currency: string
   issueDate: string
   dueDate: string
@@ -39,10 +41,7 @@ export class CreateInvoiceError extends Error {
     limit: number
   }
 
-  constructor(
-    message: string,
-    options?: CreateInvoiceErrorOptions
-  ) {
+  constructor(message: string, options?: CreateInvoiceErrorOptions) {
     super(message)
     this.name = "CreateInvoiceError"
     this.code = options?.code
@@ -53,28 +52,21 @@ export class CreateInvoiceError extends Error {
 export async function createInvoice(
   data: CreateInvoicePayload
 ): Promise<Invoice> {
-  const response = await fetch(
-    "/api/dashboard/invoices",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    }
-  )
+  const response = await fetch("/api/dashboard/invoices", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  })
 
   const result = await response.json()
 
   if (!response.ok) {
-    throw new CreateInvoiceError(
-      result.error ||
-        "Failed to create invoice",
-      {
-        code: result.code,
-        usage: result.usage,
-      }
-    )
+    throw new CreateInvoiceError(result.error || "Failed to create invoice", {
+      code: result.code,
+      usage: result.usage,
+    })
   }
 
   return result.invoice
@@ -85,9 +77,7 @@ export function useCreateInvoice() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (
-      data: CreateInvoicePayload
-    ) => createInvoice(data),
+    mutationFn: (data: CreateInvoicePayload) => createInvoice(data),
 
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -98,12 +88,12 @@ export function useCreateInvoice() {
         queryKey: ["invoice-usage"],
       })
 
-      toast.add({
-        title: "Invoice created",
-        description:
-          "Your invoice was created successfully.",
-        type: "success",
-      })
+      // toast.add({
+      //   title: "Invoice created",
+      //   description:
+      //     "Your invoice was created successfully.",
+      //   type: "success",
+      // })
 
       router.push("/dashboard/invoices")
     },
@@ -111,14 +101,11 @@ export function useCreateInvoice() {
     onError: (error) => {
       if (
         error instanceof CreateInvoiceError &&
-        error.code ===
-          "FREE_INVOICE_LIMIT_REACHED"
+        error.code === "FREE_INVOICE_LIMIT_REACHED"
       ) {
-        const count =
-          error.usage?.count ?? 5
+        const count = error.usage?.count ?? 5
 
-        const limit =
-          error.usage?.limit ?? 5
+        const limit = error.usage?.limit ?? 5
 
         toast.add({
           title: "Free invoice limit reached",

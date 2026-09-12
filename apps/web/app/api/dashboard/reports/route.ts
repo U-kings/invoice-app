@@ -1,13 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
-import { cookies } from "next/headers"
-import jwt from "jsonwebtoken"
 import { prisma } from "@repo/db"
+import { getAuthenticatedSession } from "@/lib/auth/session"
 
 type ReportPeriod = "7d" | "30d" | "90d" | "12m"
-
-interface AuthPayload {
-  userId: string
-}
 
 function getPeriodStart(period: ReportPeriod) {
   const now = new Date()
@@ -78,19 +73,10 @@ function getInvoiceTotal(invoice: {
 
 export async function GET(request: NextRequest) {
   try {
-    const cookieStore = await cookies()
-    const token = cookieStore.get("token")?.value
+    const auth = await getAuthenticatedSession(request)
 
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as AuthPayload
-
-    const userId = decoded.userId
-
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (!auth) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
     const { searchParams } = new URL(request.url)
@@ -102,7 +88,7 @@ export async function GET(request: NextRequest) {
     const [invoices, periodPayments] = await Promise.all([
       prisma.invoice.findMany({
         where: {
-          userId,
+          userId: auth.userId,
           createdAt: {
             gte: periodStart,
             lte: now,
@@ -122,7 +108,7 @@ export async function GET(request: NextRequest) {
       prisma.payment.findMany({
         where: {
           invoice: {
-            userId,
+            userId: auth.userId,
           },
           status: "SUCCESS",
           createdAt: {

@@ -1,30 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
-import jwt from "jsonwebtoken"
-import {prisma} from "@repo/db"
+import { prisma } from "@repo/db"
+import { getAuthenticatedSession } from "@/lib/auth/session"
 
 interface JwtPayload {
   userId: string
   role?: string
   class?: string
-}
-
-function getUserId(req: NextRequest) {
-  const token = req.cookies.get("token")?.value
-
-  if (!token) {
-    return null
-  }
-
-  try {
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET!
-    ) as JwtPayload
-
-    return decoded.userId ?? null
-  } catch {
-    return null
-  }
 }
 
 interface RouteContext {
@@ -36,17 +17,11 @@ interface RouteContext {
 /**
  * GET /api/dashboard/products/[productId]
  */
-export async function GET(
-  req: NextRequest,
-  context: RouteContext
-) {
-  const userId = getUserId(req)
+export async function GET(request: NextRequest, context: RouteContext) {
+  const auth = await getAuthenticatedSession(request)
 
-  if (!userId) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    )
+  if (!auth) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
   }
 
   const { productId } = await context.params
@@ -55,7 +30,7 @@ export async function GET(
     const product = await prisma.product.findFirst({
       where: {
         id: productId,
-        userId,
+        userId: auth.userId,
       },
       select: {
         id: true,
@@ -68,10 +43,7 @@ export async function GET(
     })
 
     if (!product) {
-      return NextResponse.json(
-        { error: "Product not found" },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: "Product not found" }, { status: 404 })
     }
 
     return NextResponse.json({
@@ -90,36 +62,27 @@ export async function GET(
 /**
  * PATCH /api/dashboard/products/[productId]
  */
-export async function PATCH(
-  req: NextRequest,
-  context: RouteContext
-) {
-  const userId = getUserId(req)
+export async function PATCH(request: NextRequest, context: RouteContext) {
+  const auth = await getAuthenticatedSession(request)
 
-  if (!userId) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    )
+  if (!auth) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
   }
 
   const { productId } = await context.params
 
   try {
-    const body = await req.json()
+    const body = await request.json()
 
     const existingProduct = await prisma.product.findFirst({
       where: {
         id: productId,
-        userId,
+        userId: auth.userId,
       },
     })
 
     if (!existingProduct) {
-      return NextResponse.json(
-        { error: "Product not found" },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: "Product not found" }, { status: 404 })
     }
 
     const data: {
@@ -129,10 +92,7 @@ export async function PATCH(
     } = {}
 
     if (body.name !== undefined) {
-      if (
-        typeof body.name !== "string" ||
-        !body.name.trim()
-      ) {
+      if (typeof body.name !== "string" || !body.name.trim()) {
         return NextResponse.json(
           { error: "Product name cannot be empty" },
           { status: 400 }
@@ -143,10 +103,7 @@ export async function PATCH(
     }
 
     if (body.description !== undefined) {
-      if (
-        body.description !== null &&
-        typeof body.description !== "string"
-      ) {
+      if (body.description !== null && typeof body.description !== "string") {
         return NextResponse.json(
           { error: "Invalid product description" },
           { status: 400 }
@@ -213,34 +170,24 @@ export async function PATCH(
 /**
  * DELETE /api/dashboard/products/[productId]
  */
-export async function DELETE(
-  req: NextRequest,
-  context: RouteContext
-) {
-  const userId = getUserId(req)
+export async function DELETE(request: NextRequest, context: RouteContext) {
+  const auth = await getAuthenticatedSession(request)
 
-  if (!userId) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    )
+  if (!auth) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
   }
-
   const { productId } = await context.params
 
   try {
     const product = await prisma.product.findFirst({
       where: {
         id: productId,
-        userId,
+        userId: auth.userId,
       },
     })
 
     if (!product) {
-      return NextResponse.json(
-        { error: "Product not found" },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: "Product not found" }, { status: 404 })
     }
 
     await prisma.product.delete({

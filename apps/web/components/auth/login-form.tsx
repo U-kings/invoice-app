@@ -295,7 +295,7 @@ export function LoginForm() {
             <Button
               type="submit"
               disabled={form.formState.isSubmitting || isPending}
-              className="group relative h-12 w-full overflow-hidden bg-[#2EAFB4] hover:bg-[#289ca0]"
+              className="group relative text-white h-12 w-full overflow-hidden bg-[#2EAFB4] hover:bg-[#289ca0]"
             >
               <span className="absolute inset-0 -translate-x-full bg-white/20 transition-transform duration-700 group-hover:translate-x-full" />
               {(form.formState.isSubmitting || isPending) && <AuthLoader />}

@@ -1,44 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
-import jwt from "jsonwebtoken"
-
 import { prisma } from "@repo/db"
 import { cloudinary } from "@/lib/cloudinary"
+import { getAuthenticatedSession } from "@/lib/auth/session"
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024
 
-const ALLOWED_TYPES = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-])
+const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"])
 
-interface AuthPayload {
-  userId: string
-}
-
-async function authenticateUser(req: NextRequest) {
-  const token = req.cookies.get("token")?.value
-
-  if (!token) {
-    return null
-  }
-
-  const jwtSecret = process.env.JWT_SECRET
-
-  if (!jwtSecret) {
-    throw new Error(
-      "JWT_SECRET environment variable is missing from configuration."
-    )
-  }
-
-  try {
-    const decoded = jwt.verify(token, jwtSecret) as AuthPayload
-
-    return decoded.userId || null
-  } catch {
-    return null
-  }
-}
 
 function uploadBusinessLogo(
   buffer: Buffer,
@@ -73,11 +41,7 @@ function uploadBusinessLogo(
         }
 
         if (!result?.secure_url || !result.public_id) {
-          reject(
-            new Error(
-              "Cloudinary did not return a valid upload result."
-            )
-          )
+          reject(new Error("Cloudinary did not return a valid upload result."))
           return
         }
 
@@ -92,26 +56,23 @@ function uploadBusinessLogo(
   })
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     // ---------------------------------------------------------
     // 1. Authentication
     // ---------------------------------------------------------
 
-    const userId = await authenticateUser(req)
+    const auth = await getAuthenticatedSession(request)
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      )
+    if (!auth) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
     // ---------------------------------------------------------
     // 2. Read uploaded file
     // ---------------------------------------------------------
 
-    const formData = await req.formData()
+    const formData = await request.formData()
     const file = formData.get("file")
 
     if (!(file instanceof File)) {
@@ -130,8 +91,7 @@ export async function POST(req: NextRequest) {
     if (!ALLOWED_TYPES.has(file.type)) {
       return NextResponse.json(
         {
-          error:
-            "Invalid image type. Please upload a JPG, PNG, or WEBP image.",
+          error: "Invalid image type. Please upload a JPG, PNG, or WEBP image.",
         },
         { status: 400 }
       )
@@ -163,22 +123,20 @@ export async function POST(req: NextRequest) {
     // 5. Get current business profile
     // ---------------------------------------------------------
 
-    const currentBusinessProfile =
-      await prisma.businessProfile.findUnique({
-        where: {
-          userId,
-        },
-        select: {
-          id: true,
-          logoPublicId: true,
-        },
-      })
+    const currentBusinessProfile = await prisma.businessProfile.findUnique({
+      where: {
+        userId:auth.userId,
+      },
+      select: {
+        id: true,
+        logoPublicId: true,
+      },
+    })
 
     if (!currentBusinessProfile) {
       return NextResponse.json(
         {
-          error:
-            "Please create your business profile before uploading a logo.",
+          error: "Please create your business profile before uploading a logo.",
         },
         { status: 404 }
       )
@@ -190,30 +148,26 @@ export async function POST(req: NextRequest) {
 
     const buffer = Buffer.from(await file.arrayBuffer())
 
-    const uploadedLogo = await uploadBusinessLogo(
-      buffer,
-      userId
-    )
+    const uploadedLogo = await uploadBusinessLogo(buffer, auth.userId)
 
     // ---------------------------------------------------------
     // 7. Save logo information
     // ---------------------------------------------------------
 
-    const updatedBusinessProfile =
-      await prisma.businessProfile.update({
-        where: {
-          userId,
-        },
-        data: {
-          logoUrl: uploadedLogo.secure_url,
-          logoPublicId: uploadedLogo.public_id,
-        },
-        select: {
-          id: true,
-          logoUrl: true,
-          logoPublicId: true,
-        },
-      })
+    const updatedBusinessProfile = await prisma.businessProfile.update({
+      where: {
+        userId:auth.userId,
+      },
+      data: {
+        logoUrl: uploadedLogo.secure_url,
+        logoPublicId: uploadedLogo.public_id,
+      },
+      select: {
+        id: true,
+        logoUrl: true,
+        logoPublicId: true,
+      },
+    })
 
     // ---------------------------------------------------------
     // 8. Delete old Cloudinary logo
@@ -221,22 +175,15 @@ export async function POST(req: NextRequest) {
 
     if (
       currentBusinessProfile.logoPublicId &&
-      currentBusinessProfile.logoPublicId !==
-        uploadedLogo.public_id
+      currentBusinessProfile.logoPublicId !== uploadedLogo.public_id
     ) {
       try {
-        await cloudinary.uploader.destroy(
-          currentBusinessProfile.logoPublicId,
-          {
-            resource_type: "image",
-            invalidate: true,
-          }
-        )
+        await cloudinary.uploader.destroy(currentBusinessProfile.logoPublicId, {
+          resource_type: "image",
+          invalidate: true,
+        })
       } catch (error) {
-        console.error(
-          "Failed to delete old business logo:",
-          error
-        )
+        console.error("Failed to delete old business logo:", error)
       }
     }
 
@@ -245,10 +192,7 @@ export async function POST(req: NextRequest) {
       logoUrl: updatedBusinessProfile.logoUrl,
     })
   } catch (error) {
-    console.error(
-      "Upload business logo error:",
-      error
-    )
+    console.error("Upload business logo error:", error)
 
     return NextResponse.json(
       {
@@ -259,34 +203,30 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function DELETE(req: NextRequest) {
+export async function DELETE(request: NextRequest) {
   try {
     // ---------------------------------------------------------
     // 1. Authentication
     // ---------------------------------------------------------
 
-    const userId = await authenticateUser(req)
+          const auth = await getAuthenticatedSession(request)
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      )
+    if (!auth) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
     // ---------------------------------------------------------
     // 2. Get current business logo
     // ---------------------------------------------------------
 
-    const businessProfile =
-      await prisma.businessProfile.findUnique({
-        where: {
-          userId,
-        },
-        select: {
-          logoPublicId: true,
-        },
-      })
+    const businessProfile = await prisma.businessProfile.findUnique({
+      where: {
+        userId:auth.userId,
+      },
+      select: {
+        logoPublicId: true,
+      },
+    })
 
     if (!businessProfile) {
       return NextResponse.json(
@@ -303,18 +243,12 @@ export async function DELETE(req: NextRequest) {
 
     if (businessProfile.logoPublicId) {
       try {
-        await cloudinary.uploader.destroy(
-          businessProfile.logoPublicId,
-          {
-            resource_type: "image",
-            invalidate: true,
-          }
-        )
+        await cloudinary.uploader.destroy(businessProfile.logoPublicId, {
+          resource_type: "image",
+          invalidate: true,
+        })
       } catch (error) {
-        console.error(
-          "Failed to delete Cloudinary business logo:",
-          error
-        )
+        console.error("Failed to delete Cloudinary business logo:", error)
 
         return NextResponse.json(
           {
@@ -331,7 +265,7 @@ export async function DELETE(req: NextRequest) {
 
     await prisma.businessProfile.update({
       where: {
-        userId,
+        userId:auth.userId,
       },
       data: {
         logoUrl: null,
@@ -343,10 +277,7 @@ export async function DELETE(req: NextRequest) {
       success: true,
     })
   } catch (error) {
-    console.error(
-      "Delete business logo error:",
-      error
-    )
+    console.error("Delete business logo error:", error)
 
     return NextResponse.json(
       {

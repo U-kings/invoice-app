@@ -1,27 +1,18 @@
 import { NextRequest, NextResponse } from "next/server"
-import jwt from "jsonwebtoken"
-
 import { prisma } from "@repo/db"
+import { getAuthenticatedSession } from "@/lib/auth/session"
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get("token")?.value
+    const auth = await getAuthenticatedSession(request)
 
-    if (!token) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 },
-      )
+    if (!auth) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
-
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET!,
-    ) as { userId: string }
 
     const twoFactor = await prisma.userTwoFactor.findUnique({
       where: {
-        userId: decoded.userId,
+        userId: auth.userId,
       },
       select: {
         enabled: true,
@@ -36,7 +27,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(
       { error: "Failed to fetch two-factor authentication status" },
-      { status: 500 },
+      { status: 500 }
     )
   }
 }

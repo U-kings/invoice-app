@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server"
 import crypto from "crypto"
 import { prisma } from "@repo/db" // Your explicit monorepo Prisma Client instance
-import { Resend } from "resend"
-
-const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function POST(request: Request) {
   try {
@@ -41,12 +38,11 @@ export async function POST(request: Request) {
     expiryDate.setHours(expiryDate.getHours() + 1)
 
     // 6. Save token and expiry into your live Supabase database
-    // FIX: Changed 'resetTokenExpiry' to match your schema's 'resetTokenExpires'
     await prisma.user.update({
       where: { id: user.id },
       data: {
         resetToken: token,
-        resetTokenExpires: expiryDate, // 👈 Matched to schema
+        resetTokenExpires: expiryDate,
       },
     })
 
@@ -54,31 +50,52 @@ export async function POST(request: Request) {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
     const resetUrl = `${baseUrl}/reset-password?token=${token}`
 
-    const fromEmail = "Invoice Flow <onboarding@resend.dev>"
+    // ⚠️ For testing, make sure your BREVO_API_KEY is defined in your .env file
+    const brevoApiKey = process.env.BREVO_API_KEY
 
-    // 8. Trigger automated transactional mail delivery via Resend API
-    const { error } = await resend.emails.send({
-      from: fromEmail,
-      to: [cleanEmail],
-      subject: "Reset Your Invoicing App Password",
-      html: `
-        <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 0px solid #e5e7eb; border-radius: 8px;">
-          <h2 style="color: #111827; margin-bottom: 16px;">Password Reset Request</h2>
-          <p style="color: #4b5563; line-height: 24px;">Hello ${user.firstName || "there"},</p>
-          <p style="color: #4b5563; line-height: 24px;">We received a request to reset your invoicing app account password. Click the secure action button below to create a new password:</p>
-          <div style="margin: 24px 0;">
-            <a href="${resetUrl}" style="background-color: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block;">Reset Password</a>
+    if (!brevoApiKey) {
+      console.error("BREVO_CONFIG_ERROR: BREVO_API_KEY environment variable is missing.")
+      return NextResponse.json(
+        { success: false, error: "Email configuration error." },
+        { status: 500 }
+      )
+    }
+
+    // 8. Trigger automated transactional mail delivery via Brevo Transactional API
+    const response = await fetch("https://brevo.com", {
+      method: "POST",
+      headers: {
+        "accept": "application/json",
+        "api-key": brevoApiKey,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        sender: { 
+          name: "Invoice Flow", 
+          email: "onboarding@resend.dev" // 👈 Swap this with your verified sender email in Brevo
+        },
+        to: [{ email: cleanEmail }],
+        subject: "Reset Your Invoicing App Password",
+        htmlContent: `
+          <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 0px solid #e5e7eb; border-radius: 8px;">
+            <h2 style="color: #111827; margin-bottom: 16px;">Password Reset Request</h2>
+            <p style="color: #4b5563; line-height: 24px;">Hello ${user.firstName || "there"},</p>
+            <p style="color: #4b5563; line-height: 24px;">We received a request to reset your invoicing app account password. Click the secure action button below to create a new password:</p>
+            <div style="margin: 24px 0;">
+              <a href="${resetUrl}" style="background-color: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block;">Reset Password</a>
+            </div>
+            <p style="color: #6b7280; font-size: 14px; line-height: 20px;">This secure link is time-sensitive and will expire in 1 hour. If you did not make this request, you can safely ignore this email.</p>
+            <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 24px 0;" />
+            <p style="color: #9ca3af; font-size: 12px;">If the button above isn't working, copy and paste this URL into your browser:</p>
+            <p style="color: #2563eb; font-size: 12px; word-break: break-all;">${resetUrl}</p>
           </div>
-          <p style="color: #6b7280; font-size: 14px; line-height: 20px;">This secure link is time-sensitive and will expire in 1 hour. If you did not make this request, you can safely ignore this email.</p>
-          <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 24px 0;" />
-          <p style="color: #9ca3af; font-size: 12px;">If the button above isn't working, copy and paste this URL into your browser:</p>
-          <p style="color: #2563eb; font-size: 12px; word-break: break-all;">${resetUrl}</p>
-        </div>
-      `,
+        `,
+      }),
     })
 
-    if (error) {
-      console.error("RESEND_DELIVERY_ERROR:", error)
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      console.error("BREVO_DELIVERY_ERROR:", errorData)
       return NextResponse.json(
         {
           success: false,
@@ -96,7 +113,6 @@ export async function POST(request: Request) {
     console.error("FORGOT_PASSWORD_GLOBAL_ERROR:", error)
     return NextResponse.json(
       { success: false, error: error?.message || String(error) },
-      // { success: false, error: "An unexpected internal server error occurred." },
       { status: 500 }
     )
   }

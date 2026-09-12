@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from "next/server"
-import jwt from "jsonwebtoken"
-
 import { prisma } from "@repo/db"
 import { getAuthenticatedSession } from "@/lib/auth/session"
 

@@ -1,16 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
-import jwt from "jsonwebtoken"
-
 import { Prisma, prisma } from "@repo/db"
 import { sendInvoice } from "@/lib/invoices/send-invoice"
-
 import { getInvoiceReminderSettings } from "@/lib/invoice-reminders/get-reminder-settings"
 import { scheduleInvoiceReminders } from "@/lib/invoice-reminders/schedule-invoice-reminders"
 import { checkInvoiceCreationLimit } from "@/lib/billing/check-invoice-creation-limit"
-
-interface AuthPayload {
-  userId: string
-}
 
 interface CreateInvoiceItem {
   name: string
@@ -21,6 +14,8 @@ interface CreateInvoiceItem {
 
 interface CreateInvoiceBody {
   customerId: string
+  customerEmail: string
+  customerName: string
   currency: string
   issueDate: string
   dueDate: string
@@ -34,6 +29,7 @@ interface CreateInvoiceBody {
 }
 
 import { InvoiceStatus as PrismaInvoiceStatus } from "@repo/db"
+import { getAuthenticatedSession } from "@/lib/auth/session"
 
 const statusMap: Record<string, PrismaInvoiceStatus> = {
   Sent: "SENT",
@@ -43,72 +39,23 @@ const statusMap: Record<string, PrismaInvoiceStatus> = {
   Cancelled: "CANCELLED",
 }
 
-export async function GET(req: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
     // ---------------------------------------------------------
     // 1. Get authentication token
     // ---------------------------------------------------------
 
-    const token = req.cookies.get("token")?.value
+    const auth = await getAuthenticatedSession(request)
 
-    if (!token) {
-      return NextResponse.json(
-        {
-          error: "Unauthorized",
-        },
-        {
-          status: 401,
-        }
-      )
-    }
-
-    // ---------------------------------------------------------
-    // 2. Verify JWT
-    // ---------------------------------------------------------
-
-    const jwtSecret = process.env.JWT_SECRET
-
-    if (!jwtSecret) {
-      throw new Error(
-        "JWT_SECRET environment variable is missing from configuration."
-      )
-    }
-
-    let decoded: {
-      userId: string
-      role?: string
-      class?: string
-    }
-
-    try {
-      decoded = jwt.verify(token, jwtSecret) as typeof decoded
-    } catch {
-      return NextResponse.json(
-        {
-          error: "Invalid or expired token",
-        },
-        {
-          status: 401,
-        }
-      )
-    }
-
-    if (!decoded.userId) {
-      return NextResponse.json(
-        {
-          error: "Invalid authentication token",
-        },
-        {
-          status: 401,
-        }
-      )
+    if (!auth) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
     // ---------------------------------------------------------
     // 3. Query parameters
     // ---------------------------------------------------------
 
-    const { searchParams } = new URL(req.url)
+    const { searchParams } = new URL(request.url)
 
     const search = searchParams.get("search")?.trim() || ""
 
@@ -149,7 +96,7 @@ export async function GET(req: NextRequest) {
     // ---------------------------------------------------------
 
     const where = {
-      userId: decoded.userId,
+      userId: auth.userId,
 
       ...(search
         ? {
@@ -242,56 +189,27 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     // --------------------------------------------------
     // 1. Authenticate user
     // --------------------------------------------------
+    const auth = await getAuthenticatedSession(request)
 
-    const token = req.cookies.get("token")?.value
-
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const jwtSecret = process.env.JWT_SECRET
-
-    if (!jwtSecret) {
-      throw new Error("JWT_SECRET environment variable is missing")
-    }
-
-    let decoded: AuthPayload
-
-    try {
-      decoded = jwt.verify(token, jwtSecret) as AuthPayload
-    } catch {
-      return NextResponse.json(
-        {
-          error: "Invalid or expired authentication token",
-        },
-        { status: 401 }
-      )
-    }
-
-    const userId = decoded.userId
-
-    if (!userId) {
-      return NextResponse.json(
-        {
-          error: "Invalid authentication token",
-        },
-        { status: 401 }
-      )
+    if (!auth) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
     // --------------------------------------------------
     // 2. Parse request body
     // --------------------------------------------------
 
-    const body = (await req.json()) as CreateInvoiceBody
+    const body = (await request.json()) as CreateInvoiceBody
 
     const {
       customerId,
+      customerEmail,
+      customerName,
       currency,
       issueDate,
       dueDate,
@@ -307,12 +225,24 @@ export async function POST(req: NextRequest) {
     // 3. Basic validation
     // --------------------------------------------------
 
-    if (!customerId) {
+    // Dynamic Customer Check: Must provide an existing ID OR complete info for a new customer
+    if (!customerId && (!customerEmail || !customerName)) {
       return NextResponse.json(
-        { error: "Customer is required" },
+        {
+          error:
+            "Customer is required, complete details (name and email) to create a new customer.",
+          // "Provide either a customerId or complete details (name and email) to create a new customer.",
+        },
         { status: 400 }
       )
     }
+
+    // if (!customerId) {
+    //   return NextResponse.json(
+    //     { error: "Customer is required" },
+    //     { status: 400 }
+    //   )
+    // }
 
     if (!issueDate || !dueDate) {
       return NextResponse.json(
@@ -338,7 +268,7 @@ export async function POST(req: NextRequest) {
 
     const invoiceSettings = await prisma.invoiceSettings.findUnique({
       where: {
-        userId,
+        userId: auth.userId,
       },
     })
 
@@ -465,25 +395,70 @@ export async function POST(req: NextRequest) {
     }
 
     // --------------------------------------------------
-    // 9. Verify customer belongs to user
+    // 9. Resolve or Upsert Customer safely
     // --------------------------------------------------
 
-    const customer = await prisma.customer.findFirst({
-      where: {
-        id: customerId,
-        userId,
-      },
-    })
+    let resolvedCustomerId: string
 
-    if (!customer) {
-      return NextResponse.json({ error: "Customer not found" }, { status: 404 })
+    if (customerId) {
+      // Scenario A: Customer ID was provided. Verify it exists and belongs to this user.
+      const existingCustomer = await prisma.customer.findFirst({
+        where: {
+          id: customerId,
+          userId: auth.userId,
+        },
+      })
+
+      if (!existingCustomer) {
+        return NextResponse.json(
+          {
+            error:
+              "The provided customer does not exist or does not belong to your account.",
+          },
+          { status: 404 }
+        )
+      }
+
+      resolvedCustomerId = existingCustomer.id
+    } else {
+      // Scenario B: No customerId provided. Handle dynamic on-the-fly customer creation.
+      const cleanEmail = customerEmail!.toLowerCase().trim()
+
+      // Enforce isolation: Ensure this user hasn't already registered this email in their customer table
+      const duplicateCustomer = await prisma.customer.findFirst({
+        where: {
+          userId: auth.userId,
+          email: cleanEmail,
+        },
+      })
+
+      if (duplicateCustomer) {
+        return NextResponse.json(
+          {
+            error:
+              "A customer with this email address already exists in your account. Please use their customer identifier.",
+          },
+          { status: 400 }
+        )
+      }
+
+      // Create the new customer record since it passed the validation check
+      const newCustomer = await prisma.customer.create({
+        data: {
+          userId: auth.userId,
+          name: customerName!.trim(),
+          email: cleanEmail,
+        },
+      })
+
+      resolvedCustomerId = newCustomer.id
     }
 
     // --------------------------------------------------
     // 10. Create invoice transactionally
     // --------------------------------------------------
 
-    const reminderSettings = await getInvoiceReminderSettings(userId)
+    const reminderSettings = await getInvoiceReminderSettings(auth.userId)
 
     const invoice = await prisma.$transaction(
       async (tx) => {
@@ -491,7 +466,7 @@ export async function POST(req: NextRequest) {
         // Check invoice creation limit
         // ----------------------------------------------
 
-        const invoiceLimit = await checkInvoiceCreationLimit(tx, userId)
+        const invoiceLimit = await checkInvoiceCreationLimit(tx, auth.userId)
 
         if (!invoiceLimit.allowed) {
           throw new Error(
@@ -505,11 +480,11 @@ export async function POST(req: NextRequest) {
 
         const settings = await tx.invoiceSettings.upsert({
           where: {
-            userId,
+            userId: auth.userId,
           },
 
           create: {
-            userId,
+            userId: auth.userId,
             invoiceNumberPrefix: "INV-",
             nextInvoiceNumber: 1,
             defaultCurrency: "NGN",
@@ -534,7 +509,7 @@ export async function POST(req: NextRequest) {
 
         await tx.invoiceSettings.update({
           where: {
-            userId,
+            userId: auth.userId,
           },
 
           data: {
@@ -552,9 +527,9 @@ export async function POST(req: NextRequest) {
           data: {
             invoiceNumber,
 
-            userId,
+            userId: auth.userId,
 
-            customerId,
+            customerId: resolvedCustomerId,
 
             status: "DRAFT",
 
@@ -598,7 +573,7 @@ export async function POST(req: NextRequest) {
           await scheduleInvoiceReminders({
             tx,
             invoiceId: createdInvoice.id,
-            userId,
+            userId: auth.userId,
             issueDate: parsedIssueDate,
             dueDate: parsedDueDate,
             settings: reminderSettings,
@@ -620,7 +595,7 @@ export async function POST(req: NextRequest) {
       // 1. Send invoice
       // ----------------------------------------------
 
-      const sentInvoice = await sendInvoice(invoice.id, userId)
+      const sentInvoice = await sendInvoice(invoice.id, auth.userId)
 
       return NextResponse.json(
         {
@@ -675,18 +650,3 @@ export async function POST(req: NextRequest) {
     )
   }
 }
-
-// async function generateInvoiceNumber() {
-//   const year = new Date().getFullYear()
-
-//   const count = await prisma.invoice.count({
-//     where: {
-//       createdAt: {
-//         gte: new Date(`${year}-01-01T00:00:00.000Z`),
-//         lt: new Date(`${year + 1}-01-01T00:00:00.000Z`),
-//       },
-//     },
-//   })
-
-//   return `INV-${year}-${String(count + 1).padStart(4, "0")}`
-// }

@@ -1,51 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
-import jwt from "jsonwebtoken"
-
 import { prisma } from "@repo/db"
 import { cloudinary } from "@/lib/cloudinary"
+import { getAuthenticatedSession } from "@/lib/auth/session"
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024
 
-const ALLOWED_TYPES = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-])
-
-interface AuthPayload {
-  userId: string
-}
-
-async function authenticateUser(req: NextRequest) {
-  const token = req.cookies.get("token")?.value
-
-  if (!token) {
-    return null
-  }
-
-  const jwtSecret = process.env.JWT_SECRET
-
-  if (!jwtSecret) {
-    throw new Error(
-      "JWT_SECRET environment variable is missing from configuration."
-    )
-  }
-
-  try {
-    const decoded = jwt.verify(
-      token,
-      jwtSecret
-    ) as AuthPayload
-
-    if (!decoded.userId) {
-      return null
-    }
-
-    return decoded.userId
-  } catch {
-    return null
-  }
-}
+const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"])
 
 function uploadToCloudinary(
   buffer: Buffer,
@@ -81,11 +41,7 @@ function uploadToCloudinary(
         }
 
         if (!result?.secure_url || !result.public_id) {
-          reject(
-            new Error(
-              "Cloudinary did not return a valid upload result."
-            )
-          )
+          reject(new Error("Cloudinary did not return a valid upload result."))
           return
         }
 
@@ -100,30 +56,21 @@ function uploadToCloudinary(
   })
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     // ---------------------------------------------------------
     // 1. Authentication
     // ---------------------------------------------------------
+    const auth = await getAuthenticatedSession(request)
 
-    const userId = await authenticateUser(req)
-
-    if (!userId) {
-      return NextResponse.json(
-        {
-          error: "Unauthorized",
-        },
-        {
-          status: 401,
-        }
-      )
+    if (!auth) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
-
     // ---------------------------------------------------------
     // 2. Read uploaded file
     // ---------------------------------------------------------
 
-    const formData = await req.formData()
+    const formData = await request.formData()
 
     const file = formData.get("file")
 
@@ -145,8 +92,7 @@ export async function POST(req: NextRequest) {
     if (!ALLOWED_TYPES.has(file.type)) {
       return NextResponse.json(
         {
-          error:
-            "Invalid image type. Please upload a JPG, PNG, or WEBP image.",
+          error: "Invalid image type. Please upload a JPG, PNG, or WEBP image.",
         },
         {
           status: 400,
@@ -186,7 +132,7 @@ export async function POST(req: NextRequest) {
 
     const currentUser = await prisma.user.findUnique({
       where: {
-        id: userId,
+        id: auth.userId,
       },
 
       select: {
@@ -209,14 +155,9 @@ export async function POST(req: NextRequest) {
     // 6. Upload to Cloudinary
     // ---------------------------------------------------------
 
-    const buffer = Buffer.from(
-      await file.arrayBuffer()
-    )
+    const buffer = Buffer.from(await file.arrayBuffer())
 
-    const uploadedImage = await uploadToCloudinary(
-      buffer,
-      userId
-    )
+    const uploadedImage = await uploadToCloudinary(buffer, auth.userId)
 
     // ---------------------------------------------------------
     // 7. Save image information
@@ -224,7 +165,7 @@ export async function POST(req: NextRequest) {
 
     const updatedUser = await prisma.user.update({
       where: {
-        id: userId,
+        id: auth.userId,
       },
 
       data: {
@@ -245,37 +186,26 @@ export async function POST(req: NextRequest) {
 
     if (
       currentUser.profileImagePublicId &&
-      currentUser.profileImagePublicId !==
-        uploadedImage.public_id
+      currentUser.profileImagePublicId !== uploadedImage.public_id
     ) {
       try {
-        await cloudinary.uploader.destroy(
-          currentUser.profileImagePublicId,
-          {
-            resource_type: "image",
-            invalidate: true,
-          }
-        )
+        await cloudinary.uploader.destroy(currentUser.profileImagePublicId, {
+          resource_type: "image",
+          invalidate: true,
+        })
       } catch (error) {
         // The new image is already saved.
         // Do not fail the request because cleanup failed.
-        console.error(
-          "Failed to delete old profile image:",
-          error
-        )
+        console.error("Failed to delete old profile image:", error)
       }
     }
 
     return NextResponse.json({
       success: true,
-      profileImageUrl:
-        updatedUser.profileImageUrl,
+      profileImageUrl: updatedUser.profileImageUrl,
     })
   } catch (error) {
-    console.error(
-      "Upload profile image error:",
-      error
-    )
+    console.error("Upload profile image error:", error)
 
     return NextResponse.json(
       {
@@ -288,23 +218,16 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function DELETE(req: NextRequest) {
+export async function DELETE(request: NextRequest) {
   try {
     // ---------------------------------------------------------
     // 1. Authentication
     // ---------------------------------------------------------
 
-    const userId = await authenticateUser(req)
+    const auth = await getAuthenticatedSession(request)
 
-    if (!userId) {
-      return NextResponse.json(
-        {
-          error: "Unauthorized",
-        },
-        {
-          status: 401,
-        }
-      )
+    if (!auth) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
     // ---------------------------------------------------------
@@ -313,7 +236,7 @@ export async function DELETE(req: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: {
-        id: userId,
+        id: auth.userId,
       },
 
       select: {
@@ -338,23 +261,16 @@ export async function DELETE(req: NextRequest) {
 
     if (user.profileImagePublicId) {
       try {
-        await cloudinary.uploader.destroy(
-          user.profileImagePublicId,
-          {
-            resource_type: "image",
-            invalidate: true,
-          }
-        )
+        await cloudinary.uploader.destroy(user.profileImagePublicId, {
+          resource_type: "image",
+          invalidate: true,
+        })
       } catch (error) {
-        console.error(
-          "Failed to delete Cloudinary profile image:",
-          error
-        )
+        console.error("Failed to delete Cloudinary profile image:", error)
 
         return NextResponse.json(
           {
-            error:
-              "Failed to remove profile image.",
+            error: "Failed to remove profile image.",
           },
           {
             status: 500,
@@ -369,7 +285,7 @@ export async function DELETE(req: NextRequest) {
 
     await prisma.user.update({
       where: {
-        id: userId,
+        id: auth.userId,
       },
 
       data: {
@@ -382,10 +298,7 @@ export async function DELETE(req: NextRequest) {
       success: true,
     })
   } catch (error) {
-    console.error(
-      "Delete profile image error:",
-      error
-    )
+    console.error("Delete profile image error:", error)
 
     return NextResponse.json(
       {

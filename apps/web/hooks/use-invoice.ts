@@ -127,3 +127,28 @@ export function useInvoices(params: UseInvoicesParams = {}) {
     gcTime: 0, // (Or cacheTime: 0 in older versions) Wipes cache instantly on page leave
   })
 }
+
+async function getSingleInvoice(id: string): Promise<Invoice> {
+  const response = await fetch(`/api/dashboard/invoices/${id}`, {
+    method: "GET",
+    credentials: "include",
+  })
+
+  const result = await response.json().catch(() => null)
+
+  if (!response.ok) {
+    throw new Error(result?.error || "Failed to fetch invoice")
+  }
+
+  return result as Invoice
+}
+
+export function useInvoice(id: string) {
+  return useQuery({
+    queryKey: ["invoice", id],
+    queryFn: () => getSingleInvoice(id),
+    enabled: !!id, // Only run the query if an ID is present
+    staleTime: 0,
+    gcTime: 0,
+  })
+}

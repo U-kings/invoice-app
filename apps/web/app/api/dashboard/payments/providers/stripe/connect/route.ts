@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
-import jwt from "jsonwebtoken"
 import Stripe from "stripe"
-
 import { prisma } from "@repo/db"
+import { getAuthenticatedSession } from "@/lib/auth/session"
 
 interface JwtPayload {
   userId: string
@@ -10,26 +9,14 @@ interface JwtPayload {
   class?: string
 }
 
-function getUserId(request: NextRequest) {
-  const token = request.cookies.get("token")?.value
-
-  if (!token) {
-    return null
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload
-
-    return decoded.userId ?? null
-  } catch {
-    return null
-  }
-}
-
 export async function GET(request: NextRequest) {
-  const userId = getUserId(request)
+  const auth = await getAuthenticatedSession(request)
 
-  if (!userId) {
+  // if (!auth) {
+  //   return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
+  // }
+
+  if (!auth?.userId) {
     return NextResponse.redirect(new URL("/login", request.url))
   }
 
@@ -45,7 +32,7 @@ export async function GET(request: NextRequest) {
       await prisma.paymentProviderConnection.findUnique({
         where: {
           userId_provider: {
-            userId,
+            userId: auth.userId,
             provider: "STRIPE",
           },
         },
@@ -56,13 +43,13 @@ export async function GET(request: NextRequest) {
     if (!accountId) {
       const businessProfile = await prisma.businessProfile.findUnique({
         where: {
-          userId,
+          userId: auth.userId,
         },
       })
 
       const user = await prisma.user.findUnique({
         where: {
-          id: userId,
+          id: auth.userId,
         },
         select: {
           email: true,
@@ -82,12 +69,12 @@ export async function GET(request: NextRequest) {
       await prisma.paymentProviderConnection.upsert({
         where: {
           userId_provider: {
-            userId,
+            userId: auth.userId,
             provider: "STRIPE",
           },
         },
         create: {
-          userId,
+          userId: auth.userId,
           provider: "STRIPE",
           status: "PENDING",
           providerAccountId: accountId,
@@ -123,7 +110,7 @@ export async function GET(request: NextRequest) {
 
     await prisma.paymentProviderConnection.updateMany({
       where: {
-        userId,
+        userId: auth.userId,
         provider: "STRIPE",
       },
       data: {

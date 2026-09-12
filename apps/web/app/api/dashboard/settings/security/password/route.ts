@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
-import jwt from "jsonwebtoken"
-
 import { prisma } from "@repo/db"
+import { getAuthenticatedSession } from "@/lib/auth/session"
 
 type JwtPayload = {
   userId: string
@@ -21,25 +20,10 @@ export async function PATCH(request: NextRequest) {
     // ------------------------------------------------------------
     // Authenticate user
     // ------------------------------------------------------------
-    const token = request.cookies.get("token")?.value
+    const auth = await getAuthenticatedSession(request)
 
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    let decoded: JwtPayload
-
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload
-    } catch {
-      return NextResponse.json(
-        { error: "Invalid or expired session" },
-        { status: 401 }
-      )
-    }
-
-    if (!decoded.userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (!auth) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
     // ------------------------------------------------------------
@@ -94,7 +78,7 @@ export async function PATCH(request: NextRequest) {
     // ------------------------------------------------------------
     const user = await prisma.user.findUnique({
       where: {
-        id: decoded.userId,
+        id: auth.userId,
       },
       select: {
         id: true,

@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import jwt from "jsonwebtoken"
-
 import { prisma } from "@repo/db"
 import { getAuthenticatedSession } from "@/lib/auth/session"
-
-interface AuthPayload {
-  userId: string
-}
 
 interface UpdateCustomerBody {
   name?: string
@@ -155,27 +149,11 @@ export async function DELETE(request: NextRequest, { params }: RouteContext) {
     // ---------------------------------------------
     // 1. Authenticate (Keep your existing token verification here)
     // ---------------------------------------------
-    const token = request.cookies.get("token")?.value
-    if (!token)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    const jwtSecret = process.env.JWT_SECRET
-    if (!jwtSecret)
-      throw new Error("JWT_SECRET environment variable is missing")
-    let decoded: AuthPayload
-    try {
-      decoded = jwt.verify(token, jwtSecret) as AuthPayload
-    } catch {
-      return NextResponse.json(
-        { error: "Invalid or expired authentication token" },
-        { status: 401 }
-      )
-    }
-    if (!decoded.userId)
-      return NextResponse.json(
-        { error: "Invalid authentication token" },
-        { status: 401 }
-      )
+    const auth = await getAuthenticatedSession(request)
 
+    if (!auth) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
+    }
     // ---------------------------------------------
     // 2. Get customer ID
     // ---------------------------------------------
@@ -192,7 +170,7 @@ export async function DELETE(request: NextRequest, { params }: RouteContext) {
     const customer = await prisma.customer.findFirst({
       where: {
         id,
-        userId: decoded.userId,
+        userId: auth.userId,
       },
       include: {
         invoices: {

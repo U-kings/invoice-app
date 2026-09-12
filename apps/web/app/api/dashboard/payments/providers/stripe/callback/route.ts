@@ -1,35 +1,17 @@
 import { NextRequest, NextResponse } from "next/server"
-import jwt from "jsonwebtoken"
 import Stripe from "stripe"
 
 import { prisma } from "@repo/db"
-
-interface JwtPayload {
-  userId: string
-  role?: string
-  class?: string
-}
-
-function getUserId(request: NextRequest) {
-  const token = request.cookies.get("token")?.value
-
-  if (!token) {
-    return null
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload
-
-    return decoded.userId ?? null
-  } catch {
-    return null
-  }
-}
+import { getAuthenticatedSession } from "@/lib/auth/session"
 
 export async function GET(request: NextRequest) {
-  const userId = getUserId(request)
+  const auth = await getAuthenticatedSession(request)
 
-  if (!userId) {
+  // if (!auth) {
+  //   return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
+  // }
+
+  if (!auth?.userId) {
     return NextResponse.redirect(new URL("/login", request.url))
   }
 
@@ -37,7 +19,7 @@ export async function GET(request: NextRequest) {
     const connection = await prisma.paymentProviderConnection.findUnique({
       where: {
         userId_provider: {
-          userId,
+          userId: auth.userId,
           provider: "STRIPE",
         },
       },
@@ -46,7 +28,7 @@ export async function GET(request: NextRequest) {
     if (!connection?.providerAccountId) {
       console.error(
         "[Stripe Connect] No Stripe account found for user:",
-        userId
+        auth.userId
       )
 
       return NextResponse.redirect(
@@ -109,7 +91,7 @@ export async function GET(request: NextRequest) {
     try {
       await prisma.paymentProviderConnection.updateMany({
         where: {
-          userId,
+          userId: auth.userId,
           provider: "STRIPE",
         },
         data: {

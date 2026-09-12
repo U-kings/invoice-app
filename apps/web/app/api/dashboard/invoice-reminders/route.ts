@@ -1,70 +1,26 @@
 import { NextRequest, NextResponse } from "next/server"
-import jwt from "jsonwebtoken"
-
 import { prisma } from "@repo/db"
+import { getAuthenticatedSession } from "@/lib/auth/session"
 
 const REMINDER_BATCH_SIZE = 100
 
-export async function GET(req: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
     // ---------------------------------------------------------
     // 1. Authentication
     // ---------------------------------------------------------
 
-    const token = req.cookies.get("token")?.value
+    const auth = await getAuthenticatedSession(request)
 
-    if (!token) {
-      return NextResponse.json(
-        {
-          error: "Unauthorized",
-        },
-        {
-          status: 401,
-        }
-      )
-    }
-
-    const jwtSecret = process.env.JWT_SECRET
-
-    if (!jwtSecret) {
-      throw new Error(
-        "JWT_SECRET environment variable is missing from configuration."
-      )
-    }
-
-    let decoded: {
-      userId: string
-    }
-
-    try {
-      decoded = jwt.verify(token, jwtSecret) as typeof decoded
-    } catch {
-      return NextResponse.json(
-        {
-          error: "Invalid or expired token",
-        },
-        {
-          status: 401,
-        }
-      )
-    }
-
-    if (!decoded.userId) {
-      return NextResponse.json(
-        {
-          error: "Invalid authentication token",
-        },
-        {
-          status: 401,
-        }
-      )
+    if (!auth) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
     // ---------------------------------------------------------
     // 2. Query parameters
     // ---------------------------------------------------------
 
-    const { searchParams } = new URL(req.url)
+    const { searchParams } = new URL(request.url)
 
     const search =
       searchParams.get("search")?.trim() || ""
@@ -94,7 +50,7 @@ export async function GET(req: NextRequest) {
     // ---------------------------------------------------------
 
     const reminderWhere = {
-      userId: decoded.userId,
+      userId: auth.userId,
 
       ...(search
         ? {
@@ -149,7 +105,7 @@ export async function GET(req: NextRequest) {
     // ---------------------------------------------------------
 
     const statsWhere = {
-      userId: decoded.userId,
+      userId: auth.userId,
     }
 
     // ---------------------------------------------------------

@@ -1,32 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import jwt from "jsonwebtoken"
 import { prisma } from "@repo/db"
-
-
-interface JwtPayload {
-  userId: string
-  role?: string
-  class?: string
-}
-
-function getUserId(request: NextRequest) {
-  const token = request.cookies.get("token")?.value
-
-  if (!token) {
-    return null
-  }
-
-  try {
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET!
-    ) as JwtPayload
-
-    return decoded.userId ?? null
-  } catch {
-    return null
-  }
-}
+import { getAuthenticatedSession } from "@/lib/auth/session"
 
 const paymentSettingsSelect = {
   id: true,
@@ -55,22 +29,19 @@ const paymentSettingsSelect = {
 } as const
 
 export async function GET(request: NextRequest) {
-  const userId = getUserId(request)
+  const auth = await getAuthenticatedSession(request)
 
-  if (!userId) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    )
+  if (!auth) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
   }
 
   try {
     const paymentSettings = await prisma.paymentSettings.upsert({
       where: {
-        userId,
+        userId: auth.userId,
       },
       create: {
-        userId,
+        userId: auth.userId,
       },
       update: {},
       select: paymentSettingsSelect,
@@ -88,15 +59,11 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  const userId = getUserId(request)
+  const auth = await getAuthenticatedSession(request)
 
-  if (!userId) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    )
+  if (!auth) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
   }
-
   try {
     const body = await request.json()
 
@@ -159,29 +126,22 @@ export async function PATCH(request: NextRequest) {
     }
 
     if (typeof automaticPaymentConfirmation === "boolean") {
-      data.automaticPaymentConfirmation =
-        automaticPaymentConfirmation
+      data.automaticPaymentConfirmation = automaticPaymentConfirmation
     }
 
     if (typeof bankName === "string" || bankName === null) {
       data.bankName =
-        typeof bankName === "string"
-          ? bankName.trim() || null
-          : null
+        typeof bankName === "string" ? bankName.trim() || null : null
     }
 
     if (typeof accountName === "string" || accountName === null) {
       data.accountName =
-        typeof accountName === "string"
-          ? accountName.trim() || null
-          : null
+        typeof accountName === "string" ? accountName.trim() || null : null
     }
 
     if (typeof accountNumber === "string" || accountNumber === null) {
       data.accountNumber =
-        typeof accountNumber === "string"
-          ? accountNumber.trim() || null
-          : null
+        typeof accountNumber === "string" ? accountNumber.trim() || null : null
     }
 
     if (
@@ -196,10 +156,10 @@ export async function PATCH(request: NextRequest) {
 
     const paymentSettings = await prisma.paymentSettings.upsert({
       where: {
-        userId,
+        userId: auth.userId,
       },
       create: {
-        userId,
+        userId: auth.userId,
         ...data,
       },
       update: data,

@@ -1,27 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
-import jwt from "jsonwebtoken"
 import { prisma } from "@repo/db"
+import { getAuthenticatedSession } from "@/lib/auth/session"
 
 interface JwtPayload {
   userId: string
   role?: string
   class?: string
-}
-
-function getUserId(req: NextRequest) {
-  const token = req.cookies.get("token")?.value
-
-  if (!token) {
-    return null
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload
-
-    return decoded.userId ?? null
-  } catch {
-    return null
-  }
 }
 
 /**
@@ -32,15 +16,15 @@ function getUserId(req: NextRequest) {
  * Optional:
  * ?search=website
  */
-export async function GET(req: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const userId = await getUserId(req)
+    const auth = await getAuthenticatedSession(request)
 
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (!auth) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
-    const { searchParams } = new URL(req.url)
+    const { searchParams } = new URL(request.url)
 
     const search = searchParams.get("search")?.trim() ?? ""
 
@@ -60,7 +44,7 @@ export async function GET(req: NextRequest) {
     const skip = (page - 1) * pageSize
 
     const where = {
-      userId,
+      userId: auth.userId,
       ...(search
         ? {
             OR: [
@@ -130,15 +114,15 @@ export async function GET(req: NextRequest) {
  *
  * Creates a new product for the authenticated user.
  */
-export async function POST(req: NextRequest) {
-  const userId = getUserId(req)
+export async function POST(request: NextRequest) {
+  const auth = await getAuthenticatedSession(request)
 
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!auth) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
   }
 
   try {
-    const body = await req.json()
+    const body = await request.json()
 
     const name = typeof body.name === "string" ? body.name.trim() : ""
 
@@ -169,7 +153,7 @@ export async function POST(req: NextRequest) {
 
     const product = await prisma.product.create({
       data: {
-        userId,
+        userId: auth.userId,
         name,
         description: description || null,
         rate: Number(rate),

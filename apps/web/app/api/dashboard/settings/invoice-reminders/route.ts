@@ -1,53 +1,23 @@
 import { NextRequest, NextResponse } from "next/server"
-import jwt from "jsonwebtoken"
 import { prisma } from "@repo/db"
-
-interface AuthPayload {
-  userId: string
-}
-
-async function getAuthenticatedUserId(req: NextRequest) {
-  const token = req.cookies.get("token")?.value
-
-  if (!token) {
-    return null
-  }
-
-  const jwtSecret = process.env.JWT_SECRET
-
-  if (!jwtSecret) {
-    throw new Error("JWT_SECRET environment variable is missing")
-  }
-
-  try {
-    const decoded = jwt.verify(token, jwtSecret) as AuthPayload
-
-    return decoded.userId || null
-  } catch {
-    return null
-  }
-}
+import { getAuthenticatedSession } from "@/lib/auth/session"
 
 /**
  * GET /api/dashboard/settings/invoice-reminders
  */
-export async function GET(req: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const userId = await getAuthenticatedUserId(req)
+    const auth = await getAuthenticatedSession(request)
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      )
+    if (!auth) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
-    const settings =
-      await prisma.invoiceReminderSettings.findUnique({
-        where: {
-          userId,
-        },
-      })
+    const settings = await prisma.invoiceReminderSettings.findUnique({
+      where: {
+        userId: auth.userId,
+      },
+    })
 
     /**
      * Settings may not exist yet for a new user.
@@ -59,10 +29,7 @@ export async function GET(req: NextRequest) {
       settings,
     })
   } catch (error) {
-    console.error(
-      "Get invoice reminder settings error:",
-      error
-    )
+    console.error("Get invoice reminder settings error:", error)
 
     return NextResponse.json(
       {
@@ -79,18 +46,15 @@ export async function GET(req: NextRequest) {
 /**
  * PATCH /api/dashboard/settings/invoice-reminders
  */
-export async function PATCH(req: NextRequest) {
+export async function PATCH(request: NextRequest) {
   try {
-    const userId = await getAuthenticatedUserId(req)
+    const auth = await getAuthenticatedSession(request)
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      )
+    if (!auth) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
-    const body = await req.json()
+    const body = await request.json()
 
     const {
       enabled,
@@ -130,8 +94,7 @@ export async function PATCH(req: NextRequest) {
     ) {
       return NextResponse.json(
         {
-          error:
-            "Before due days must be an integer between 1 and 30",
+          error: "Before due days must be an integer between 1 and 30",
         },
         { status: 400 }
       )
@@ -158,8 +121,7 @@ export async function PATCH(req: NextRequest) {
     ) {
       return NextResponse.json(
         {
-          error:
-            "Overdue days must be an integer between 1 and 30",
+          error: "Overdue days must be an integer between 1 and 30",
         },
         { status: 400 }
       )
@@ -172,8 +134,7 @@ export async function PATCH(req: NextRequest) {
     ) {
       return NextResponse.json(
         {
-          error:
-            "Overdue repeat days must be an integer between 1 and 90",
+          error: "Overdue repeat days must be an integer between 1 and 90",
         },
         { status: 400 }
       )
@@ -186,8 +147,7 @@ export async function PATCH(req: NextRequest) {
     ) {
       return NextResponse.json(
         {
-          error:
-            "Maximum overdue reminders must be between 1 and 10",
+          error: "Maximum overdue reminders must be between 1 and 10",
         },
         { status: 400 }
       )
@@ -219,61 +179,49 @@ export async function PATCH(req: NextRequest) {
     // Save settings
     // ----------------------------------------
 
-    const settings =
-      await prisma.invoiceReminderSettings.upsert({
-        where: {
-          userId,
-        },
+    const settings = await prisma.invoiceReminderSettings.upsert({
+      where: {
+        userId: auth.userId,
+      },
 
-        create: {
-          userId,
-          enabled,
-          beforeDueEnabled,
-          beforeDueDays,
-          dueDateEnabled,
-          overdueEnabled,
-          overdueAfterDays,
-          overdueRepeatDays,
-          maxOverdueReminders,
-          emailSubject:
-            typeof emailSubject === "string"
-              ? emailSubject.trim() || null
-              : null,
-          emailMessage:
-            typeof emailMessage === "string"
-              ? emailMessage.trim() || null
-              : null,
-        },
+      create: {
+        userId: auth.userId,
+        enabled,
+        beforeDueEnabled,
+        beforeDueDays,
+        dueDateEnabled,
+        overdueEnabled,
+        overdueAfterDays,
+        overdueRepeatDays,
+        maxOverdueReminders,
+        emailSubject:
+          typeof emailSubject === "string" ? emailSubject.trim() || null : null,
+        emailMessage:
+          typeof emailMessage === "string" ? emailMessage.trim() || null : null,
+      },
 
-        update: {
-          enabled,
-          beforeDueEnabled,
-          beforeDueDays,
-          dueDateEnabled,
-          overdueEnabled,
-          overdueAfterDays,
-          overdueRepeatDays,
-          maxOverdueReminders,
-          emailSubject:
-            typeof emailSubject === "string"
-              ? emailSubject.trim() || null
-              : null,
-          emailMessage:
-            typeof emailMessage === "string"
-              ? emailMessage.trim() || null
-              : null,
-        },
-      })
+      update: {
+        enabled,
+        beforeDueEnabled,
+        beforeDueDays,
+        dueDateEnabled,
+        overdueEnabled,
+        overdueAfterDays,
+        overdueRepeatDays,
+        maxOverdueReminders,
+        emailSubject:
+          typeof emailSubject === "string" ? emailSubject.trim() || null : null,
+        emailMessage:
+          typeof emailMessage === "string" ? emailMessage.trim() || null : null,
+      },
+    })
 
     return NextResponse.json({
       message: "Invoice reminder settings updated successfully",
       settings,
     })
   } catch (error) {
-    console.error(
-      "Update invoice reminder settings error:",
-      error
-    )
+    console.error("Update invoice reminder settings error:", error)
 
     return NextResponse.json(
       {

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import jwt from "jsonwebtoken"
-
 import { prisma } from "@repo/db"
+import { getAuthenticatedSession } from "@/lib/auth/session"
 
 interface JwtPayload {
   userId: string
@@ -9,33 +8,17 @@ interface JwtPayload {
   class?: string
 }
 
-function getUserId(request: NextRequest) {
-  const token = request.cookies.get("token")?.value
-
-  if (!token) {
-    return null
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload
-
-    return decoded.userId ?? null
-  } catch {
-    return null
-  }
-}
-
 export async function GET(request: NextRequest) {
-  const userId = getUserId(request)
+  const auth = await getAuthenticatedSession(request)
 
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!auth) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
   }
 
   try {
     const connections = await prisma.paymentProviderConnection.findMany({
       where: {
-        userId,
+        userId: auth.userId,
       },
       select: {
         id: true,

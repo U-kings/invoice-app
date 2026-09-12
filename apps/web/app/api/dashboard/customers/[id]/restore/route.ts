@@ -1,16 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
-import jwt from "jsonwebtoken"
 import { prisma } from "@repo/db"
 import { getAuthenticatedSession } from "@/lib/auth/session"
 
 interface RouteContext {
   params: Promise<{ id: string }>
 }
-
-interface AuthPayload {
-  userId: string
-}
-
 export async function PATCH(request: NextRequest, { params }: RouteContext) {
   try {
     // ---------------------------------------------

@@ -1,22 +1,18 @@
 import { NextRequest, NextResponse } from "next/server"
 import { randomBytes } from "node:crypto"
-import jwt from "jsonwebtoken"
 import bcrypt from "bcryptjs"
 
 import { prisma } from "@repo/db"
 import { resend } from "@/lib/email/resend"
 import { confirmEmailChangeTemplate } from "@/lib/email/templates/confirm-email-change"
+import { getAuthenticatedSession } from "@/lib/auth/session"
 
 export async function POST(request: NextRequest) {
   try {
-    const token = request.cookies.get("token")?.value
+    const auth = await getAuthenticatedSession(request)
 
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-      userId: string
+    if (!auth) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
     const body = await request.json()
@@ -50,7 +46,7 @@ export async function POST(request: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: {
-        id: decoded.userId,
+        id: auth.userId,
       },
       select: {
         id: true,

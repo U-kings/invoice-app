@@ -9,27 +9,21 @@ export type InvoiceTotalInput = {
   taxRate: unknown
 }
 
-export function getInvoiceTotal(
-  invoice: InvoiceTotalInput | undefined
-) {
+export function getInvoiceTotal(invoice: InvoiceTotalInput | undefined) {
   if (!invoice) {
     return 0
   }
 
   const subtotal = invoice.lineItems.reduce(
-    (total, item) =>
-      total + item.quantity * Number(item.rate),
+    (total, item) => total + item.quantity * Number(item.rate),
     0
   )
 
-  const discountAmount =
-    subtotal * (Number(invoice.discount) / 100)
+  const discountAmount = subtotal * (Number(invoice.discount) / 100)
 
-  const taxableAmount =
-    subtotal - discountAmount
+  const taxableAmount = subtotal - discountAmount
 
-  const taxAmount =
-    taxableAmount * (Number(invoice.taxRate) / 100)
+  const taxAmount = taxableAmount * (Number(invoice.taxRate) / 100)
 
   return taxableAmount + taxAmount
 }
@@ -88,6 +82,9 @@ export function getEffectiveInvoiceStatus(
 
   if (newStatus === "Cancelled") {
     return "Cancelled"
+  }
+  if (newStatus === "Draft") {
+    return "Draft"
   }
 
   return invoice.status

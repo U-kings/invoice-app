@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import jwt from "jsonwebtoken"
-
 import { prisma } from "@repo/db"
-
-interface AuthPayload {
-  userId: string
-}
+import { getAuthenticatedSession } from "@/lib/auth/session"
 
 interface RouteContext {
   params: Promise<{
@@ -14,7 +9,7 @@ interface RouteContext {
 }
 
 export async function POST(
-  req: NextRequest,
+  request: NextRequest,
   { params }: RouteContext
 ) {
   try {
@@ -22,47 +17,11 @@ export async function POST(
     // 1. Authenticate user
     // ---------------------------------------------
 
-    const token = req.cookies.get("token")?.value
+    const auth = await getAuthenticatedSession(request)
 
-    if (!token) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      )
+    if (!auth) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
-
-    const jwtSecret = process.env.JWT_SECRET
-
-    if (!jwtSecret) {
-      throw new Error(
-        "JWT_SECRET environment variable is missing"
-      )
-    }
-
-    let decoded: AuthPayload
-
-    try {
-      decoded = jwt.verify(
-        token,
-        jwtSecret
-      ) as AuthPayload
-    } catch {
-      return NextResponse.json(
-        {
-          error:
-            "Invalid or expired authentication token",
-        },
-        { status: 401 }
-      )
-    }
-
-    if (!decoded.userId) {
-      return NextResponse.json(
-        { error: "Invalid authentication token" },
-        { status: 401 }
-      )
-    }
-
     // ---------------------------------------------
     // 2. Get invoice ID
     // ---------------------------------------------
@@ -83,7 +42,7 @@ export async function POST(
     const invoice = await prisma.invoice.findFirst({
       where: {
         id,
-        userId: decoded.userId,
+        userId: auth.userId,
       },
     })
 

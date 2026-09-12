@@ -1,12 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import jwt from "jsonwebtoken"
-
 import { prisma } from "@repo/db"
-
-interface AuthPayload {
-  userId: string
-}
-
 import { CustomerStatus as PrismaCustomerStatus } from "@repo/db"
 import { getAuthenticatedSession } from "@/lib/auth/session"
 
@@ -18,13 +11,10 @@ const statusMap: Record<string, PrismaCustomerStatus> = {
 
 export async function GET(request: NextRequest) {
   try {
-const auth = await getAuthenticatedSession(request)
+    const auth = await getAuthenticatedSession(request)
 
     if (!auth) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 },
-      )
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
     // ---------------------------------------------
     // 2. Read query parameters
@@ -231,36 +221,10 @@ export async function POST(request: NextRequest) {
     // 1. Authenticate user
     // ---------------------------------------------
 
-    const token = request.cookies.get("token")?.value
+    const auth = await getAuthenticatedSession(request)
 
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const jwtSecret = process.env.JWT_SECRET
-
-    if (!jwtSecret) {
-      throw new Error("JWT_SECRET environment variable is missing")
-    }
-
-    let decoded: AuthPayload
-
-    try {
-      decoded = jwt.verify(token, jwtSecret) as AuthPayload
-    } catch {
-      return NextResponse.json(
-        {
-          error: "Invalid or expired authentication token",
-        },
-        { status: 401 }
-      )
-    }
-
-    if (!decoded.userId) {
-      return NextResponse.json(
-        { error: "Invalid authentication token" },
-        { status: 401 }
-      )
+    if (!auth) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
     // ---------------------------------------------
@@ -305,7 +269,7 @@ export async function POST(request: NextRequest) {
 
     const existingCustomer = await prisma.customer.findFirst({
       where: {
-        userId: decoded.userId,
+        userId: auth.userId,
         email,
       },
     })
@@ -322,10 +286,10 @@ export async function POST(request: NextRequest) {
     // ---------------------------------------------
     // 5. Create customer
     // ---------------------------------------------
-    console.error(decoded.userId)
+    console.error(auth.userId)
     const customer = await prisma.customer.create({
       data: {
-        userId: decoded.userId,
+        userId: auth.userId,
         name,
         email,
       },

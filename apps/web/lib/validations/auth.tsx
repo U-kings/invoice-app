@@ -20,7 +20,7 @@ export const SignupSchema = z
 
     lastName: z.string().min(2, "Last name is required"),
 
-    email: z.string().email("Please enter a valid email"),
+    email: z.email("Please enter a valid email"),
     phoneNumber: z
       .string()
       .min(1, "Phone number is required")

@@ -1,55 +1,24 @@
 import { NextRequest, NextResponse } from "next/server"
-import jwt from "jsonwebtoken"
-
 import { prisma } from "@repo/db"
+import { getAuthenticatedSession } from "@/lib/auth/session"
 
-interface AuthPayload {
-  userId: string
-}
-
-export async function GET(req: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
     // --------------------------------------------------
     // 1. Authenticate user
     // --------------------------------------------------
 
-    const token = req.cookies.get("token")?.value
+    const auth = await getAuthenticatedSession(request)
 
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const jwtSecret = process.env.JWT_SECRET
-
-    if (!jwtSecret) {
-      throw new Error("JWT_SECRET environment variable is missing")
-    }
-
-    let decoded: AuthPayload
-
-    try {
-      decoded = jwt.verify(token, jwtSecret) as AuthPayload
-    } catch {
-      return NextResponse.json(
-        {
-          error: "Invalid or expired authentication token",
-        },
-        { status: 401 }
-      )
-    }
-
-    if (!decoded.userId) {
-      return NextResponse.json(
-        { error: "Invalid authentication token" },
-        { status: 401 }
-      )
+    if (!auth) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
     // --------------------------------------------------
     // 2. Query parameters
     // --------------------------------------------------
 
-    const { searchParams } = new URL(req.url)
+    const { searchParams } = new URL(request.url)
 
     const page = Math.max(Number(searchParams.get("page")) || 1, 1)
 
@@ -74,7 +43,7 @@ export async function GET(req: NextRequest) {
 
     const where = {
       invoice: {
-        userId: decoded.userId,
+        userId: auth.userId,
       },
 
       ...(status

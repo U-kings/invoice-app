@@ -4,20 +4,18 @@ import bcrypt from "bcryptjs"
 
 import { prisma } from "@repo/db"
 import { generateRecoveryCodes } from "@/lib/auth/two-factor"
+import { getAuthenticatedSession } from "@/lib/auth/session"
 
 // 1. GET: Check status of recovery codes (Since they are hashed, we can't show them)
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get("token")?.value
+    const auth = await getAuthenticatedSession(request)
 
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (!auth) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string }
-
     const twoFactor = await prisma.userTwoFactor.findUnique({
-      where: { userId: decoded.userId },
+      where: { userId: auth.userId },
       select: {
         enabled: true,
         recoveryCodes: true,
@@ -53,7 +51,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string }
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
+      userId: string
+    }
 
     const twoFactor = await prisma.userTwoFactor.findUnique({
       where: { userId: decoded.userId },
@@ -62,7 +62,10 @@ export async function POST(request: NextRequest) {
 
     if (!twoFactor || !twoFactor.enabled) {
       return NextResponse.json(
-        { error: "Two-factor authentication must be enabled to generate recovery codes" },
+        {
+          error:
+            "Two-factor authentication must be enabled to generate recovery codes",
+        },
         { status: 400 }
       )
     }
@@ -72,9 +75,7 @@ export async function POST(request: NextRequest) {
 
     // Hash them exactly like your verify setup route
     const hashedRecoveryCodes = await Promise.all(
-      recoveryCodes.map((recoveryCode) =>
-        bcrypt.hash(recoveryCode, 12),
-      ),
+      recoveryCodes.map((recoveryCode) => bcrypt.hash(recoveryCode, 12))
     )
 
     // Overwrite old codes with the new hashed set
