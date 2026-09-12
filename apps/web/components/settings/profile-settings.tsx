@@ -280,7 +280,7 @@ export function ProfileSettings() {
               <Image
                 width={50}
                 height={50}
-                src={profileImageUrl}
+                src={profileImageUrl ?? null}
                 alt={`${profileQuery.data?.firstName} ${profileQuery.data?.lastName}`}
                 className="h-full w-full object-cover"
               />
