@@ -93,7 +93,7 @@ export function RecentInvoices() {
           </p>
 
           <Link
-            href="/dashboard/invoices/create"
+            href="/dashboard/invoices/new"
             className="mt-4 text-sm font-medium text-[#2EAFB4] hover:underline"
           >
             Create your first invoice
