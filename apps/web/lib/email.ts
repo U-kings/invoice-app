@@ -64,7 +64,7 @@ export async function sendVerificationEmail({
     // Catch-block error parser updated to catch v6 structured errors securely
     const errorDetails = err.body || err
     console.error("Brevo SDK delivery failed:", errorDetails)
-
+    
     return { success: false, error: errorDetails }
   }
 }
