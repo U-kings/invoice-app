@@ -84,7 +84,7 @@ export async function sendInvoiceReminderEmail({
     throw new Error("Email configuration error.")
   }
 
-  const response = await fetch("https://brevo.com", {
+  const response = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: {
       "accept": "application/json",
@@ -94,7 +94,7 @@ export async function sendInvoiceReminderEmail({
     body: JSON.stringify({
       sender: { 
         name: "Invoice Flow", 
-        email: "your-verified-email@domain.com" // 👈 Swap this with your verified sender email in Brevo
+        email: "kingsleyigbokwe909@gmail.com" // 👈 Swap this with your verified sender email in Brevo
       },
       to: [{ email: invoice.customer.email }],
       replyTo: { email: user.email },

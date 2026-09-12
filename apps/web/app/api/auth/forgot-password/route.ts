@@ -62,7 +62,7 @@ export async function POST(request: Request) {
     }
 
     // 8. Trigger automated transactional mail delivery via Brevo Transactional API
-    const response = await fetch("https://brevo.com", {
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
         "accept": "application/json",
@@ -72,7 +72,7 @@ export async function POST(request: Request) {
       body: JSON.stringify({
         sender: { 
           name: "Invoice Flow", 
-          email: "onboarding@resend.dev" // 👈 Swap this with your verified sender email in Brevo
+          email: "kingsleyigbokwe909@gmail.com" // 👈 Swap this with your verified sender email in Brevo
         },
         to: [{ email: cleanEmail }],
         subject: "Reset Your Invoicing App Password",

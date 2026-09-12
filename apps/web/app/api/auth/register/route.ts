@@ -67,6 +67,7 @@ export async function POST(req: NextRequest) {
         class: userClass || "Default",
         email: email.toLowerCase(),
         phoneNumber,
+        isVerified:true,
         password: hashedPassword,
         terms: Boolean(terms),
         verificationToken: hashedToken,
@@ -80,11 +81,13 @@ export async function POST(req: NextRequest) {
     const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/verify-email?token=${verificationToken}`;
 
     // Fire email helper using database property contexts
-    await sendVerificationEmail({
-      to: user.email,
-      firstName: user.firstName,
-      verificationUrl: verificationUrl,
-    });
+    // await sendVerificationEmail({
+    //   to: "kingsleyigboke909@gmail.com",
+    //   firstName: "Uchenna",
+    //   // to: user.email,
+    //   // firstName: user.firstName,
+    //   verificationUrl: verificationUrl,
+    // });
 
     // 6. Return unified Next.js NextResponse object format to fix your previous route configuration crashes
     return NextResponse.json(

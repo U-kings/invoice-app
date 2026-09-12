@@ -57,7 +57,7 @@ export function VerifyEmail({
 
       <Button
         type="button"
-        className="mt-8 h-12 w-full bg-[#2EAFB4] hover:bg-[#289ca0]"
+        className="mt-8 h-12 w-full text-white bg-[#2EAFB4] hover:bg-[#289ca0]"
       >
         <Link href="/login">Back to Login</Link>
       </Button>
